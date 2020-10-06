@@ -1,3 +1,4 @@
+import sys
 import logging
 from libs.authenticated_client import AuthenticatedClient
 
@@ -14,6 +15,7 @@ class Trader:
 
         self.Upward_Trend_Threshold = 1.5
         self.Dip_Threshold = -2.25
+        
         self.Profit_Threshold = 1.25
         self.Stop_Loss_Threshold = -2.00
 
@@ -31,17 +33,20 @@ class Trader:
         self.client = AuthenticatedClient(key, b64secret, passphrase, api_url=url)
 
     def attemptToMakeTrade(self):
-        currentPrice = self.getMarketPrice()
-        if self.lastOpPrice==0:
-            self.updateOpPrice(currentPrice)
-            return
-        difference = currentPrice - self.lastOpPrice
-        percentDiff = difference/self.lastOpPrice*100
-        logging.info('[CHECK] ' + str(currentPrice) + ' - ' + str(self.lastOpPrice) + ' = ' + str(round(difference,2)) + ' ' + str(round(percentDiff,2)) + '%')
-        if (self.isInBuyState):
-            self.tryToBuy(percentDiff)
-        else:
-            self.tryToSell(percentDiff)
+        try:
+            currentPrice = self.getMarketPrice()
+            if self.lastOpPrice==0:
+                self.updateOpPrice(currentPrice)
+                return
+            difference = currentPrice - self.lastOpPrice
+            percentDiff = difference/self.lastOpPrice*100
+            logging.info('[CHECK] ' + str(currentPrice) + ' - ' + str(self.lastOpPrice) + ' = ' + str(round(difference,2)) + ' ' + str(round(percentDiff,2)) + '%')
+            if (self.isInBuyState):
+                self.tryToBuy(percentDiff)
+            else:
+                self.tryToSell(percentDiff)
+        except ValueError as e:
+            logging.info('[ERROR] ' + str(e))
 
     def tryToBuy(self, percentDiff):
         if percentDiff >= self.Upward_Trend_Threshold or percentDiff <= self.Dip_Threshold:
@@ -70,16 +75,16 @@ class Trader:
 
     def placeBuyOrder(self):
         account = self.getCashAccount()
-        fundsToUse = account['balance'] * 0.25
+        fundsToUse = float(account['balance']) * 0.25
         result = self.client.place_market_order(product_id=self.product_id, side='buy', funds=fundsToUse)
-        logging.info('[BUY] Bought ' + str(result['size']) + ' for ' + str(result['price']))
+        logging.info('[BUY] Bought ' + str(result['size']) + ' for ' + str(fundsToUse) + ', ' + str(result['price']) + ' per ' + result['product_id'])
         return result['price']
 
     def placeSellOrder(self):
         account = self.getCryptoAccount()
-        amountToSell = account['balance'] * 0.25
+        amountToSell = float(account['balance']) * 0.25
         result = self.client.place_market_order(product_id=self.product_id, side='sell', size=amountToSell)
-        logging.info('[SELL] Sold ' + str(result['size']) + ' for ' + str(result['price']))
+        logging.info('[SELL] Sold ' + str(result['size']) + ' for ' + str(amountToSell) + ', ' + str(result['price']) + ' per ' + result['product_id'])
         return result['price']
 
     def updateOpPrice(self, newprice):
