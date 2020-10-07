@@ -1,5 +1,6 @@
 import sys
 import logging
+from cpapi import CbApi
 from libs.authenticated_client import AuthenticatedClient
 
 class Trader:
@@ -11,11 +12,13 @@ class Trader:
         logging.getLogger().addHandler(console)
         logging.info("Start")
 
+        self.api = CbApi()
+
         self.isInBuyState = True
 
         self.Upward_Trend_Threshold = 1.5
         self.Dip_Threshold = -2.25
-        
+
         self.Profit_Threshold = 1.25
         self.Stop_Loss_Threshold = -2.00
 
@@ -26,15 +29,9 @@ class Trader:
         #self.product_id = 'LTC-USD'
         self.product_id = 'BTC-USD'
 
-        key = 'xxxxxxxxxxxxxxxxx'
-        b64secret = 'xxxxxxxxxxxxxxxxxxxxxx=='
-        passphrase = 'xxxxxxxxxxxx'
-        url = 'https://api-public.sandbox.pro.coinbase.com'
-        self.client = AuthenticatedClient(key, b64secret, passphrase, api_url=url)
-
     def attemptToMakeTrade(self):
         try:
-            currentPrice = self.getMarketPrice()
+            currentPrice = self.api.getMarketPrice(self.product_id)
             if self.lastOpPrice==0:
                 self.updateOpPrice(currentPrice)
                 return
@@ -58,34 +55,17 @@ class Trader:
             self.updateOpPrice(self.placeSellOrder())
             self.isInBuyState = True
 
-    def getCashAccount(self):
-        account = self.client.get_account(self.cash_account_id)
-        logging.info('[BALANCE] ' + account['currency'] + ': ' + str(account['balance']))
-        return account
-
-    def getCryptoAccount(self):
-        account = self.client.get_account(self.crypto_account_id)
-        logging.info('[BALANCE] ' + account['currency'] + ': ' + str(account['balance']))
-        return account
-
-    def getMarketPrice(self):
-        result = self.client.get_product_ticker(self.product_id)
-        logging.info('[PRICE] ' + self.product_id + ' ' + str(result['price']))
-        return float(result['price'])
-
     def placeBuyOrder(self):
-        account = self.getCashAccount()
+        account = self.api.getAccountDetails(self.cash_account_id)
         fundsToUse = float(account['balance']) * 0.25
-        result = self.client.place_market_order(product_id=self.product_id, side='buy', funds=fundsToUse)
-        logging.info('[BUY] Bought ' + str(result['size']) + ' for ' + str(fundsToUse) + ', ' + str(result['price']) + ' per ' + result['product_id'])
-        return result['price']
+        newPrice = self.api.buy(self.product_id, fundsToUse)
+        return newPrice
 
     def placeSellOrder(self):
-        account = self.getCryptoAccount()
+        account = self.api.getAccountDetails(self.crypto_account_id)
         amountToSell = float(account['balance']) * 0.25
-        result = self.client.place_market_order(product_id=self.product_id, side='sell', size=amountToSell)
-        logging.info('[SELL] Sold ' + str(result['size']) + ' for ' + str(amountToSell) + ', ' + str(result['price']) + ' per ' + result['product_id'])
-        return result['price']
+        newPrice = self.api.sell(self.product_id, amountToSell)
+        return newPrice
 
     def updateOpPrice(self, newprice):
         logging.info('[UPDATE] lastOpPrice: ' + str(self.lastOpPrice) + ' to ' + str(newprice))
