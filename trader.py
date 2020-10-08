@@ -1,11 +1,12 @@
 import sys
 import logging
+from datamanager import DataManager
 from cpapi import CbApi
 from libs.authenticated_client import AuthenticatedClient
 
 class Trader:
     def __init__(self):
-        logging.basicConfig(level=logging.INFO, filename='testlog.log', format='%(asctime)s - %(message)s', datefmt='%m-%d-%Y %H:%M:%S')
+        logging.basicConfig(level=logging.INFO, filename='logs/testlog.log', format='%(asctime)s - %(message)s', datefmt='%m-%d-%Y %H:%M:%S')
         console = logging.StreamHandler()
         console.setLevel(logging.INFO)
         console.setFormatter(logging.Formatter(fmt='%(asctime)s - %(message)s', datefmt='%m-%d-%Y %H:%M:%S'))
@@ -13,16 +14,22 @@ class Trader:
         logging.info("Start")
 
         self.api = CbApi()
+        self.dm = DataManager()
 
         self.isInBuyState = True
+        self.lastOpPrice = 0.00
+
+        lastOp = self.dm.lastOpResults()
+        if 'operation' in lastOp:
+            self.isInBuyState = False if lastOp['operation'] == 'buy' else True
+        if 'lastOpPrice' in lastOp:
+            self.lastOpPrice = float(lastOp['lastOpPrice'])
 
         self.Upward_Trend_Threshold = 1.5
         self.Dip_Threshold = -2.25
 
         self.Profit_Threshold = 1.25
         self.Stop_Loss_Threshold = -2.00
-
-        self.lastOpPrice = 0.00
         
         self.cash_account_id = 'xxxxxxxxxxxxxxxxxxxxxxxxx'
         self.crypto_account_id = 'xxxxxxxxxxxxxxxxxxxxxxx'
@@ -42,7 +49,8 @@ class Trader:
                 self.tryToBuy(percentDiff)
             else:
                 self.tryToSell(percentDiff)
-        except ValueError as e:
+        except Exception as e:
+            self.dm.save()
             logging.info('[ERROR] ' + str(e))
 
     def tryToBuy(self, percentDiff):
@@ -59,12 +67,14 @@ class Trader:
         account = self.api.getAccountDetails(self.cash_account_id)
         fundsToUse = float(account['balance']) * 0.25
         newPrice = self.api.buy(self.product_id, fundsToUse)
+        self.dm.addOperation('buy', newPrice)
         return newPrice
 
     def placeSellOrder(self):
         account = self.api.getAccountDetails(self.crypto_account_id)
         amountToSell = float(account['balance']) * 0.25
         newPrice = self.api.sell(self.product_id, amountToSell)
+        self.dm.addOperation('sell', newPrice)
         return newPrice
 
     def updateOpPrice(self, newprice):

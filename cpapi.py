@@ -17,15 +17,17 @@ class CbApi:
 
     def getMarketPrice(self, product_id):
         result = self.client.get_product_ticker(product_id)
-        logging.info('[PRICE] ' + product_id + ' ' + str(result['price']))
+        # logging.info('[PRICE] ' + product_id + ' ' + str(result['price']))
         return float(result['price'])
 
     def buy(self, product_id, funds):
         result = self.client.place_market_order(product_id=product_id, side='buy', funds=funds)
+        logging.info('[API] result: ' + str(result))
         logging.info('[BUY] Bought ' + str(result['size']) + ' for ' + str(funds))
         return float(result['price'])
 
     def sell(self, product_id, size):
         result = self.client.place_market_order(product_id=product_id, side='sell', size=size)
-        logging.info('[SELL] Sold ' + str(result['size']) + ' for ' + str(result['price']))
+        logging.info('[API] result: ' + str(result))
+        logging.info('[SELL] Sold ' + str(result['size']))
         return float(result['price'])
