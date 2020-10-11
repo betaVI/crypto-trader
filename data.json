@@ -1,6 +1,22 @@
 [
     {
-        "operation": "buy",
-        "lastOpPrice": 10629
+        "lastOpPrice": 10629,
+        "operation": "buy"
+    },
+    {
+        "lastOpPrice": 10776.07,
+        "operation": "sell"
+    },
+    {
+        "lastOpPrice": 10938.12,
+        "operation": "buy"
+    },
+    {
+        "lastOpPrice": 11079.85,
+        "operation": "sell"
+    },
+    {
+        "lastOpPrice": 11344.18,
+        "operation": "buy"
     }
 ]

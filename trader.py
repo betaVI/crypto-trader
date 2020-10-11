@@ -30,6 +30,9 @@ class Trader:
 
         self.Profit_Threshold = 1.25
         self.Stop_Loss_Threshold = -2.00
+
+        # orders = self.api.getOrderDetails('cb27dc70-1e6f-4243-8bd4-791cad47d02a')
+        # logging.info("[ORDER] Info: " + str(orders))
         
         self.cash_account_id = 'xxxxxxxxxxxxxxxxxxxxxxxxx'
         self.crypto_account_id = 'xxxxxxxxxxxxxxxxxxxxxxx'
@@ -50,8 +53,7 @@ class Trader:
             else:
                 self.tryToSell(percentDiff)
         except Exception as e:
-            self.dm.save()
-            logging.info('[ERROR] ' + str(e))
+            logging.info('[ERROR] ' + repr(e))
 
     def tryToBuy(self, percentDiff):
         if percentDiff >= self.Upward_Trend_Threshold or percentDiff <= self.Dip_Threshold:
@@ -65,14 +67,14 @@ class Trader:
 
     def placeBuyOrder(self):
         account = self.api.getAccountDetails(self.cash_account_id)
-        fundsToUse = float(account['balance']) * 0.25
+        fundsToUse = round(float(account['balance']) * 0.5, 2)
         newPrice = self.api.buy(self.product_id, fundsToUse)
         self.dm.addOperation('buy', newPrice)
         return newPrice
 
     def placeSellOrder(self):
         account = self.api.getAccountDetails(self.crypto_account_id)
-        amountToSell = float(account['balance']) * 0.25
+        amountToSell = float(account['balance'])
         newPrice = self.api.sell(self.product_id, amountToSell)
         self.dm.addOperation('sell', newPrice)
         return newPrice

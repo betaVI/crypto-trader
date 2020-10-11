@@ -18,7 +18,8 @@ class DataManager:
             'operation':operation,
             'lastOpPrice':price
         })
+        self.save()
 
     def save(self):
         with open('data.json', 'w') as f:
-            json.dump(self.operations, f)
+            json.dump(self.operations, f, indent = 4, sort_keys=True)
