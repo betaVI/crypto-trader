@@ -35,6 +35,12 @@ class CbApi:
         logging.info('[SELL] Sold ' + str(size) + ' for ' + str(fill['usd_volume']) + ' at ' + str(fill['price']))
         return float(fill['price'])
 
+    def placeLimitOrder(self, product_id, side, price, size):
+        result = self.client.place_limit_order(product_id=product_id, side=side, price=price, size=size)
+        logging.info('[API] result: ' + str(result))
+        logging.info('[{}] Created {} order for price {}'.format(side.upper(), size, price))
+        return result['id']
+
     def getOrderDetails(self, orderid):
         fills = []
         while len(fills) == 0:
@@ -44,5 +50,10 @@ class CbApi:
             fills = list(result)
         return fills[0]
 
-    def getFills(self, productid):
-        return list(self.client.get_fills(product_id=productid))
+    def checkIfOrdersFilled(self, orderids):
+        completedFills=[]
+        for order in orderids:
+            fills = list(self.client.get_fills(order_id=order))
+            if len(fills) == 1:
+                completedFills.append(fills[1])
+        return completedFills

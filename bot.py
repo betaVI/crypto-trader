@@ -1,7 +1,7 @@
 import sys
 import signal
 import time
-from trader import Trader
+from market.markettrader import MarketTrader
 
 def handle_cancel(sig, frame):
     print('Cancelled')
@@ -10,8 +10,9 @@ def handle_cancel(sig, frame):
 if __name__ == "__main__":
     signal.signal(signal.SIGINT, handle_cancel)
     runinterval = 10
-    trader = Trader()
+    trader = MarketTrader()
     while True:
-        trader.attemptToMakeTrade()
+        trader.attemptToMakeMarketTrade()
+        # trader.attemptToMkakeLimitTrade()
         print('Waiting ' + str(runinterval) + ' seconds')
         time.sleep(runinterval)
