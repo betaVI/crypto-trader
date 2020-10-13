@@ -39,38 +39,6 @@ class MarketTrader:
         #self.product_id = 'LTC-USD'
         self.product_id = 'BTC-USD'
 
-    # def attemptToMakeLimitTrade(self):
-    #     try:
-    #         if self.lastOpPrice == 0:
-    #             self.updateOpPrice(self.api.getMarketPrice(self.product_id))
-    #         if len(self.orderIds) == 0:
-    #             self.createLimitOrders()
-    #         fills = self.api.checkIfOrdersFilled(self.orderIds)
-    #         if len(fills) == 1:
-    #             self.updateOpPrice(float(fills[0]['price']))
-    #             self.isInBuyState = fills[0]['side'] == 'sell'
-    #             self.orderIds = []
-    #     except Exception as e:
-    #         logging.info('[ERROR] ' + repr(e))
-
-    # def createLimitOrders(self):
-    #     maxlimit = (self.Upward_Trend_Threshold if self.isInBuyState else self.Profit_Threshold)/100
-    #     minlimit = (self.Dip_Threshold if self.isInBuyState else self.Stop_Loss_Threshold)/100
-    #     maxPrice = round(self.lastOpPrice + (self.lastOpPrice * maxlimit), 2)
-    #     minPrice = round(self.lastOpPrice + (self.lastOpPrice * minlimit), 2)
-    #     if self.isInBuyState:
-    #         account = self.api.getAccountDetails(self.cash_account_id)
-    #         funds = round(float(account['balance']) * 0.5, 2)
-    #         size = funds / maxPrice
-    #     else:
-    #         account = self.api.getAccountDetails(self.crypto_account_id)
-    #         size = float(account['balance'])
-    #     side = 'buy' if self.isInBuyState else 'sell'
-    #     self.orderIds.append(self.api.placeLimitOrder(self.product_id, side, maxPrice, size))
-    #     self.orderIds.append(self.api.placeLimitOrder(self.product_id, side, minPrice, size))
-    #     # self.dm.addOperation(side, self.lastOpPrice, self.orderIds)
-    #     # self.dm.save()
-
     def attemptToMakeMarketTrade(self):
         try:
             currentPrice = self.api.getMarketPrice(self.product_id)

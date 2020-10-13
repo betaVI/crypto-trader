@@ -44,7 +44,7 @@ class CbApi:
     def getOrderDetails(self, orderid):
         fills = []
         while len(fills) == 0:
-            time.sleep(5)
+            time.sleep(2)
             logging.info('[FILL] Looking for orderid ' + orderid)
             result = self.client.get_fills(order_id=orderid)
             fills = list(result)

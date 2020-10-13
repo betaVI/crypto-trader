@@ -18,5 +18,77 @@
     {
         "lastOpPrice": 11344.18,
         "operation": "buy"
+    },
+    {
+        "lastOpPrice": 11488.52,
+        "operation": "sell"
+    },
+    {
+        "lastOpPrice": 12007.62,
+        "operation": "buy"
+    },
+    {
+        "lastOpPrice": 11600.4,
+        "operation": "sell"
+    },
+    {
+        "lastOpPrice": 12007.62,
+        "operation": "buy"
+    },
+    {
+        "lastOpPrice": 11720.94,
+        "operation": "sell"
+    },
+    {
+        "lastOpPrice": 12007.62,
+        "operation": "buy"
+    },
+    {
+        "lastOpPrice": 11720.94,
+        "operation": "sell"
+    },
+    {
+        "lastOpPrice": 12007.62,
+        "operation": "buy"
+    },
+    {
+        "lastOpPrice": 11720.94,
+        "operation": "sell"
+    },
+    {
+        "lastOpPrice": 12007.62,
+        "operation": "buy"
+    },
+    {
+        "lastOpPrice": 11563.11,
+        "operation": "sell"
+    },
+    {
+        "lastOpPrice": 12007.62,
+        "operation": "buy"
+    },
+    {
+        "lastOpPrice": 11226.83,
+        "operation": "sell"
+    },
+    {
+        "lastOpPrice": 12007.62,
+        "operation": "buy"
+    },
+    {
+        "lastOpPrice": 11174.88,
+        "operation": "sell"
+    },
+    {
+        "lastOpPrice": 12007.62,
+        "operation": "buy"
+    },
+    {
+        "lastOpPrice": 11174.88,
+        "operation": "sell"
+    },
+    {
+        "lastOpPrice": 12007.62,
+        "operation": "buy"
     }
 ]
