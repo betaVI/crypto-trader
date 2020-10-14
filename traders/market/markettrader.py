@@ -6,7 +6,7 @@ from libs.authenticated_client import AuthenticatedClient
 
 class MarketTrader:
     def __init__(self):
-        logging.basicConfig(level=logging.INFO, filename='market/log.log', format='%(asctime)s - %(message)s', datefmt='%m-%d-%Y %H:%M:%S')
+        logging.basicConfig(level=logging.INFO, filename='traders/market/log.log', format='%(asctime)s - %(message)s', datefmt='%m-%d-%Y %H:%M:%S')
         console = logging.StreamHandler()
         console.setLevel(logging.INFO)
         console.setFormatter(logging.Formatter(fmt='%(asctime)s - %(message)s', datefmt='%m-%d-%Y %H:%M:%S'))
@@ -14,7 +14,7 @@ class MarketTrader:
         logging.info("Start")
 
         self.api = CbApi()
-        self.dm = DataManager('market/marketdata.json')
+        self.dm = DataManager('traders/market/marketdata.json')
 
         self.isInBuyState = True
         self.lastOpPrice = 0.00

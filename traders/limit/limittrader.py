@@ -4,7 +4,7 @@ from datamanager import DataManager
 
 class LimitTrader:
     def __init(self):
-        logging.basicConfig(level=logging.INFO, filename='limit/log.log', format='%(asctime)s - %(message)s', datefmt='%m-%d-%Y %H:%M:%S')
+        logging.basicConfig(level=logging.INFO, filename='traders/limit/log.log', format='%(asctime)s - %(message)s', datefmt='%m-%d-%Y %H:%M:%S')
         console = logging.StreamHandler()
         console.setLevel(logging.INFO)
         console.setFormatter(logging.Formatter(fmt='%(asctime)s - %(message)s', datefmt='%m-%d-%Y %H:%M:%S'))
@@ -12,7 +12,7 @@ class LimitTrader:
         logging.info("Start")
         
         self.api = CbApi()
-        self.dm = DataManager('limit/data.json')
+        self.dm = DataManager('traders/limit/data.json')
 
         self.lastOperation = self.dm.lastOpResults()
         if 'operation' not in self.lastOperation:

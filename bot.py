@@ -1,7 +1,7 @@
 import sys
 import signal
 import time
-from market.markettrader import MarketTrader
+from traders.market.markettrader import MarketTrader
 
 def handle_cancel(sig, frame):
     print('Cancelled')
