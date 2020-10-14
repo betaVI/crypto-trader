@@ -1,18 +1,11 @@
 import logging
 from cpapi import CbApi
 from datamanager import DataManager
+from traders.trader import Trader
 
-class LimitTrader:
-    def __init(self):
-        logging.basicConfig(level=logging.INFO, filename='traders/limit/log.log', format='%(asctime)s - %(message)s', datefmt='%m-%d-%Y %H:%M:%S')
-        console = logging.StreamHandler()
-        console.setLevel(logging.INFO)
-        console.setFormatter(logging.Formatter(fmt='%(asctime)s - %(message)s', datefmt='%m-%d-%Y %H:%M:%S'))
-        logging.getLogger().addHandler(console)
-        logging.info("Start")
-        
-        self.api = CbApi()
-        self.dm = DataManager('traders/limit/data.json')
+class LimitTrader(Trader):
+    def __init(self, productid, cashaccount, cryptoaccount):
+        super().__init__(productid, cashaccount, cryptoaccount, 'traders/limit/log.log', 'traders/limit/data.json')
 
         self.lastOperation = self.dm.lastOpResults()
         if 'operation' not in self.lastOperation:
@@ -25,14 +18,6 @@ class LimitTrader:
 
         self.Profit_Threshold = 1.25
         self.Stop_Loss_Threshold = -2.00
-
-        # orders = self.api.getOrderDetails('cb27dc70-1e6f-4243-8bd4-791cad47d02a')
-        # logging.info("[ORDER] Info: " + str(orders))
-        
-        self.cash_account_id = 'xxxxxxxxxxxxxxxxxxxxxxxxx'
-        self.crypto_account_id = 'xxxxxxxxxxxxxxxxxxxxxxx'
-        #self.product_id = 'LTC-USD'
-        self.product_id = 'BTC-USD'
 
     def attemptToMakeLimitTrade(self):
         try:

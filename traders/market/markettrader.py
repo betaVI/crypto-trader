@@ -3,18 +3,11 @@ import logging
 from datamanager import DataManager
 from cpapi import CbApi
 from libs.authenticated_client import AuthenticatedClient
+from traders.trader import Trader
 
-class MarketTrader:
-    def __init__(self):
-        logging.basicConfig(level=logging.INFO, filename='traders/market/log.log', format='%(asctime)s - %(message)s', datefmt='%m-%d-%Y %H:%M:%S')
-        console = logging.StreamHandler()
-        console.setLevel(logging.INFO)
-        console.setFormatter(logging.Formatter(fmt='%(asctime)s - %(message)s', datefmt='%m-%d-%Y %H:%M:%S'))
-        logging.getLogger().addHandler(console)
-        logging.info("Start")
-
-        self.api = CbApi()
-        self.dm = DataManager('traders/market/marketdata.json')
+class MarketTrader(Trader):
+    def __init__(self, productid, cashaccount, cryptoaccount):
+        super().__init__(productid, cashaccount, cryptoaccount, 'traders/market/log.log', 'traders/market/marketdata.json')
 
         self.isInBuyState = True
         self.lastOpPrice = 0.00
@@ -33,11 +26,6 @@ class MarketTrader:
 
         # orders = self.api.getOrderDetails('cb27dc70-1e6f-4243-8bd4-791cad47d02a')
         # logging.info("[ORDER] Info: " + str(orders))
-        
-        self.cash_account_id = 'xxxxxxxxxxxxxxxxxxxxxxxxx'
-        self.crypto_account_id = 'xxxxxxxxxxxxxxxxxxxxxxx'
-        #self.product_id = 'LTC-USD'
-        self.product_id = 'BTC-USD'
 
     def attemptToMakeMarketTrade(self):
         try:
