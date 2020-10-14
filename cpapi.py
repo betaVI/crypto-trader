@@ -13,7 +13,7 @@ class CbApi:
         
     def getAccountDetails(self, account_id):
         account = self.client.get_account(account_id)
-        logging.info('[BALANCE] ' + account['currency'] + ': ' + str(account['balance']))
+        logging.info('[BALANCE] {}: {}'.format(account['currency'], account['balance']))
         return account
 
     def getMarketPrice(self, product_id):
@@ -25,14 +25,14 @@ class CbApi:
         result = self.client.place_market_order(product_id=product_id, side='buy', funds=funds)
         orderid = result['id']
         fill = self.getOrderDetails(orderid)
-        logging.info('[BUY] Used ' + str(funds) +' to buy ' + str(fill['size']) + ' at ' + str(fill['price']))
+        logging.info('[BUY] Used {} to buy {} at {}'.format(funds, fill['size'], fill['price']))
         return float(fill['price'])
 
     def sell(self, product_id, size):
         result = self.client.place_market_order(product_id=product_id, side='sell', size=size)
         orderid = result['id']
         fill = self.getOrderDetails(orderid)
-        logging.info('[SELL] Sold ' + str(size) + ' for ' + str(fill['usd_volume']) + ' at ' + str(fill['price']))
+        logging.info('[SELL] Sold {} for {} at {}'.format(size, fill['usd_volume'], fill['price']))
         return float(fill['price'])
 
     def placeLimitOrder(self, product_id, side, price, size):

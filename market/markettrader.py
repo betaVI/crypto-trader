@@ -6,7 +6,7 @@ from libs.authenticated_client import AuthenticatedClient
 
 class MarketTrader:
     def __init__(self):
-        logging.basicConfig(level=logging.INFO, filename='logs/marketlog.log', format='%(asctime)s - %(message)s', datefmt='%m-%d-%Y %H:%M:%S')
+        logging.basicConfig(level=logging.INFO, filename='market/log.log', format='%(asctime)s - %(message)s', datefmt='%m-%d-%Y %H:%M:%S')
         console = logging.StreamHandler()
         console.setLevel(logging.INFO)
         console.setFormatter(logging.Formatter(fmt='%(asctime)s - %(message)s', datefmt='%m-%d-%Y %H:%M:%S'))
@@ -47,7 +47,7 @@ class MarketTrader:
                 return
             difference = currentPrice - self.lastOpPrice
             percentDiff = difference/self.lastOpPrice*100
-            logging.info('[CHECK] ' + str(currentPrice) + ' - ' + str(self.lastOpPrice) + ' = ' + str(round(difference,2)) + ' ' + str(round(percentDiff,2)) + '%')
+            logging.info('[CHECK][{}] {} - {} = {} {}%'.format('BUY' if self.isInBuyState else 'SELL', currentPrice, self.lastOpPrice, round(difference,2), round(percentDiff,2)))
             if (self.isInBuyState):
                 self.tryToBuy(percentDiff)
             else:
