@@ -56,14 +56,14 @@ class MarketTrader(Trader):
     def placeMarketBuyOrder(self):
         account = self.api.getAccountDetails(self.cash_account_id)
         fundsToUse = round(float(account['balance']) * 0.5, 2)
-        newPrice = self.api.buy(self.product_id, fundsToUse)
+        newPrice = self.api.placeMarketOrder(self.product_id, 'buy', funds=fundsToUse)
         self.dm.addOperation({ 'operation': 'buy', 'lastOpPrice': newPrice })
         return newPrice
 
     def placeMarketSellOrder(self):
         account = self.api.getAccountDetails(self.crypto_account_id)
         amountToSell = float(account['balance'])
-        newPrice = self.api.sell(self.product_id, amountToSell)
+        newPrice = self.api.placeMarketOrder(self.product_id, 'sell', size=amountToSell)
         self.dm.addOperation({ 'operation': 'sell', 'lastOpPrice': newPrice })
         return newPrice
 

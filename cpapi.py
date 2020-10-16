@@ -21,18 +21,11 @@ class CbApi:
         # logging.info('[PRICE] ' + product_id + ' ' + str(result['price']))
         return float(result['price'])
 
-    def buy(self, product_id, funds):
-        result = self.client.place_market_order(product_id=product_id, side='buy', funds=funds)
+    def placeMarketOrder(self, product_id, side, funds = None, size = None):
+        result = self.client.place_market_order(product_id=product_id, side=side, size=size, funds=funds)
         orderid = result['id']
-        fill = self.getOrderDetails(orderid)
-        logging.info('[BUY] Used {} to buy {} at {}'.format(funds, fill['size'], fill['price']))
-        return float(fill['price'])
-
-    def sell(self, product_id, size):
-        result = self.client.place_market_order(product_id=product_id, side='sell', size=size)
-        orderid = result['id']
-        fill = self.getOrderDetails(orderid)
-        logging.info('[SELL] Sold {} for {} at {}'.format(size, fill['usd_volume'], fill['price']))
+        fill = self._getOrderDetails(orderid)
+        logging.info('[{}] {} BTC for ${} at {}/BTC'.format(side.upper(), fill['size'], fill['usd_volume'], fill['price']))
         return float(fill['price'])
 
     def placeLimitOrder(self, product_id, side, price, size):
@@ -41,15 +34,6 @@ class CbApi:
         logging.info('[{}] Created {} order for price {}'.format(side.upper(), size, price))
         return result['id']
 
-    def getOrderDetails(self, orderid):
-        fills = []
-        while len(fills) == 0:
-            time.sleep(2)
-            logging.info('[FILL] Looking for orderid ' + orderid)
-            result = self.client.get_fills(order_id=orderid)
-            fills = list(result)
-        return fills[0]
-
     def checkIfOrdersFilled(self, orderids):
         completedFills=[]
         for order in orderids:
@@ -57,3 +41,12 @@ class CbApi:
             if len(fills) == 1:
                 completedFills.append(fills[1])
         return completedFills
+
+    def _getOrderDetails(self, orderid):
+        fills = []
+        while len(fills) == 0:
+            time.sleep(2)
+            logging.info('[FILL] Looking for orderid ' + orderid)
+            result = self.client.get_fills(order_id=orderid)
+            fills = list(result)
+        return fills[0]
