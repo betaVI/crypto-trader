@@ -98,5 +98,9 @@
     {
         "lastOpPrice": 11452.52,
         "operation": "buy"
+    },
+    {
+        "lastOpPrice": 11348.51,
+        "operation": "sell"
     }
 ]

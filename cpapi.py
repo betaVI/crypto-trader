@@ -26,7 +26,7 @@ class CbApi:
         orderid = result['id']
         fill = self._getOrderDetails(orderid)
         logging.info('[{}] {} BTC for ${} at {}/BTC'.format(side.upper(), fill['size'], fill['usd_volume'], fill['price']))
-        return float(fill['price'])
+        return float(fill['price']), round(float(fill['usd_volume']),2), float(fill['size']), round(float(fill['fee']),2)
 
     def placeLimitOrder(self, product_id, side, price, size):
         result = self.client.place_limit_order(product_id=product_id, side=side, price=price, size=size)
@@ -41,6 +41,11 @@ class CbApi:
             if len(fills) == 1:
                 completedFills.append(fills[1])
         return completedFills
+
+    def getFees(self):
+        result = self.client.get_fees()
+        logging.info('[GETFEES] result ' + str(result))
+        return float(result['taker_fee_rate'])
 
     def _getOrderDetails(self, orderid):
         fills = []

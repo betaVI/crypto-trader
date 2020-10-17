@@ -2,6 +2,7 @@ import sys
 import signal
 import time
 from traders.market.markettrader import MarketTrader
+from traders.average.averagetrader import AverageTrader
 
 def handle_cancel(sig, frame):
     print('Cancelled')
@@ -14,9 +15,9 @@ if __name__ == "__main__":
     cash_account_id = 'xxxxxxxxxxxxxxxxxxxxxxxxx'
     crypto_account_id = 'xxxxxxxxxxxxxxxxxxxxxxx'
 
-    trader = MarketTrader(productid, cash_account_id, crypto_account_id)
+    trader = AverageTrader(productid, cash_account_id, crypto_account_id)
+    # trader = MarketTrader(productid, cash_account_id, crypto_account_id)
     while True:
-        trader.attemptToMakeMarketTrade()
-        # trader.attemptToMkakeLimitTrade()
+        trader.attemptToMakeTrade()
         print('Waiting ' + str(runinterval) + ' seconds')
         time.sleep(runinterval)

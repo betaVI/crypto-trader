@@ -7,12 +7,13 @@ from traders.trader import Trader
 
 class MarketTrader(Trader):
     def __init__(self, productid, cashaccount, cryptoaccount):
-        super().__init__(productid, cashaccount, cryptoaccount, 'traders/market/log.log', 'traders/market/marketdata.json')
+        super().__init__(productid, cashaccount, cryptoaccount, 'traders/market/marketlog.log', 'traders/market/marketdata.json')
 
         self.isInBuyState = True
         self.lastOpPrice = 0.00
+        self.data = self.dm.loadData()
 
-        lastOp = self.dm.lastOpResults()
+        lastOp = {} if len(self.data)==0 else self.data[-1]
         if 'operation' in lastOp:
             self.isInBuyState = False if lastOp['operation'] == 'buy' else True
         if 'lastOpPrice' in lastOp:
@@ -27,46 +28,50 @@ class MarketTrader(Trader):
         # orders = self.api.getOrderDetails('cb27dc70-1e6f-4243-8bd4-791cad47d02a')
         # logging.info("[ORDER] Info: " + str(orders))
 
-    def attemptToMakeMarketTrade(self):
+    def attemptToMakeTrade(self):
         try:
             currentPrice = self.api.getMarketPrice(self.product_id)
             if self.lastOpPrice==0:
-                self.updateOpPrice(currentPrice)
+                self._updateOpPrice(currentPrice)
                 return
             difference = currentPrice - self.lastOpPrice
             percentDiff = difference/self.lastOpPrice*100
             logging.info('[CHECK][{}] {} - {} = {} {}%'.format('BUY' if self.isInBuyState else 'SELL', currentPrice, self.lastOpPrice, round(difference,2), round(percentDiff,2)))
             if (self.isInBuyState):
-                self.tryToBuy(percentDiff)
+                self._tryToBuy(percentDiff)
             else:
-                self.tryToSell(percentDiff)
+                self._tryToSell(percentDiff)
         except Exception as e:
             logging.info('[ERROR] ' + repr(e))
 
-    def tryToBuy(self, percentDiff):
+    def _tryToBuy(self, percentDiff):
         if percentDiff >= self.Upward_Trend_Threshold or percentDiff <= self.Dip_Threshold:
-            self.updateOpPrice(self.placeMarketBuyOrder())
+            self._updateOpPrice(self._placeMarketBuyOrder())
             self.isInBuyState = False
 
-    def tryToSell(self, percentDiff):
+    def _tryToSell(self, percentDiff):
         if percentDiff >= self.Profit_Threshold or percentDiff <= self.Stop_Loss_Threshold:
-            self.updateOpPrice(self.placeMarketSellOrder())
+            self._updateOpPrice(self._placeMarketSellOrder())
             self.isInBuyState = True
 
-    def placeMarketBuyOrder(self):
+    def _placeMarketBuyOrder(self):
         account = self.api.getAccountDetails(self.cash_account_id)
         fundsToUse = round(float(account['balance']) * 0.5, 2)
         newPrice = self.api.placeMarketOrder(self.product_id, 'buy', funds=fundsToUse)
-        self.dm.addOperation({ 'operation': 'buy', 'lastOpPrice': newPrice })
+        self._addOperation({ 'operation': 'buy', 'lastOpPrice': newPrice })
         return newPrice
 
-    def placeMarketSellOrder(self):
+    def _placeMarketSellOrder(self):
         account = self.api.getAccountDetails(self.crypto_account_id)
         amountToSell = float(account['balance'])
         newPrice = self.api.placeMarketOrder(self.product_id, 'sell', size=amountToSell)
-        self.dm.addOperation({ 'operation': 'sell', 'lastOpPrice': newPrice })
+        self._addOperation({ 'operation': 'sell', 'lastOpPrice': newPrice })
         return newPrice
 
-    def updateOpPrice(self, newprice):
+    def _updateOpPrice(self, newprice):
         logging.info('[UPDATE] lastOpPrice: ' + str(self.lastOpPrice) + ' to ' + str(newprice))
         self.lastOpPrice = newprice
+
+    def _addOperation(self,operation):
+        self.data.append(operation)
+        self.dm.saveData(self.data)

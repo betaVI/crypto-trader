@@ -7,7 +7,8 @@ class LimitTrader(Trader):
     def __init(self, productid, cashaccount, cryptoaccount):
         super().__init__(productid, cashaccount, cryptoaccount, 'traders/limit/log.log', 'traders/limit/data.json')
 
-        self.lastOperation = self.dm.lastOpResults()
+        self.data = self.dm.loadData()
+        self.lastOperation = {} if len(self.data) else self.data[-1]
         if 'operation' not in self.lastOperation:
             self.lastOperation['operation'] = 'buy'
         if 'price' not in self.lastOperation:
@@ -59,4 +60,4 @@ class LimitTrader(Trader):
         logging.info('[UPDATE] previous: ' + str(self.lastOperation))
         logging.info('[UPDATE] updated : ' + str(operation))
         self.lastOperation = operation
-        self.dm.save()
+        self.dm.saveData(self.data)
