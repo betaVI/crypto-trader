@@ -43,10 +43,10 @@ class AverageTrader(Trader):
                 logging.info('[CHECK] {} - {} = {} {}%'.format(marketPrice, avgPrice, round(difference,2), round(percentDiff,2)))
                 profitMargin = self._getProfitMargin()
                 logging.info('[PROFITMARGIN] ' +str(profitMargin))
-                lastPriceDiff = (marketPrice - self.lastMarketPrice/self.lastMarketPrice)*100
+                lastPriceDiff = ((marketPrice - self.lastMarketPrice)/self.lastMarketPrice)*100
                 if percentDiff <= self.Dip_Threshold:
                     self._placeBuyOrder()
-                elif percentDiff >= self.Profit_Threshold and lastPriceDiff < 4.00:
+                elif percentDiff >= profitMargin and lastPriceDiff < 4.00:
                     self._placeSellOrder()
                 self.lastMarketPrice = marketPrice
         except Exception: # as e:
@@ -72,7 +72,11 @@ class AverageTrader(Trader):
         price, funds, size, fee = self.api.placeMarketOrder(self.product_id, 'sell', size=amountToSell)
         # self.dm.addOperation({ 'operation': 'sell', 'lastOpPrice': newPrice })
         # totalfees = sum([o['fee'] for o in self.state['orders']]) + fee
+        totalspent = sum([o['funds'] + o['fee'] for o in self.state['orders']])
         self.state['fundsearned'] = funds
+        self.state['totalspent'] = totalspent
+        self.state['totalearned'] = funds - fee
+        self.state['profit'] = (funds - fee) - totalspent
         self.state['sizesold'] = size
         self.state['feespaid'] = fee
         self._addState()
@@ -97,6 +101,7 @@ class AverageTrader(Trader):
         self.state = {
             'orders':[]
         }
+        self._updateFees()
         self.data.append(self.state)
         self.dm.saveData(self.data)
 
