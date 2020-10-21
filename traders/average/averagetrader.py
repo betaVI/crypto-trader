@@ -31,7 +31,8 @@ class AverageTrader(Trader):
 
     def attemptToMakeTrade(self):
         try:
-            if len(self.state['orders']) == 0:
+            length = len(self.state['orders'])
+            if length == 0:
                 self._placeBuyOrder()
             else:
                 marketPrice = self.api.getMarketPrice(self.product_id)
@@ -43,14 +44,26 @@ class AverageTrader(Trader):
                 logging.info('[CHECK] {} - {} = {} {}%'.format(marketPrice, avgPrice, round(difference,2), round(percentDiff,2)))
                 profitMargin = self._getProfitMargin()
                 logging.info('[PROFITMARGIN] ' +str(profitMargin))
-                lastPriceDiff = ((marketPrice - self.lastMarketPrice)/self.lastMarketPrice)*100
                 if percentDiff <= self.Dip_Threshold:
-                    self._placeBuyOrder()
-                elif percentDiff >= profitMargin and lastPriceDiff < 4.00:
-                    self._placeSellOrder()
+                    isStable = self._isPriceStable(marketPrice, 'buy')
+                    if isStable:
+                        self._placeBuyOrder()
+                elif percentDiff >= profitMargin:
+                    isStable = self._isPriceStable(marketPrice, 'sell')
+                    if isStable:
+                        self._placeSellOrder()
                 self.lastMarketPrice = marketPrice
         except Exception: # as e:
             logging.exception(traceback.format_exc())
+
+    def _isPriceStable(self, marketPrice, side):
+        trades = self.api.getRecentTrades(self.product_id, side, 40)
+        avgTradePrice = np.mean(trades)
+        standardDeviation = np.std(trades)
+        highStd = round(avgTradePrice + standardDeviation,2)
+        lowStd = round(avgTradePrice - standardDeviation,2)
+        isstable = lowStd <= marketPrice and marketPrice <= highStd
+        return isstable
 
     def _placeBuyOrder(self):
         account = self.api.getAccountDetails(self.cash_account_id)
@@ -64,7 +77,7 @@ class AverageTrader(Trader):
         })
         self._updateFees()
         self._updateState()
-        return price
+        return price 
 
     def _placeSellOrder(self):
         account = self.api.getAccountDetails(self.crypto_account_id)
