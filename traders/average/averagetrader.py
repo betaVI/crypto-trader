@@ -41,9 +41,11 @@ class AverageTrader(Trader):
                 avgPrice = self._getAveragePricePaid()
                 difference = marketPrice - avgPrice
                 percentDiff = difference/avgPrice*100
-                logging.info('[CHECK] {} - {} = {} {}%'.format(marketPrice, avgPrice, round(difference,2), round(percentDiff,2)))
                 profitMargin = self._getProfitMargin()
-                logging.info('[PROFITMARGIN] ' +str(profitMargin))
+                maxAmount = avgPrice + (avgPrice * profitMargin) / 100
+                minAmount = avgPrice + (avgPrice * self.Dip_Threshold) / 100
+                logging.info('[CHECK] {} - {} = {} {}% (MAX: {} | MIN: {})'.format(marketPrice, avgPrice, round(difference,2), round(percentDiff,2), round(maxAmount,2), round(minAmount,2)))
+                # logging.info('[PROFITMARGIN] ' +str(profitMargin))
                 if percentDiff <= self.Dip_Threshold:
                     isStable = self._isPriceStable(marketPrice, 'buy')
                     if isStable:
@@ -96,7 +98,7 @@ class AverageTrader(Trader):
         return price
 
     def _getAveragePricePaid(self):
-        return sum([o['funds'] for o in self.state['orders']])/sum([o['size'] for o in self.state['orders']])
+        return round(sum([o['funds'] for o in self.state['orders']])/sum([o['size'] for o in self.state['orders']]), 2)
 
     def _getProfitMargin(self):
         return (self.state['fee'] * 100) * len(self.state['orders']) + self.Profit_Threshold
