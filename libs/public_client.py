@@ -29,7 +29,27 @@ class PublicClient(object):
         self.auth = None
         self.session = requests.Session()
 
-    def get_products(self):
+    def get_product(self, product_id):
+        """Get a list of available currency pairs for trading.
+
+        Returns:
+            list: Info about all currency pairs. Example::
+                [
+                    {
+                        "id": "BTC-USD",
+                        "display_name": "BTC/USD",
+                        "base_currency": "BTC",
+                        "quote_currency": "USD",
+                        "base_min_size": "0.01",
+                        "base_max_size": "10000.00",
+                        "quote_increment": "0.01"
+                    }
+                ]
+
+        """
+        return self._send_message('get', '/products/{}'.format(product_id))
+
+    def get_products(self, product_id):
         """Get a list of available currency pairs for trading.
 
         Returns:

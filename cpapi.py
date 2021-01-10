@@ -11,6 +11,11 @@ class CbApi:
         url = 'https://api-public.sandbox.pro.coinbase.com'
         self.client = AuthenticatedClient(key, b64secret, passphrase, api_url=url)
         
+    def getProduct(self, product_id):
+        product = self.client.get_product(product_id)
+        logging.info("[MIN INC] {}: {}".format(product_id, product['base_increment']))
+        return product['base_increment']
+    
     def getAccountDetails(self, account_id):
         account = self.client.get_account(account_id)
         logging.info('[BALANCE] {}: {}'.format(account['currency'], account['balance']))
@@ -34,6 +39,7 @@ class CbApi:
 
     def placeMarketOrder(self, product_id, side, funds = None, size = None):
         result = self.client.place_market_order(product_id=product_id, side=side, size=size, funds=funds)
+        logging.info('[API] Market Order Result: ' + str(result))
         orderid = result['id']
         fill = self._getOrderDetails(orderid)
         logging.info('[{}] {} BTC for ${} at {}/BTC'.format(side.upper(), fill['size'], fill['usd_volume'], fill['price']))
