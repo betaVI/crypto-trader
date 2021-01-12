@@ -1,6 +1,6 @@
 import logging
-from cpapi import CbApi
-from datamanager import DataManager
+from bots.cpapi import CbApi
+from bots.datamanager import DataManager
 
 class Trader:
     def __init__(self, productid, cashaccount, cryptoaccount, logFileName, dataFileName):

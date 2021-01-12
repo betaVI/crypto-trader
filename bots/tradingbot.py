@@ -1,14 +1,16 @@
 import sys
 import signal
 import time
-from traders.market.markettrader import MarketTrader
-from traders.average.averagetrader import AverageTrader
+import os
+from bots.traders.market.markettrader import MarketTrader
+from bots.traders.average.averagetrader import AverageTrader
 
 def handle_cancel(sig, frame):
     print('Cancelled')
     sys.exit(0)
 
 if __name__ == "__main__":
+    print('cwd is %s' %(os.getcwd()))
     signal.signal(signal.SIGINT, handle_cancel)
     runinterval = 5
     productid = 'BTC-USD'

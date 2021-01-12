@@ -1,7 +1,7 @@
 import logging
-from cpapi import CbApi
-from datamanager import DataManager
-from traders.trader import Trader
+from bots.cpapi import CbApi
+from bots.datamanager import DataManager
+from bots.traders.trader import Trader
 
 class LimitTrader(Trader):
     def __init(self, productid, cashaccount, cryptoaccount):

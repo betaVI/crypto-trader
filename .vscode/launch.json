@@ -8,6 +8,8 @@
             "name": "Python: TradingBot",
             "type": "python",
             "request": "launch",
+            "env": { "PYTHONPATH": "${workspaceFolder};${workspaceFolder}/bots"},
+            "cwd": "${workspaceFolder}/bots",
             "program": "tradingbot.py",
             "console": "integratedTerminal"
         },
@@ -15,7 +17,7 @@
             "name": "Python: DataBot",
             "type": "python",
             "request": "launch",
-            "program": "DataBot",
+            "program": "bots/DataBot",
             "console": "integratedTerminal"
         }
     ]
