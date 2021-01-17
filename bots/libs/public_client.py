@@ -49,7 +49,7 @@ class PublicClient(object):
         """
         return self._send_message('get', '/products/{}'.format(product_id))
 
-    def get_products(self, product_id):
+    def get_products(self):
         """Get a list of available currency pairs for trading.
 
         Returns:

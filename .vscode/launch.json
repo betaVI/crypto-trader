@@ -19,6 +19,15 @@
             "request": "launch",
             "program": "bots/DataBot",
             "console": "integratedTerminal"
-        }
+        },
+        {
+            "name": "Python: Site",
+            "type": "python",
+            "request": "launch",
+            "env": { "PYTHONPATH": "${workspaceFolder};${workspaceFolder}/site"},
+            "cwd": "${workspaceFolder}/site",
+            "program": "app.py",
+            "console": "integratedTerminal"
+        },
     ]
 }

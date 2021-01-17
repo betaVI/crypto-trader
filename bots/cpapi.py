@@ -1,15 +1,25 @@
 import time
 import logging
-from libs.authenticated_client import AuthenticatedClient
+from bots.libs.authenticated_client import AuthenticatedClient
 
 class CbApi:
     def __init__(self):
         
-        key = 'xxxxxxxxxxxxxxxxx'
-        b64secret = 'xxxxxxxxxxxxxxxxxxxxxx=='
-        passphrase = 'xxxxxxxxxxxx'
-        url = 'https://api-public.sandbox.pro.coinbase.com'
+        key = 'xxxxxxxxxxxxxxxxxxxx' #'xxxxxxxxxxxxxxxxx'
+        b64secret = 'xxxxxxxxxxxxxxxxxxxxxx==' #'xxxxxxxxxxxxxxxxxxxxxx=='
+        passphrase = 'xxxxxxxxxxxxxxxxxxxx' #'xxxxxxxxxxxx'
+        url = 'https://api.pro.coinbase.com' #'https://api-public.sandbox.pro.coinbase.com'
         self.client = AuthenticatedClient(key, b64secret, passphrase, api_url=url)
+    
+    def getProducts(self):
+        products = self.client.get_products()
+        #print(products)
+        return products
+
+    def getAccounts(self):
+        accounts = self.client.get_accounts()
+        print(accounts)
+        return accounts
         
     def getProduct(self, product_id):
         product = self.client.get_product(product_id)
