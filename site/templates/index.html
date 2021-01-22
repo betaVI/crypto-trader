@@ -8,21 +8,28 @@
    <table id="traders" class="table table-striped table-bordered" style="width: 100%;">
       <thead>
          <tr>
-            <th>&nbsp;</th>
+            <th data-orderable="false">&nbsp;</th>
             <th>Product</th>
+            <th>Status</th>
             <th>BUY Upper/Lower</th>
             <th>Sell Upper/Lower</th>
-            <th>&nbsp;</th>
+            <th data-orderable="false">&nbsp;</th>
          </tr>
       </thead>
       <tbody>
          {% for item in traders %}
             <tr>
-               <td><a href={{ url_for('viewTrader', id=item.id) }}>View</a></td>
+               <td class="column-fit">
+                  <a href={{ url_for('viewTrader', id=item.id) }} class="btn btn-primary btn-sm">View</a>
+               </td>
                <td>{{ item.product }}</td>
-               <td>{{ item.buyupperthreshold ~ '/' ~ item.buylowerthreshold }}</td>
-               <td>{{ item.sellupperthreshold ~ '/' ~ item.selllowerthreshold }}</td>
-               <td><a href= {{ url_for('alterTrader', id=item.id) }}>Edit</a>|<a href={{ url_for('deleteTrader', id=item.id) }}>Del</a></td>
+               <td><h5><span class="badge badge-{{ 'success' if item.statusname == 'Active' else 'danger' }}">{{ item.statusname }}</span></h5></td>
+               <td>{{ item.buyupperthreshold ~ ' / ' ~ item.buylowerthreshold }}</td>
+               <td>{{ item.sellupperthreshold ~ ' / ' ~ item.selllowerthreshold }}</td>
+               <td class="column-fit">
+                  <a href={{ url_for('alterTrader', id=item.id) }} class="btn btn-primary btn-sm">Edit</a>&nbsp;
+                  <a href={{ url_for('deleteTrader', id=item.id) }} onclick="return confirm('Are you sure you want to delete this record?')" class="btn btn-danger btn-sm">Del</a>
+               </td>
             </tr>
          {% endfor %}
       </tbody>
@@ -31,7 +38,10 @@
 {% block scipt %}
    <script type="text/javascript">
       $(document).ready(function(){
-         $('#traders').DataTable();
+         $('#traders').DataTable({
+            "autoWidth": true,
+            "order": [[ 1, "asc" ]]
+         });
       });
    </script>
 {% endblock %}

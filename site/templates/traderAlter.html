@@ -2,7 +2,7 @@
 {% block title %}{{title}}{% endblock %}
 {% block header %}{{title}}{% endblock %}
 {% block content %}
-    <form action="" method="POST" class="was-validated">
+    <form action="" method="POST">
         {{ form.csrf_token }}
         <div class="row">
             <div class="col-md-6">
@@ -11,6 +11,17 @@
                     {{ form.product(class_="form-control") }}
                     {% if form.product.errors %}
                         {% for error in form.product.errors %}
+                            <div class="text-danger">{{ error }}</div>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group">
+                    {{ form.status.label }}
+                    {{ form.status(class_="form-control") }}
+                    {% if form.status.errors %}
+                        {% for error in form.status.errors %}
                             <div class="text-danger">{{ error }}</div>
                         {% endfor %}
                     {% endif %}
