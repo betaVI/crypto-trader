@@ -1,6 +1,32 @@
 {% extends "layout.html" %}
-{% block title %}{{title}}{% endblock %}
-{% block header %}{{title}}{% endblock %}
+{% block title %}{{ trader.product }}{% endblock %}
 {% block content %}
-    
+    <div class="card">
+        <div class="card-header">
+            <h2>{{ trader.product }}<span id="lblPrice" class="badge badge-success float-right"></span></h2>
+        </div>
+        <div class="card-body">
+        </div>
+    </div>
+{% endblock %}
+{% block script %}
+<script type="text/javascript">
+    $(document).ready(function(){
+        getPrice();
+        setInterval(getPrice, 5000);
+    })
+    function getPrice(){
+        $.ajax({
+            type: 'GET',
+            url: "{{ url_for('getPrice',productid=trader.product) }}",
+            contentType: 'application/json;charset=UTF-8'
+        }).fail(function(xhr, status, err) {
+            console.error('unable to get price: ' + status);
+        }).done(function(data, status, xhr) {
+            var price= Number(data).toLocaleString('en-US',options={ minimumFractionDigits: 2, style: 'currency', currency: '{{ product.quote_currency }}' });
+            $('#lblPrice').text(price);
+            // console.log('Success: ' +price)
+        });
+    }
+</script>
 {% endblock %}

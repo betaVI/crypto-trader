@@ -1,15 +1,12 @@
+from configLoader import loadConfig
 import time
 import logging
 from bots.libs.authenticated_client import AuthenticatedClient
 
 class CbApi:
     def __init__(self):
-        
-        key = 'xxxxxxxxxxxxxxxxxxxx' #'xxxxxxxxxxxxxxxxx'
-        b64secret = 'xxxxxxxxxxxxxxxxxxxxxx==' #'xxxxxxxxxxxxxxxxxxxxxx=='
-        passphrase = 'xxxxxxxxxxxxxxxxxxxx' #'xxxxxxxxxxxx'
-        url = 'https://api.pro.coinbase.com' #'https://api-public.sandbox.pro.coinbase.com'
-        self.client = AuthenticatedClient(key, b64secret, passphrase, api_url=url)
+        config = loadConfig('../coinbase.ini','credentials')
+        self.client = AuthenticatedClient(config['key'], config['b64secret'], config['passphrase'], api_url=config['url'])
     
     def getProducts(self):
         products = self.client.get_products()
@@ -18,13 +15,14 @@ class CbApi:
 
     def getAccounts(self):
         accounts = self.client.get_accounts()
-        print(accounts)
+        # print(accounts)
         return accounts
         
     def getProduct(self, product_id):
         product = self.client.get_product(product_id)
-        logging.info("[MIN INC] {}: {}".format(product_id, product['base_increment']))
-        return product['base_increment']
+        # print(product)
+        # logging.info("[product] {}: {}".format(product_id, product['base_increment']))
+        return product#['base_increment']
     
     def getAccountDetails(self, account_id):
         account = self.client.get_account(account_id)

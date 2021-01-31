@@ -1,85 +1,95 @@
 {% extends "layout.html" %}
 {% block title %}{{title}}{% endblock %}
-{% block header %}{{title}}{% endblock %}
 {% block content %}
-    <form action="" method="POST">
-        {{ form.csrf_token }}
-        <div class="row">
-            <div class="col-md-6">
-                <div class="form-group">
-                    {{ form.product.label }}
-                    {{ form.product(class_="form-control") }}
-                    {% if form.product.errors %}
-                        {% for error in form.product.errors %}
-                            <div class="text-danger">{{ error }}</div>
-                        {% endfor %}
-                    {% endif %}
+<div class="card">
+    <div class="card-header">
+        <h2>{{ title }}</h2>
+    </div>
+    <div class="card-body">
+        <form action="" method="POST">
+            {{ form.csrf_token }}
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        {{ form.product.label }}
+                        {{ form.product(class_="form-control") }}
+                        {% if form.product.errors %}
+                            {% for error in form.product.errors %}
+                                <div class="text-danger">{{ error }}</div>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        {{ form.status.label }}
+                        {{ form.status(class_="form-control") }}
+                        {% if form.status.errors %}
+                            {% for error in form.status.errors %}
+                                <div class="text-danger">{{ error }}</div>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
                 </div>
             </div>
-            <div class="col-md-6">
-                <div class="form-group">
-                    {{ form.status.label }}
-                    {{ form.status(class_="form-control") }}
-                    {% if form.status.errors %}
-                        {% for error in form.status.errors %}
-                            <div class="text-danger">{{ error }}</div>
-                        {% endfor %}
-                    {% endif %}
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        {{ form.buyupperthreshold.label }}
+                        {{ form.buyupperthreshold(class_="form-control")}}
+                        {% if form.buyupperthreshold.errors %}
+                            {% for error in form.buyupperthreshold.errors %}
+                                <div class="text-danger">{{ error }}</div>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        {{ form.buylowerthreshold.label }}
+                        {{ form.buylowerthreshold(class_="form-control")}}
+                        {% if form.buylowerthreshold.errors %}
+                            {% for error in form.buylowerthreshold.errors %}
+                                <div class="text-danger">{{ error }}</div>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
                 </div>
             </div>
-        </div>
-        <div class="row">
-            <div class="col-md-6">
-                <div class="form-group">
-                    {{ form.buyupperthreshold.label }}
-                    {{ form.buyupperthreshold(class_="form-control")}}
-                    {% if form.buyupperthreshold.errors %}
-                        {% for error in form.buyupperthreshold.errors %}
-                            <div class="text-danger">{{ error }}</div>
-                        {% endfor %}
-                    {% endif %}
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        {{ form.sellupperthreshold.label }}
+                        {{ form.sellupperthreshold(class_="form-control")}}
+                        {% if form.sellupperthreshold.errors %}
+                            {% for error in form.sellupperthreshold.errors %}
+                                <div class="text-danger">{{ error }}</div>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        {{ form.selllowerthreshold.label }}
+                        {{ form.selllowerthreshold(class_="form-control")}}
+                        {% if form.selllowerthreshold.errors %}
+                            {% for error in form.selllowerthreshold.errors %}
+                                <div class="text-danger">{{ error }}</div>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
                 </div>
             </div>
-            <div class="col-md-6">
-                <div class="form-group">
-                    {{ form.buylowerthreshold.label }}
-                    {{ form.buylowerthreshold(class_="form-control")}}
-                    {% if form.buylowerthreshold.errors %}
-                        {% for error in form.buylowerthreshold.errors %}
-                            <div class="text-danger">{{ error }}</div>
-                        {% endfor %}
-                    {% endif %}
+            <div class="row">
+                <div class="col-md-2">
+                    <a href={{ url_for('index') }} class="btn btn-danger btn-block">Cancel</a>
+                </div>
+                <div class="col-md-8"></div>
+                <div class="col-md-2">
+                    {{ form.submit(class_="btn btn-primary btn-block") }}
                 </div>
             </div>
-        </div>
-        <div class="row">
-            <div class="col-md-6">
-                <div class="form-group">
-                    {{ form.sellupperthreshold.label }}
-                    {{ form.sellupperthreshold(class_="form-control")}}
-                    {% if form.sellupperthreshold.errors %}
-                        {% for error in form.sellupperthreshold.errors %}
-                            <div class="text-danger">{{ error }}</div>
-                        {% endfor %}
-                    {% endif %}
-                </div>
-            </div>
-            <div class="col-md-6">
-                <div class="form-group">
-                    {{ form.selllowerthreshold.label }}
-                    {{ form.selllowerthreshold(class_="form-control")}}
-                    {% if form.selllowerthreshold.errors %}
-                        {% for error in form.selllowerthreshold.errors %}
-                            <div class="text-danger">{{ error }}</div>
-                        {% endfor %}
-                    {% endif %}
-                </div>
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-md-2">
-                {{ form.submit(class_="btn btn-primary btn-block") }}
-            </div>
-        </div>
-    </form>
+        </form>
+    </div>
+</div>
 {% endblock %}

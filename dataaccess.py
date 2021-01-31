@@ -1,10 +1,9 @@
-import sqlite3
-from sqlite3 import Error
+from configLoader import loadConfig
+from psycopg2.extras import RealDictCursor
+import psycopg2
 
 class DataAccess():
-    def __init__(self, path):
-        self.path = path +'/Data/trading.db'
-        print(self.path)
+    def __init__(self):
         self._initializeTables()
 
     def fetchTraders(self):
@@ -23,11 +22,12 @@ class DataAccess():
         values = (product, baseaccount, quoteaccount, float(buyupperthreshold), float(buylowerthreshold), float(sellupperthreshold), float(selllowerthreshold), int(statusid))
         if id != 0:
             query = """UPDATE traders 
-                            SET product = ?, baseaccount=?, quoteaccount=?, buyupperthreshold=?, buylowerthreshold=?, sellupperthreshold=?, selllowerthreshold=?, statusid=?
+                            SET product = %s, baseaccount=%s, quoteaccount=%s, buyupperthreshold=%s, buylowerthreshold=%s, sellupperthreshold=%s, selllowerthreshold=%s, statusid=%s
                             WHERE id = {}""".format(id)
         else:
+            query = ",".join(['%s']*len(values))
             query = """INSERT INTO traders (product, baseaccount, quoteaccount, buyupperthreshold, buylowerthreshold, sellupperthreshold, selllowerthreshold, statusid) 
-                        VALUES (?,?,?,?,?,?,?,?)"""
+                        VALUES ({})""".format(query)
         
         return self._execute(query,values)
 
@@ -38,69 +38,53 @@ class DataAccess():
     def _create_connection(self):
         connection = None
         try:
-            connection = sqlite3.connect(self.path)
-            # print('Connection to SQLite DB successful')
-        except Error as e:
+            dbconfig = loadConfig('../database.ini', 'postgresdb')
+            connection = psycopg2.connect(**dbconfig)
+        except (Exception, psycopg2.DatabaseError) as e:
             print(f"The error '{e}' occurred")
         return connection
 
     def _initializeTables(self):
         create_traders_table = """CREATE TABLE IF NOT EXISTS traders(
-                                        id integer PRIMARY KEY,
-                                        product text NOT NULL,
+                                        id SERIAL PRIMARY KEY,
+                                        product text NOT NULL CONSTRAINT unique_traders_product UNIQUE,
                                         baseaccount text NOT NULL,
                                         quoteaccount text NOT NULL,
-                                        lastpurcahseprice REAL NULL,
-                                        buyupperthreshold REAL NOT NULL,
-                                        buylowerthreshold REAL NOT NULL,
-                                        sellupperthreshold REAL NOT NULL,
-                                        selllowerthreshold REAL NOT NULL,
-                                        statusid integer NOT NULL,
-                                        FOREIGN KEY (statusid) REFERENCES status (id)
+                                        lastpurchaseprice numeric(16,10) NULL,
+                                        maxpurchaseamount numeric(16,10) NOT NULL,
+                                        buyupperthreshold Numeric(3,2) NOT NULL,
+                                        buylowerthreshold Numeric(3,2) NOT NULL,
+                                        sellupperthreshold Numeric(3,2) NOT NULL,
+                                        selllowerthreshold Numeric(3,2) NOT NULL,
+                                        statusid smallint NOT NULL references status(id)
                                     )"""
                                     
         create_status_table = """CREATE TABLE IF NOT EXISTS status(
-                                    id integer PRIMARY KEY,
+                                    id serial PRIMARY KEY,
                                     name text NOT NULL UNIQUE
                                 )"""
 
         self._execute(create_traders_table)
         self._execute(create_status_table)
-        self._execute("""INSERT OR IGNORE INTO status (name) VALUES ('Active'),('Disabled')""")
+        self._execute("INSERT INTO status (name) VALUES ('Active'),('Disabled') ON CONFLICT DO NOTHING")
 
-        if self._columnNotExists('traders','statusid'):
-            self._updateTable('traders', create_traders_table, """INSERT INTO traders (product, baseaccount, quoteaccount, buyupperthreshold, buylowerthreshold, sellupperthreshold, selllowerthreshold, statusid)
-                            SELECT product, baseaccount, quoteaccount, buyupperthreshold, buylowerthreshold, sellupperthreshold, selllowerthreshold, 1 FROM traders_old""")
+        #check for schema updates
+        if not self._checkForConstraint('unique_traders_product'):
+            self._execute("ALTER TABLE traders ADD CONSTRAINT unique_traders_product UNIQUE (product)")
+        if not self._checkTableForColumn('traders','maxpurchaseamount'):
+            self._execute("ALTER TABLE traders ADD COLUMN maxpurchaseamount numeric(16,10) NOT NULL DEFAULT 0")
 
-    def _columnNotExists(self, table, column):
-        with self._create_connection() as conn:
-            c = conn.cursor()
-            try:
-                columns = c.execute("PRAGMA table_info(" + table + ")")
-                columns = [i[1] for i in columns]
-                return column not in columns
-            except Error as e:
-                print(f"Find Column Error: '{e}'")
-            finally:
-                c.close()
+    def _checkTableForColumn(self, table, column):
+        query = """SELECT EXISTS (
+            SELECT 1 FROM information_schema.columns WHERE table_schema='public' AND table_name='{}' AND column_name='{}'
+        )""".format(table,column)
+        result = self._executeRead(query)
+        return result[0]['exists']
 
-    def _updateTable(self, tablename, createquery, insertquery):
-        oldtablename = tablename + "_old"
-        with self._create_connection() as conn:
-            c = conn.cursor()
-            try:
-                c.execute("PRAGMA forign_keys=off")
-                c.execute("BEGIN TRANSACTION")
-                c.execute("ALTER TABLE " + tablename + " RENAME TO " + oldtablename)
-                c.execute(createquery)
-                c.execute(insertquery)
-                c.execute("DROP TABLE " + oldtablename)
-                c.execute("COMMIT")
-                c.execute("PRAGMA forign_keys=on")
-            except Error as e:
-                print(f"Table Update Error: '{e}'")
-            finally:
-                c.close()
+    def _checkForConstraint(self, constraintname):
+        query = "SELECT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = '{}')".format(constraintname)
+        result = self._executeRead(query)
+        return result[0]['exists']
 
     def _execute(self, statement, params=None):
         error = None
@@ -111,7 +95,7 @@ class DataAccess():
                     c.execute(statement)
                 else:
                     c.execute(statement, params)
-            except Error as e:
+            except (Exception, psycopg2.DatabaseError) as e:
                 error = f"Sql Error: '{e}'"
             finally:
                 c.close()
@@ -129,13 +113,12 @@ class DataAccess():
 
     def _executeRead(self,statement):
         with self._create_connection() as conn:
-            conn.row_factory = sqlite3.Row
-            c = conn.cursor()
+            c = conn.cursor(cursor_factory=RealDictCursor)
             try:
                 c.execute(statement)
                 result = c.fetchall()
                 return result
-            except Error as e:
+            except (Exception, psycopg2.DatabaseError) as e:
                 print(f"Sql Read Error: '{e}'")
             finally:
                 c.close()

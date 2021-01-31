@@ -1,6 +1,6 @@
 import os, sys
 # sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from flask import Flask, render_template, request, redirect, url_for, flash
+from flask import Flask, render_template, request, redirect, url_for, flash, jsonify
 from dataaccess import DataAccess
 from forms.TraderForm import TraderForm
 from bots.cpapi import CbApi
@@ -8,20 +8,39 @@ from bots.cpapi import CbApi
 app = Flask(__name__)
 app.config['SECRET_KEY'] = str(os.urandom(32))
 
-path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 cbapi = CbApi()
-db = DataAccess(path)
+db = DataAccess()
 
 @app.route('/')
 def index():
     traders = db.fetchTraders()
-    templatedata = { 'title': 'Traders', 'traders': traders }
+    accounts = [a for a in cbapi.getAccounts() if float(a['balance']) > 0]
+    templatedata = { 'traders': traders, 'accounts': accounts }
     return render_template('index.html', **templatedata)
+
+@app.route('/<productid>/price', methods=["GET"])
+def getPrice(productid):
+    price = cbapi.getMarketPrice(productid)
+    return jsonify(price)
+
+@app.route('/accounts/getbalances', methods=["POST"])
+def getAccountBalances():
+    result = {}
+    if 'currencies' in request.json:
+        currencies = request.json['currencies']
+        for c in currencies:
+            if c=='USD':
+                price = 1
+            else:
+                price = cbapi.getMarketPrice(c+'-USD')
+            result[c]=price
+    return jsonify(result)
 
 @app.route('/trader/view/<id>')
 def viewTrader(id):
     trader = db.fetchTrader(id)
-    templatedata = { 'title': trader['product']+' Trader'}
+    product = cbapi.getProduct(trader['product'])
+    templatedata = { 'trader': trader, 'product': product }
     return render_template("traderView.html", **templatedata)
 
 @app.route('/trader/delete/<id>')
@@ -38,7 +57,7 @@ def alterTrader(id=0):
     if request.method == 'GET' and id != 0:
         title = 'Edit Trader'
         trader = db.fetchTrader(id)
-        form = TraderForm(data=dict(zip(trader.keys(),trader)))
+        form = TraderForm(data=trader)#dict(zip(trader.keys(),trader)))
     else:
         form = TraderForm()
     statuses = db.fetchStatuses()

@@ -1,47 +1,109 @@
 {% extends "layout.html" %}
-{% block title %}{{ title }}{% endblock %}
-{% block header %}{{ title }}{% endblock %}
+{% block title %}Traders{% endblock %}
 {% block content %}
-   <a href={{ url_for('alterTrader') }} class="btn btn-success">Add</a>
-   <br/>
-   <br/>
-   <table id="traders" class="table table-striped table-bordered" style="width: 100%;">
-      <thead>
-         <tr>
-            <th data-orderable="false">&nbsp;</th>
-            <th>Product</th>
-            <th>Status</th>
-            <th>BUY Upper/Lower</th>
-            <th>Sell Upper/Lower</th>
-            <th data-orderable="false">&nbsp;</th>
-         </tr>
-      </thead>
-      <tbody>
-         {% for item in traders %}
-            <tr>
-               <td class="column-fit">
-                  <a href={{ url_for('viewTrader', id=item.id) }} class="btn btn-primary btn-sm">View</a>
-               </td>
-               <td>{{ item.product }}</td>
-               <td><h5><span class="badge badge-{{ 'success' if item.statusname == 'Active' else 'danger' }}">{{ item.statusname }}</span></h5></td>
-               <td>{{ item.buyupperthreshold ~ ' / ' ~ item.buylowerthreshold }}</td>
-               <td>{{ item.sellupperthreshold ~ ' / ' ~ item.selllowerthreshold }}</td>
-               <td class="column-fit">
-                  <a href={{ url_for('alterTrader', id=item.id) }} class="btn btn-primary btn-sm">Edit</a>&nbsp;
-                  <a href={{ url_for('deleteTrader', id=item.id) }} onclick="return confirm('Are you sure you want to delete this record?')" class="btn btn-danger btn-sm">Del</a>
-               </td>
-            </tr>
-         {% endfor %}
-      </tbody>
-   </table>
+   <div class="row">
+      <div class="col-lg-6 col-md-8">
+         <div class="card">
+            <div class="card-header">
+               <h2>Traders<a href={{ url_for('alterTrader') }} class="btn btn-success float-right">Add</a></h2>
+            </div>
+            <div class="card-body">
+               <table id="traders" class="table table-striped table-bordered table-sm" style="width: 100%;">
+                  <thead>
+                     <tr>
+                        <!-- <th data-orderable="false">&nbsp;</th> -->
+                        <th>Status</th>
+                        <th>Product</th>
+                        <th>BUY Upper/Lower</th>
+                        <th>Sell Upper/Lower</th>
+                        <th data-orderable="false">&nbsp;</th>
+                     </tr>
+                  </thead>
+                  <tbody>
+                     {% for item in traders %}
+                        <tr>
+                           <!-- <td class="column-fit">
+                              <a href={{ url_for('viewTrader', id=item.id) }} class="btn btn-primary btn-sm">View</a>
+                           </td> -->
+                           <td class="align-middle"><span class="badge badge-{{ 'success' if item.statusname == 'Active' else 'danger' }}">{{ item.statusname }}</span></td>
+                           <td class="align-middle">{{ item.product }}</td>
+                           <td class="align-middle">{{ item.buyupperthreshold ~ ' / ' ~ item.buylowerthreshold }}</td>
+                           <td class="align-middle">{{ item.sellupperthreshold ~ ' / ' ~ item.selllowerthreshold }}</td>
+                           <td class="align-middle column-fit">
+                              <a href={{ url_for('alterTrader', id=item.id) }} class="btn btn-primary btn-sm">Edit</a>&nbsp;
+                              <a href={{ url_for('deleteTrader', id=item.id) }} onclick="return confirm('Are you sure you want to delete this record?')" class="btn btn-danger btn-sm">Del</a>
+                           </td>
+                        </tr>
+                     {% endfor %}
+                  </tbody>
+               </table>
+            </div>
+         </div>
+      </div>
+      <div class="col-lg-6 col-md-8">
+         <div class="card">
+            <div class="card-header">
+               <h2>Accounts<span id="lblTotalPortfolio" class="float-right"></span></h2>
+            </div>
+            <div class="card-body">
+               <table id="accounts" class="table table-striped table-bordered table-sm">
+                  <thead>
+                     <tr>
+                        <th>Currency</th>
+                        <th>Quantity</th>
+                        <th>Price</th>
+                        <th>Balance</th>
+                     </tr>
+                  </thead>
+                  <tbody>
+                     {% for account in accounts %}
+                        <tr data-currency="{{ account.currency }}">
+                           <td>{{ account.currency }}</td>
+                           <td data-balance>{{ account.balance }}</td>
+                           <td data-price>----</td>
+                           <td data-total>{{ account.balance }}</td>
+                        </tr>
+                     {% endfor %}
+                  </tbody>
+               </table>
+            </div>
+         </div>
+   </div>
 {% endblock %}
-{% block scipt %}
-   <script type="text/javascript">
-      $(document).ready(function(){
-         $('#traders').DataTable({
-            "autoWidth": true,
-            "order": [[ 1, "asc" ]]
-         });
+{% block script %}
+<script type="text/javascript">
+   var currencyFormatter = new Intl.NumberFormat('en-US',options={ minimumFractionDigits: 2, style: 'currency', currency: 'USD' });
+   $(document).ready(function(){
+      updateAccountBalances();
+      setInterval(updateAccountBalances, 5000);
+   });
+   function updateAccountBalances(){
+      currencies = [];
+      $('#accounts tbody tr').each(function(i, row){
+         var $row = $(row);
+         var currency = $row.data('currency');
+         currencies.push(currency);
+      })
+         
+      $.ajax({
+         type: 'POST',
+         url: "{{ url_for('getAccountBalances') }}",
+         contentType: 'application/json;charset=UTF-8',
+         data: JSON.stringify({ currencies : currencies})
+      }).fail(function(xhr, status, err) {
+         console.error('unable to get prices: ' + status);
+      }).done(function(data, status, xhr) {
+         var accounttotal = 0;
+         for (const [key,value] of Object.entries(data)){
+            var $row = $("#accounts tbody tr[data-currency='" + key + "']");
+            var qty = parseFloat($row.find('td[data-balance]').text())
+            var total = qty*value
+            $row.find('td[data-price]').text(currencyFormatter.format(value));
+            $row.find('td[data-total]').text(currencyFormatter.format(total));
+            accounttotal+=total
+         }
+         $('#lblTotalPortfolio').text("Total: "+ currencyFormatter.format(accounttotal));
       });
-   </script>
+   }
+</script>
 {% endblock %}

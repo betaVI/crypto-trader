@@ -7,7 +7,7 @@ class AverageTrader(Trader):
     def __init__(self, productid, cashaccount, cryptaccount):
         super().__init__(productid, cashaccount, cryptaccount, 'traders/average/averagelog.log','traders/average/averagedata.json')
 
-        self.baseIncrement = 0 
+        # self.baseIncrement = 0 
         self.lastMarketPrice = 0
         self.data = self.dm.loadData()
 
@@ -21,7 +21,7 @@ class AverageTrader(Trader):
         # fill = self.api._getOrderDetails('44f8d18b-9a9e-4731-b17c-33759ddcd05c')
         # print(fill)
 
-        self.baseIncrement = self.api.getProduct(productid)
+        # self.baseIncrement = self.api.getProduct(productid)
 
         self._updateFees()
         self._updateState()
