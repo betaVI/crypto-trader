@@ -3,7 +3,8 @@ from wtforms import DecimalField, SelectField, SubmitField, HiddenField
 from wtforms.validators import DataRequired, NumberRange
 
 class TraderForm(FlaskForm):
-    id = HiddenField(u'Id')
+    title = 'Create Trader'
+    traderid = HiddenField(u'TraderId')
     product = SelectField(u'Product', validators=[DataRequired()], coerce=str)
     status = SelectField(u'Status', validators=[DataRequired()], coerce=int)
     buyupperthreshold = DecimalField(u'BUY Upper Threshold',validators=[NumberRange(min=0,max=100, message='Must be between 0-100')], number_format="#.00")

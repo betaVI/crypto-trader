@@ -7,26 +7,33 @@ class DataAccess():
         self._initializeTables()
 
     def fetchTraders(self):
-        query = "SELECT t.*, s.name as statusname FROM traders t INNER JOIN status s on s.id = t.statusid"
+        query = "SELECT t.*, p.name as product, s.name as statusname FROM traders t INNER JOIN status s on s.id = t.statusid INNER JOIN products p on p.id = t.productid"
         return self._executeRead(query)
 
     def fetchTrader(self, id):
-        query = "SELECT product, baseaccount, quoteaccount, buyupperthreshold, buylowerthreshold, sellupperthreshold, selllowerthreshold, statusid as status FROM traders t WHERE t.id = {}".format(id)
+        query = """SELECT 
+                        p.name as product, baseaccount, quoteaccount, buyupperthreshold, buylowerthreshold, sellupperthreshold, selllowerthreshold, statusid as status 
+                    FROM 
+                        traders t inner join 
+                        products p on p.id = t.productid 
+                    WHERE 
+                        t.id = {}""".format(id)
         return next(iter(self._executeRead(query)), None)
 
     def fetchStatuses(self):
         query = "SELECT * FROM status"
         return self._executeRead(query)
     
-    def alterTrader(self, id, product, baseaccount, quoteaccount, buyupperthreshold, buylowerthreshold, sellupperthreshold, selllowerthreshold, statusid):
-        values = (product, baseaccount, quoteaccount, float(buyupperthreshold), float(buylowerthreshold), float(sellupperthreshold), float(selllowerthreshold), int(statusid))
-        if id != 0:
+    def alterTrader(self, id, product, baseaccount, quoteaccount, buyupperthreshold, buylowerthreshold, sellupperthreshold, selllowerthreshold, maxpurchaseamount, statusid):
+        productid = self.updateProduct(1, product, 0)
+        values = (productid, baseaccount, quoteaccount, float(buyupperthreshold), float(buylowerthreshold), float(sellupperthreshold), float(selllowerthreshold), float(maxpurchaseamount), int(statusid))
+        if id != '0':
             query = """UPDATE traders 
-                            SET product = %s, baseaccount=%s, quoteaccount=%s, buyupperthreshold=%s, buylowerthreshold=%s, sellupperthreshold=%s, selllowerthreshold=%s, statusid=%s
+                            SET productid = %s, baseaccount=%s, quoteaccount=%s, buyupperthreshold=%s, buylowerthreshold=%s, sellupperthreshold=%s, selllowerthreshold=%s, maxpurchaseamount=%s, statusid=%s
                             WHERE id = {}""".format(id)
         else:
             query = ",".join(['%s']*len(values))
-            query = """INSERT INTO traders (product, baseaccount, quoteaccount, buyupperthreshold, buylowerthreshold, sellupperthreshold, selllowerthreshold, statusid) 
+            query = """INSERT INTO traders (productid, baseaccount, quoteaccount, buyupperthreshold, buylowerthreshold, sellupperthreshold, selllowerthreshold, maxpurchaseamount, statusid) 
                         VALUES ({})""".format(query)
         
         return self._execute(query,values)
@@ -34,6 +41,16 @@ class DataAccess():
     def deleteTrader(self, id):
         query = "DELETE FROM traders WHERE id = {}".format(id)
         return self._execute(query)
+
+    def updateProduct(self, exchangeid, product, currentprice):
+
+        update_product_query = "INSERT INTO products (exchangeid, name, currentprice) VALUES ({},'{}',{}) ".format(exchangeid,product, currentprice)
+        update_product_query += "ON CONFLICT (name) DO UPDATE SET currentprice = {}, updatedat = CURRENT_TIMESTAMP".format(currentprice)
+
+        self._execute(update_product_query)
+
+        row = self._executeRead("SELECT ID FROM products WHERE name = '{}'".format(product))
+        return row[0]['id']
 
     def _create_connection(self):
         connection = None
@@ -45,9 +62,25 @@ class DataAccess():
         return connection
 
     def _initializeTables(self):
+        create_products_table = """CREATE TABLE IF NOT EXISTS products (
+                                        id SERIAL PRIMARY KEY,
+                                        exchangeid smallint NOT NULL references exchanges(id),
+                                        name text NOT NULL,
+                                        currentprice numeric(16,10) NOT NULL,
+                                        createdat timestamp NOT NULL DEFAULT now(),
+                                        updatedat timestamp NOT NULL DEFAULT now(),
+                                        CONSTRAINT unique_product_name UNIQUE (name)
+                                    )"""
+        
+        create_exchanges_table = """CREATE TABLE IF NOT EXISTS exchanges (
+                                        id serial PRIMARY KEY,
+                                        name text NOT NULL,
+                                        CONSTRAINT unique_exhcange_name UNIQUE (name)
+                                    )"""
+        
         create_traders_table = """CREATE TABLE IF NOT EXISTS traders(
                                         id SERIAL PRIMARY KEY,
-                                        product text NOT NULL CONSTRAINT unique_traders_product UNIQUE,
+                                        productid int NOT NULL REFERENCES products(id),
                                         baseaccount text NOT NULL,
                                         quoteaccount text NOT NULL,
                                         lastpurchaseprice numeric(16,10) NULL,
@@ -64,15 +97,12 @@ class DataAccess():
                                     name text NOT NULL UNIQUE
                                 )"""
 
+        self._execute(create_exchanges_table)
+        self._execute(create_products_table)
         self._execute(create_traders_table)
         self._execute(create_status_table)
+        self._execute("INSERT INTO exchanges (name) VALUES ('CoinbasePro') ON CONFLICT DO NOTHING")
         self._execute("INSERT INTO status (name) VALUES ('Active'),('Disabled') ON CONFLICT DO NOTHING")
-
-        #check for schema updates
-        if not self._checkForConstraint('unique_traders_product'):
-            self._execute("ALTER TABLE traders ADD CONSTRAINT unique_traders_product UNIQUE (product)")
-        if not self._checkTableForColumn('traders','maxpurchaseamount'):
-            self._execute("ALTER TABLE traders ADD COLUMN maxpurchaseamount numeric(16,10) NOT NULL DEFAULT 0")
 
     def _checkTableForColumn(self, table, column):
         query = """SELECT EXISTS (
