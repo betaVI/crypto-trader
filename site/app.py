@@ -37,11 +37,5 @@ def getProducts():
     products = [p['id'] for p in cbapi.getProducts() if p['id'].endswith('USD')]
     return jsonify(success=True, data=products)
 
-@app.route('/trader/view/<id>')
-def viewTrader(id):
-    trader = db.fetchTrader(id)
-    product = cbapi.getProduct(trader['product'])
-    templatedata = { 'trader': trader, 'product': product }
-    return render_template("traderView.html", **templatedata)
 if __name__ == '__main__':
     app.run(debug=True, port=18256, host='0.0.0.0')
