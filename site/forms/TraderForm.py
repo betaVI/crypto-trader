@@ -3,7 +3,7 @@ from wtforms import DecimalField, SelectField, SubmitField, HiddenField
 from wtforms.validators import DataRequired, NumberRange
 
 class TraderForm(FlaskForm):
-    title = 'Create Trader'
+    title = "Add Trader"
     traderid = HiddenField(u'TraderId')
     product = SelectField(u'Product', validators=[DataRequired()], coerce=str)
     status = SelectField(u'Status', validators=[DataRequired()], coerce=int)

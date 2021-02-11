@@ -6,13 +6,17 @@ class DataAccess():
     def __init__(self):
         self._initializeTables()
 
+    def fetchConfiguredProducts(self):
+        query = "SELECT p.name as product FROM traders t INNER JOIN status s on s.id = t.statusid INNER JOIN products p on p.id = t.productid"
+        return self._executeRead(query)
+
     def fetchTraders(self):
-        query = "SELECT t.*, p.name as product, s.name as statusname FROM traders t INNER JOIN status s on s.id = t.statusid INNER JOIN products p on p.id = t.productid"
+        query = "SELECT t.*, p.name as product, s.name as statusname FROM traders t INNER JOIN status s on s.id = t.statusid INNER JOIN products p on p.id = t.productid ORDER BY p.name"
         return self._executeRead(query)
 
     def fetchTrader(self, id):
         query = """SELECT 
-                        p.name as product, baseaccount, quoteaccount, buyupperthreshold, buylowerthreshold, sellupperthreshold, selllowerthreshold, statusid as status 
+                        t.id as traderid, p.name as product, baseaccount, quoteaccount, buyupperthreshold, buylowerthreshold, sellupperthreshold, selllowerthreshold, statusid as status 
                     FROM 
                         traders t inner join 
                         products p on p.id = t.productid 
