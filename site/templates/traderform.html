@@ -1,32 +1,20 @@
-<form id='frmTrader' action="{{ url_for('alterTrader') }}" method="POST">
+<form id='frmTrader' action="{{ url_for('createTrader') }}" method="POST">
     {{ form.csrf_token }}
     {{ form.traderid() }}
+    {{ form.product() }}
     <div class="row">
-        <div class="col-md-6">
+        <div class="col-md-4">
             <div class="form-group">
-                {{ form.product.label }}
-                {{ form.product(class_="form-control") }}
-                {% if form.product.errors %}
-                    {% for error in form.product.errors %}
+                {{ form.maxpurchaseamount.label }}
+                {{ form.maxpurchaseamount(class_="form-control")}}
+                {% if form.maxpurchaseamount.errors %}
+                    {% for error in form.maxpurchaseamount.errors %}
                         <div class="text-danger">{{ error }}</div>
                     {% endfor %}
                 {% endif %}
             </div>
         </div>
-        <div class="col-md-6">
-            <div class="form-group">
-                {{ form.status.label }}
-                {{ form.status(class_="form-control") }}
-                {% if form.status.errors %}
-                    {% for error in form.status.errors %}
-                        <div class="text-danger">{{ error }}</div>
-                    {% endfor %}
-                {% endif %}
-            </div>
-        </div>
-    </div>
-    <div class="row">
-        <div class="col-md-6">
+        <div class="col-md-4">
             <div class="form-group">
                 {{ form.buyupperthreshold.label }}
                 {{ form.buyupperthreshold(class_="form-control")}}
@@ -37,7 +25,7 @@
                 {% endif %}
             </div>
         </div>
-        <div class="col-md-6">
+        <div class="col-md-4">
             <div class="form-group">
                 {{ form.buylowerthreshold.label }}
                 {{ form.buylowerthreshold(class_="form-control")}}
@@ -50,7 +38,9 @@
         </div>
     </div>
     <div class="row">
-        <div class="col-md-6">
+        <div class="col-md-4">
+        </div>
+        <div class="col-md-4">
             <div class="form-group">
                 {{ form.sellupperthreshold.label }}
                 {{ form.sellupperthreshold(class_="form-control")}}
@@ -61,7 +51,7 @@
                 {% endif %}
             </div>
         </div>
-        <div class="col-md-6">
+        <div class="col-md-4">
             <div class="form-group">
                 {{ form.selllowerthreshold.label }}
                 {{ form.selllowerthreshold(class_="form-control")}}

@@ -1,21 +1,27 @@
 import SpinnerComponent from './spinnerComponent.js';
-import AccountsComponent from './accountsComponent.js';
-import TradersComponent from './tradersComponent.js';
-import ModalComponent from './modalComponent.js';
-import ProductsComponent from './productsComponent.js';
-import MainApp from './MainApp.js';
+import accountsComponent from './accountsComponent.js';
+import modalComponent from './modalComponent.js';
+import loadingButtonComponent from './loadingButtonComponent.js';
+import alertComponent from './alertComponent.js';
+import productsComponent from './productsComponent.js';
+import mainApp from './MainApp.js';
+import spinnerComponent from './spinnerComponent.js';
 
-var currencyFormat = new Intl.NumberFormat('en-US',options={ minimumFractionDigits: 2, style: 'currency', currency: 'USD' });
-const app = Vue.createApp(MainApp);
+const app = Vue.createApp(mainApp);
 app.config.globalProperties.$filters = {
-    currencyUSD(value){
+    currencyUSD(value, decimalplaces){
+        var currencyFormat = new Intl.NumberFormat('en-US',options={ minimumFractionDigits: decimalplaces, style: 'currency', currency: 'USD' });
+        return currencyFormat.format(value);
+    },
+    decimal(value, decimalplaces){
+        var currencyFormat = new Intl.NumberFormat('en-US',options={ minimumFractionDigits: decimalplaces });
         return currencyFormat.format(value);
     }
 };
-app.component("spinner-component", SpinnerComponent);
-app.component("products-component", ProductsComponent);
-app.component("account-component", AccountsComponent);
-app.component("traders-component", TradersComponent);
-app.component("edit-trader-modal", ModalComponent);
-app.component("delete-trader-modal", ModalComponent);
+app.component("loading-button-component", loadingButtonComponent)
+app.component("alert-component", alertComponent);
+app.component("spinner-component", spinnerComponent);
+app.component("products-component", productsComponent);
+app.component("account-component", accountsComponent);
+app.component("trader-modal", modalComponent);
 app.mount('#mainContent');

@@ -32,10 +32,15 @@ def getAccounts():
             accounts.append(account)
     return jsonify(success=True, data=accounts), 200
 
-@app.route('/api/products')
-def getProducts():
-    products = [p['id'] for p in cbapi.getProducts() if p['id'].endswith('USD')]
-    return jsonify(success=True, data=products)
+# @app.route('/api/products')
+# def getProducts():
+#     products = [p['id'] for p in cbapi.getProducts() if p['id'].endswith('USD')]
+#     return jsonify(success=True, data=products)
+
+@app.route('/api/products/traders')
+def getProductsWithTraders():
+    traders = db.fetchProductTraders()
+    return jsonify(success=True, data=traders)
 
 if __name__ == '__main__':
     app.run(debug=True, port=18256, host='0.0.0.0')

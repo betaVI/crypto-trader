@@ -21,10 +21,23 @@ def getTrader(id='0'):
     return jsonify(success=True, data=trader), 200
 
 @app.route('/form/traders', methods=["GET"])
-@app.route('/form/traders/<id>', methods=["GET"])
-def loadTraderForm(id='0'):
-    form = initializeTraderForm(id)
+def loadTraderForm():
+    id = '0'
+    if 'id' in request.values:
+        id = request.values['id']
+    product = ''
+    if 'product' in request.values:
+        product = request.values['product']
+    form = initializeTraderForm(id, product)
     return render_template('traderform.html', form=form)
+    
+@app.route('/api/traders/<id>/<status>', methods=["GET"])
+def updateTraderStatus(id, status):
+    result = db.updateTraderStatus(id, status)
+    if result == None:
+        return jsonify(success=True, message="Successfully updated status")
+    else:
+        return jsonify(success=False, message="Failed to update status: "+ result)
 
 @app.route('/api/traders', methods=["POST"])
 def createTrader():
@@ -39,7 +52,7 @@ def createTrader():
     print(baseaccount)
     quoteaccount = next(iter([a['id'] for a in accounts if a['currency'] == product['quote_currency']]), None)
     print(quoteaccount)
-    result = db.alterTrader(id, form.product.data, baseaccount, quoteaccount, form.buyupperthreshold.data, form.buylowerthreshold.data, form.sellupperthreshold.data, form.selllowerthreshold.data, 0, form.status.data)
+    result = db.alterTrader(id, form.product.data, baseaccount, quoteaccount, form.buyupperthreshold.data, form.buylowerthreshold.data, form.sellupperthreshold.data, form.selllowerthreshold.data, form.maxpurchaseamount.data)
     action = 'update' if id != '0' else 'create'
     if result == None:
         return jsonify(success=True, message="Successfully {}d".format(action)), 201
@@ -60,15 +73,9 @@ def loadProductsDropDown(currentproduct):
     sortedproducts.sort()
     return [('','Select a Product')] + [(p,p) for p in sortedproducts]
 
-def loadStatusDropDown():
-    statuses = db.fetchStatuses()
-    return [(s['id'],s['name']) for s in statuses]
-
-def initializeTraderForm(id='0'):
+def initializeTraderForm(id='0', product=''):
     if id != '0':
         form = TraderForm(data=db.fetchTrader(id))
     else:
-        form = TraderForm()
-    form.product.choices = loadProductsDropDown(form.product.data)
-    form.status.choices = loadStatusDropDown()
+        form = TraderForm(product=product)
     return form

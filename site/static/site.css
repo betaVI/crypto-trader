@@ -5,3 +5,6 @@
     width: 1px;
     white-space: nowrap;
 }
+.table-sm tr td{
+    padding: 1px;
+}

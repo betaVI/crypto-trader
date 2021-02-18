@@ -31,5 +31,11 @@
             "program": "app.py",
             "console": "integratedTerminal"
         },
+    ],
+    "compounds": [
+        {
+            "name": "Site/DataBot",
+            "configurations": ["Python: Site", "Python: DataBot"]
+        }
     ]
 }

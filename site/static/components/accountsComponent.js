@@ -3,6 +3,9 @@ export default {
     props: ['product'],
     watch: {
         product: function(product){
+            if (!product || !product.id){
+                return;
+            }
             var currency = product.id.substring(0, product.id.indexOf('-'));
             var total = 0;
             for (var x = 0;x<this.accounts.length; x++){
@@ -37,7 +40,7 @@ export default {
     },
     template:  `<div class="card">
                     <div class="card-header">
-                        <h4>Accounts<span id="lblTotalPortfolio" class="float-right">{{ $filters.currencyUSD(accountbalance) }}</span></h4>
+                        <h4>Accounts<span id="lblTotalPortfolio" class="float-right">{{ $filters.currencyUSD(accountbalance, 2) }}</span></h4>
                     </div>
                     <div class="card-body">
                         <spinner-component :isloading="isloading"></spinner-component>
@@ -52,10 +55,10 @@ export default {
                             </thead>
                             <tbody>
                                 <tr v-for="account in accounts" :key="account.currency" :data-currency="account.currency">
-                                    <td>{{ account.currency }}</td>
-                                    <td>{{ account.balance }}</td>
-                                    <td>{{ $filters.currencyUSD(account.currencyvalue) }}</td>
-                                    <td>{{ $filters.currencyUSD(account.balance * account.currencyvalue) }}</td>
+                                    <td class="column-fit">{{ account.currency }}</td>
+                                    <td>{{ $filters.decimal(account.balance, 5) }}</td>
+                                    <td>{{ $filters.currencyUSD(account.currencyvalue, 5) }}</td>
+                                    <td>{{ $filters.currencyUSD(account.balance * account.currencyvalue, 2) }}</td>
                                 </tr>
                             </tbody>
                         </table>

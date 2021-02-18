@@ -5,8 +5,8 @@ from wtforms.validators import DataRequired, NumberRange
 class TraderForm(FlaskForm):
     title = "Add Trader"
     traderid = HiddenField(u'TraderId')
-    product = SelectField(u'Product', validators=[DataRequired()], coerce=str)
-    status = SelectField(u'Status', validators=[DataRequired()], coerce=int)
+    product = HiddenField(u'Product', validators=[DataRequired()])
+    maxpurchaseamount = DecimalField(u'MAX purchase amount',validators=[NumberRange(min=0, message='Must be greater than 0')], number_format="#.00")
     buyupperthreshold = DecimalField(u'BUY Upper Threshold',validators=[NumberRange(min=0,max=100, message='Must be between 0-100')], number_format="#.00")
     buylowerthreshold = DecimalField(u'BUY Lower Threshold',validators=[NumberRange(min=-100,max=0, message='Must be between -100-0')], places=2)
     sellupperthreshold = DecimalField(u'SELL Upper Threshold',validators=[NumberRange(min=0,max=100, message='Must be between 0-100')], places=2)

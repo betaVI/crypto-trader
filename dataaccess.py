@@ -13,10 +13,18 @@ class DataAccess():
     def fetchTraders(self):
         query = "SELECT t.*, p.name as product, s.name as statusname FROM traders t INNER JOIN status s on s.id = t.statusid INNER JOIN products p on p.id = t.productid ORDER BY p.name"
         return self._executeRead(query)
+    
+    def fetchProductTraders(self):
+        query = """select 0 as price, p.name as product, s.name as statusname, t.*
+                    from products p
+                    left join traders t on t.productid = p.id
+                    left join status s on s.id = t.statusid
+                    order by p.name"""
+        return self._executeRead(query)
 
     def fetchTrader(self, id):
         query = """SELECT 
-                        t.id as traderid, p.name as product, baseaccount, quoteaccount, buyupperthreshold, buylowerthreshold, sellupperthreshold, selllowerthreshold, statusid as status 
+                        t.id as traderid, p.name as product, baseaccount, quoteaccount, buyupperthreshold, buylowerthreshold, sellupperthreshold, selllowerthreshold, maxpurchaseamount, statusid as status 
                     FROM 
                         traders t inner join 
                         products p on p.id = t.productid 
@@ -28,16 +36,21 @@ class DataAccess():
         query = "SELECT * FROM status"
         return self._executeRead(query)
     
-    def alterTrader(self, id, product, baseaccount, quoteaccount, buyupperthreshold, buylowerthreshold, sellupperthreshold, selllowerthreshold, maxpurchaseamount, statusid):
+    def updateTraderStatus(self, id, status):
+        values = (status, id)
+        query = "UPDATE traders SET statusid = (SELECT id FROM status WHERE name = %s) WHERE id = %s"
+        return self._execute(query, values)
+
+    def alterTrader(self, id, product, baseaccount, quoteaccount, buyupperthreshold, buylowerthreshold, sellupperthreshold, selllowerthreshold, maxpurchaseamount):
         productid = self.updateProduct(1, product, 0)
-        values = (productid, baseaccount, quoteaccount, float(buyupperthreshold), float(buylowerthreshold), float(sellupperthreshold), float(selllowerthreshold), float(maxpurchaseamount), int(statusid))
+        values = (productid, baseaccount, quoteaccount, float(buyupperthreshold), float(buylowerthreshold), float(sellupperthreshold), float(selllowerthreshold), float(maxpurchaseamount))
         if id != '0':
             query = """UPDATE traders 
-                            SET productid = %s, baseaccount=%s, quoteaccount=%s, buyupperthreshold=%s, buylowerthreshold=%s, sellupperthreshold=%s, selllowerthreshold=%s, maxpurchaseamount=%s, statusid=%s
+                            SET productid = %s, baseaccount=%s, quoteaccount=%s, buyupperthreshold=%s, buylowerthreshold=%s, sellupperthreshold=%s, selllowerthreshold=%s, maxpurchaseamount=%s
                             WHERE id = {}""".format(id)
         else:
             query = ",".join(['%s']*len(values))
-            query = """INSERT INTO traders (productid, baseaccount, quoteaccount, buyupperthreshold, buylowerthreshold, sellupperthreshold, selllowerthreshold, maxpurchaseamount, statusid) 
+            query = """INSERT INTO traders (productid, baseaccount, quoteaccount, buyupperthreshold, buylowerthreshold, sellupperthreshold, selllowerthreshold, maxpurchaseamount) 
                         VALUES ({})""".format(query)
         
         return self._execute(query,values)
@@ -55,6 +68,10 @@ class DataAccess():
 
         row = self._executeRead("SELECT ID FROM products WHERE name = '{}'".format(product))
         return row[0]['id']
+
+    def createLog(self, loggername, loglevel, filename, lineno, message):
+        query = "INSERT INTO traderlogs (loggername, loglevel, filename, lineno, message) VALUES ('{}',{},'{}',{},'{}')".format(loggername, loglevel, filename, lineno, message)
+        self._execute(query)
 
     def _create_connection(self):
         connection = None
@@ -95,6 +112,27 @@ class DataAccess():
                                         selllowerthreshold Numeric(3,2) NOT NULL,
                                         statusid smallint NOT NULL references status(id)
                                     )"""
+
+        create_orders_table = """CREATE TABLE IF NOT EXISTS orders (
+                                    id SERIAL PRIMARY KEY,
+                                    productid INT NOT NULL REFERENCES products(id),
+                                    side TEXT NOT NULL,
+                                    referenceid UUID NOT NULL,
+                                    size NUMERIC(16,10) NOT NULL,
+                                    price NUMERIC(16,10) NOT NULL,
+                                    fee NUMERIC(16,10) NOT NULL,
+                                    createdat TIMESTAMP NOT NULL DEFAULT now()
+                                )"""
+
+        create_log_table = """CREATE TABLE IF NOT EXISTS traderlogs (
+                                id SERIAL PRIMARY KEY,
+                                loggername INT NOT NULL,
+                                loglevel INT NULL,
+                                filename TEXT NULL,
+                                lineno INT NULL,
+                                message TEXT NOT NULL,
+                                createdat TIMESTAMP NOT NULL DEFAULT now()
+                            )"""
                                     
         create_status_table = """CREATE TABLE IF NOT EXISTS status(
                                     id serial PRIMARY KEY,
@@ -105,20 +143,10 @@ class DataAccess():
         self._execute(create_products_table)
         self._execute(create_traders_table)
         self._execute(create_status_table)
+        self._execute(create_orders_table)
+        self._execute(create_log_table)
         self._execute("INSERT INTO exchanges (name) VALUES ('CoinbasePro') ON CONFLICT DO NOTHING")
         self._execute("INSERT INTO status (name) VALUES ('Active'),('Disabled') ON CONFLICT DO NOTHING")
-
-    def _checkTableForColumn(self, table, column):
-        query = """SELECT EXISTS (
-            SELECT 1 FROM information_schema.columns WHERE table_schema='public' AND table_name='{}' AND column_name='{}'
-        )""".format(table,column)
-        result = self._executeRead(query)
-        return result[0]['exists']
-
-    def _checkForConstraint(self, constraintname):
-        query = "SELECT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = '{}')".format(constraintname)
-        result = self._executeRead(query)
-        return result[0]['exists']
 
     def _execute(self, statement, params=None):
         error = None

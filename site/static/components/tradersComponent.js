@@ -4,14 +4,19 @@ export default{
     data(){
         return {
             isloading: false,
-            issubmitting: false,
             traders:[],
-            modaltitle: "",
-            modalcontent:"",
-            modalcontentloading:false,
-            alertsuccess: false,
-            alertmessage: "",
-            showalert: false,
+            tradermodel:{
+                title:"",
+                content:"",
+                contentloading:false,
+                issubmitting:false,
+                isloading:false,
+            },
+            alert: {
+                success: false,
+                message: "",
+                display: false
+            },
             deleteid: 0
         };
     },
@@ -40,23 +45,23 @@ export default{
             return statusname=='Active';
         },
         async showCreateTrader(){
-            this.modaltitle = 'Create Trader';
+            this.tradermodel.title = 'Create Trader';
             $(this.$refs.editmodal.$el).modal('show')
-            this.modalcontent = await this.loadForm();
+            this.tradermodel.content = await this.loadForm();
         },
         async showEditTrader(id){
-            this.modaltitle = 'Edit Trader';
+            this.tradermodel.title = 'Edit Trader';
             $(this.$refs.editmodal.$el).modal('show')
-            this.modalcontent = await this.loadForm(id);
+            this.tradermodel.content = await this.loadForm(id);
         },
         showDeleteTrader(trader){
             this.deleteid = trader.id;
-            this.modaltitle = 'Delete Trader'
-            this.modalcontent = 'Are you sure you want to delete ' + trader.product + '?';
+            this.tradermodel.title = 'Delete Trader'
+            this.tradermodel.content = 'Are you sure you want to delete ' + trader.product + '?';
             $(this.$refs.deletemodal.$el).modal('show')
         },
         async deleteTrader(){
-            this.issubmitting = true;
+            this.tradermodel.issubmitting = true;
             const result = await fetch('/api/traders/'+this.deleteid, { method: "DELETE" });
             const data = await result.json();
             if (data.success){
@@ -68,11 +73,11 @@ export default{
                     this.showAlert(false,data.message);
                 }
             }
-            this.issubmitting = false;
+            this.tradermodel.issubmitting = false;
         },
         async submitForm(){
             var form = $(this.$refs.editmodal.$el).find('form:first');
-            this.issubmitting = true;
+            this.tradermodel.issubmitting = true;
             try{
                 const result = await fetch('/api/traders', {
                     method: "POST",
@@ -98,7 +103,7 @@ export default{
             catch(err){
                 console.log('Failed to create trader: ' + err);
             }
-            this.issubmitting = false;
+            this.tradermodel.issubmitting = false;
         },
         showAlert(success,message){
             this.showalert = true;
@@ -106,14 +111,14 @@ export default{
             this.alertmessage = message;
         },
         async loadForm(id=0){
-            this.modalcontent = "";
-            this.modalcontentloading = true;
+            this.tradermodel.content = "";
+            this.tradermodel.contentloading = true;
             var endpoint = '/form/traders';
             if (id != 0){
                 endpoint += '/' + id;
             }
             const result  = await fetch(endpoint, { method: "GET" });
-            this.modalcontentloading = false;
+            this.tradermodel.contentloading = false;
             return result.text();
         }
     },
@@ -156,23 +161,23 @@ export default{
                         </table>
                     </div>
                 </div>
-                <delete-trader-modal ref="deletemodal" @accepted="deleteTrader" :issubmitting="issubmitting">
+                <trader-modal ref="deletemodal" @accepted="deleteTrader" :model=tradermodel :alertmodel=alert>
                     <template v-slot:header>
-                        <h5 class="modal-title">{{ modaltitle }}</h5>
+                        <h5 class="modal-title">{{ tradermodel.title }}</h5>
                     </template>
                     <template v-slot:body>
-                        <span v-html="modalcontent"></span>
+                        <span v-html="tradermodel.content"></span>
                     </template>
                     <template v-slot:btnSubmit>
                         Confirm
                     </template>
-                </delete-trader-modal>
-                <edit-trader-modal ref="editmodal" @accepted="submitForm" :issubmitting="issubmitting" :alertsuccess="alertsuccess" :alertmessage="alertmessage" :showalert="showalert" :modalcontentloading="modalcontentloading">
+                </trader-modal>
+                <trader-modal ref="editmodal" @accepted="submitForm" :model=tradermodel :alertmodel=alert>
                     <template v-slot:header>
-                        <h5 class="modal-title">{{ modaltitle }}</h5>
+                        <h5 class="modal-title">{{ tradermodel.title }}</h5>
                     </template>
                     <template v-slot:body>
-                        <span v-html="modalcontent"></span>
+                        <span v-html="tradermodel.content"></span>
                     </template>
-                </edit-trader-modal>`
+                </trader-modal>`
 }
