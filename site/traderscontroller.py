@@ -1,23 +1,22 @@
 import os, time
-from __main__ import app
+from __main__ import app, cbapi, db
 from forms.TraderForm import TraderForm
 from flask import Flask, request, jsonify, render_template
 from bots.cpapi import CbApi
-from dataaccess import DataAccess
+from data.traderrepository import TraderRepository
 
-cbapi = CbApi()
-db = DataAccess()
+tradersrepo = TraderRepository(db)
 
 @app.route('/api/traders', methods=["GET"])
 def getTraders():
-    traders = db.fetchTraders()
-    return jsonify(success=True, data=traders), 200
+    traders = tradersrepo.fetchProductTraders()
+    return jsonify(success=True, data=traders)
 
 @app.route('/api/traders/<id>', methods=["GET"])
 def getTrader(id='0'):
     if id == '0':
         return jsonify(success=False, message="Missing ID"), 400
-    trader = db.fetchTrader(id)
+    trader = tradersrepo.fetchTrader(id)
     return jsonify(success=True, data=trader), 200
 
 @app.route('/form/traders', methods=["GET"])
@@ -33,7 +32,7 @@ def loadTraderForm():
     
 @app.route('/api/traders/<id>/<status>', methods=["GET"])
 def updateTraderStatus(id, status):
-    result = db.updateTraderStatus(id, status)
+    result = tradersrepo.updateTraderStatus(id, status)
     if result == None:
         return jsonify(success=True, message="Successfully updated status")
     else:
@@ -52,7 +51,7 @@ def createTrader():
     print(baseaccount)
     quoteaccount = next(iter([a['id'] for a in accounts if a['currency'] == product['quote_currency']]), None)
     print(quoteaccount)
-    result = db.alterTrader(id, form.product.data, baseaccount, quoteaccount, form.buyupperthreshold.data, form.buylowerthreshold.data, form.sellupperthreshold.data, form.selllowerthreshold.data, form.maxpurchaseamount.data)
+    result = tradersrepo.alterTrader(id, form.product.data, baseaccount, quoteaccount, form.buyupperthreshold.data, form.buylowerthreshold.data, form.sellupperthreshold.data, form.selllowerthreshold.data, form.maxpurchaseamount.data)
     action = 'update' if id != '0' else 'create'
     if result == None:
         return jsonify(success=True, message="Successfully {}d".format(action)), 201
@@ -63,19 +62,12 @@ def createTrader():
 def deleteTrader(id='0'):
     if id == '0':
         return jsonify(success=False, message="Missing ID"), 400
-    db.deleteTrader(id)
+    tradersrepo.deleteTrader(id)
     return jsonify(success=True, message="Successfully deleted"), 200
-
-def loadProductsDropDown(currentproduct):
-    configproducts = [t['product'] for t in db.fetchConfiguredProducts() if t['product'] != currentproduct]
-    products = cbapi.getProducts()
-    sortedproducts = [p['id'] for p in products if p['id'].endswith('USD') and p['id'] not in configproducts]
-    sortedproducts.sort()
-    return [('','Select a Product')] + [(p,p) for p in sortedproducts]
 
 def initializeTraderForm(id='0', product=''):
     if id != '0':
-        form = TraderForm(data=db.fetchTrader(id))
+        form = TraderForm(data=tradersrepo.fetchTrader(id))
     else:
         form = TraderForm(product=product)
     return form

@@ -1,5 +1,11 @@
 export default{
     name: "LoadingButtonComponent",
+    props: ['exloading'],
+    watch:{
+        exloading: function(exloading){
+            this.isloading=exloading;
+        }
+    },
     data(){
         return {
             isloading:false

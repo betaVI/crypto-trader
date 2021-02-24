@@ -6,6 +6,7 @@ import alertComponent from './alertComponent.js';
 import productsComponent from './productsComponent.js';
 import mainApp from './MainApp.js';
 import spinnerComponent from './spinnerComponent.js';
+import logsComponent from './logsComponent.js';
 
 const app = Vue.createApp(mainApp);
 app.config.globalProperties.$filters = {
@@ -22,6 +23,7 @@ app.component("loading-button-component", loadingButtonComponent)
 app.component("alert-component", alertComponent);
 app.component("spinner-component", spinnerComponent);
 app.component("products-component", productsComponent);
+app.component("logs-component", logsComponent)
 app.component("account-component", accountsComponent);
 app.component("trader-modal", modalComponent);
 app.mount('#mainContent');

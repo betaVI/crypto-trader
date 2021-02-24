@@ -48,17 +48,17 @@ export default {
                             <thead>
                                 <tr>
                                     <th>Currency</th>
-                                    <th>Quantity</th>
-                                    <th>Price</th>
-                                    <th>Balance</th>
+                                    <th class="text-right">Quantity</th>
+                                    <th class="text-right">Price</th>
+                                    <th class="text-right">Balance</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <tr v-for="account in accounts" :key="account.currency" :data-currency="account.currency">
                                     <td class="column-fit">{{ account.currency }}</td>
-                                    <td>{{ $filters.decimal(account.balance, 5) }}</td>
-                                    <td>{{ $filters.currencyUSD(account.currencyvalue, 5) }}</td>
-                                    <td>{{ $filters.currencyUSD(account.balance * account.currencyvalue, 2) }}</td>
+                                    <td class="text-right">{{ $filters.decimal(account.balance, 5) }}</td>
+                                    <td class="text-right">{{ $filters.currencyUSD(account.currencyvalue, 5) }}</td>
+                                    <td class="text-right">{{ $filters.currencyUSD(account.balance * account.currencyvalue, 2) }}</td>
                                 </tr>
                             </tbody>
                         </table>

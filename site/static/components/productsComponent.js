@@ -35,7 +35,7 @@ export default{
     methods:{
         async fetchProducts(){
             this.isloading = true;
-            const result = await fetch('/api/products/traders', { method: "GET" });
+            const result = await fetch('/api/traders', { method: "GET" });
             const data = await result.json();
             data.data.sort();
             this.traders = data.data;
@@ -43,7 +43,6 @@ export default{
         },
         async updateStatus(id, status, event){
             var content = JSON.stringify({ id: id, status: status });
-            console.log(content);
             const result = await fetch('/api/traders/' + id + '/' + status, { method: "GET" });
             const data = await result.json();
             var trader = this.traders.find(t=>t.id == id);
@@ -171,7 +170,7 @@ export default{
                                         <i class="fa fa-pause"></i>
                                     </template>
                                 </loading-button-component>
-                                <loading-button-component v-else_if="trader.statusname == 'Disabled'" class="btn-primary btn-sm" @click="updateStatus(trader.id, 'Active')">
+                                <loading-button-component v-else-if="trader.statusname == 'Disabled'" class="btn-primary btn-sm" @click="updateStatus(trader.id, 'Active')">
                                     <template #defaultLabel>
                                         <i class="fa fa-play"></i>
                                     </template>

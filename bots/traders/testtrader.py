@@ -1,30 +1,22 @@
-import logging
-import traceback
+import logging, traceback
 import numpy as np
 from bots.traders.trader import Trader
+from bots.dbloghandler import DbLogHandler
 
-class AverageTrader(Trader):
-    def __init__(self, productid, cashaccount, cryptaccount, dataaccess):
-        super().__init__(productid, cashaccount, cryptaccount, dataaccess)
+class TestTrader():
+    def __init__(self, dbtrader, api, dbloghandler):
+        self.cash_account_id = dbtrader['quoteaccount']
+        self.crypto_account_id = dbtrader['baseaccount']
+        self.product_id = dbtrader['product']
+        self.api = api
+        self.log = logging.getLogger(self.product_id)
+        self.log.setLevel(logging.DEBUG)
 
-        # self.baseIncrement = 0 
-        self.lastMarketPrice = 0
+        console = logging.StreamHandler()
+        console.setLevel(logging.INFO)
+        console.setFormatter(logging.Formatter(fmt='%(asctime)s - %(message)s', datefmt='%m-%d-%Y %H:%M:%S'))
 
-        if len(self.data) ==0:
-            self.data.append({})
-        self.state = self.data[-1]
-
-        if 'orders' not in self.state:
-            self.state['orders'] = []
-
-        self._updateFees()
-        self._updateState()
-
-        self.Upward_Trend_Threshold = 1.5
-        self.Dip_Threshold = -2.25
-
-        self.Profit_Threshold = 1.25
-        self.Stop_Loss_Threshold = -2.00
+        self.log.info("Start")
 
     def attemptToMakeTrade(self):
         try:
@@ -41,7 +33,7 @@ class AverageTrader(Trader):
                 profitMargin = self._getProfitMargin()
                 maxAmount = avgPrice + (avgPrice * profitMargin) / 100
                 minAmount = avgPrice + (avgPrice * self.Dip_Threshold) / 100
-                logging.info('[CHECK] {} - {} = {} {}% (MAX: {} | MIN: {})'.format(marketPrice, avgPrice, round(difference,2), round(percentDiff,2), round(maxAmount,2), round(minAmount,2)))
+                self.log.info('[CHECK] {} - {} = {} {}% (MAX: {} | MIN: {})'.format(marketPrice, avgPrice, round(difference,2), round(percentDiff,2), round(maxAmount,2), round(minAmount,2)))
                 # logging.info('[PROFITMARGIN] ' +str(profitMargin))
                 if percentDiff <= self.Dip_Threshold:
                     isStable = self._isPriceStable(marketPrice, 'buy')
@@ -53,7 +45,7 @@ class AverageTrader(Trader):
                         self._placeSellOrder()
                 self.lastMarketPrice = marketPrice
         except Exception: # as e:
-            logging.exception(traceback.format_exc())
+            self.log.exception(traceback.format_exc())
 
     def _isPriceStable(self, marketPrice, side):
         trades = self.api.getRecentTrades(self.product_id, side, 40)
@@ -103,20 +95,7 @@ class AverageTrader(Trader):
     def _updateFees(self):
         fee = self.api.getFees()
         if 'fee' not in self.state:
-            logging.info('[FEE] Set to {}'.format(fee))
+            self.log.info('[FEE] Set to {}'.format(fee))
         elif fee != self.state['fee']:
-            logging.info('[FEE] Updated from {} to {}'.format(self.state['fee'], fee))
+            self.log.info('[FEE] Updated from {} to {}'.format(self.state['fee'], fee))
         self.state['fee'] = fee
-
-    def _addState(self):
-        self.data[-1] = self.state
-        self.state = {
-            'orders':[]
-        }
-        self._updateFees()
-        self.data.append(self.state)
-        self.dm.saveData(self.data)
-
-    def _updateState(self):
-        self.data[-1] = self.state
-        self.dm.saveData(self.data)

@@ -66,6 +66,7 @@ export default {
                     </div>
                     <div class="col-xl-4 col-lg-4 col-md-7 col-sm-6">
                         <account-component :product="product"></account-component>
+                        <logs-component></logs-component>
                     </div>
                 </div>
                 <div class="row">
