@@ -36,14 +36,6 @@ export default{
             this.currentPage--;
             this.refresh();
         },
-        first(){
-            this.currentPage=1;
-            this.refresh();
-        },
-        last(){
-            this.currentPage=this.maxPages();
-            this.refresh();
-        },
         next(){
             this.currentPage++;
             this.refresh();
@@ -51,22 +43,28 @@ export default{
         setPages(){
             var maxpages = this.maxPages();
             this.pages=[1];
-            var min = Math.max(this.currentPage-1,2);
-            console.log('MIN1: ' +min);
-            min = Math.min(maxpages-4,min);
-            console.log('MIN2: ' +min);
-            if (min > 2)
+            var min = 2;
+            var max = maxpages-1;
+            if (max > 6){
+                max = 5;
+                if (this.currentPage>maxpages-4)
+                    max = maxpages-1
+                else if (this.currentPage>4)
+                    max = this.currentPage+1;
+                if (this.currentPage<5)
+                    min=2;
+                else
+                    min = Math.min(this.currentPage-1, maxpages-4);
+            }
+            if (min > 3)
                 this.pages.push('..');
-            var max = Math.min(this.currentPage+1,maxpages-1);
-            console.log('MAX1: ' +max);
-            max = Math.max(5, max);
-            console.log('MAX2: ' +max);
             for (var x = min;x <= max;x++){
                 this.pages.push(x);
             }
             if (max < maxpages-1)
                 this.pages.push('..');
-            this.pages.push(maxpages);
+            if (maxpages > 1)
+                this.pages.push(maxpages);
         },
         getLogLevel(loglevel){
             switch(loglevel){
