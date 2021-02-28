@@ -1,4 +1,4 @@
-import routes from './routes.js'
+import routes from '../navigation/routes.js'
 
 export default{
     name: 'RouteLink',

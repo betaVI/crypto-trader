@@ -3,6 +3,7 @@ export default {
     data() {
         return {
             wsconnection: null,
+            manualClose: false,
             product: {
                 id:null,
                 price:0
@@ -15,9 +16,11 @@ export default {
         }
     },
     mounted(){
+        this.manualClose = false;
         this.fetchProducts();
     },
     beforeUnmount(){
+        this.manualClose = true;
         if (this.wsconnection){
             this.wsconnection.close();
         }
@@ -45,9 +48,11 @@ export default {
             });
             this.wsconnection.addEventListener('close', (event) => {
                 console.log('closed');
-                setTimeout(()=>{
-                    this.fetchProducts()
-                },5000);
+                if (!this.manualClose){
+                    setTimeout(()=>{
+                        this.fetchProducts()
+                    },5000);
+                }
             });
             this.wsconnection.addEventListener('error', (event) => {
                 console.log('error: '+event)
@@ -67,7 +72,6 @@ export default {
                         </div>
                         <div class="col-xl-4 col-lg-4 col-md-7 col-sm-6">
                             <account-component :product="product"></account-component>
-                            <logs-component></logs-component>
                         </div>
                     </div>
                     <div class="row">

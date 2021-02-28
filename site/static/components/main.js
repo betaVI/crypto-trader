@@ -6,29 +6,8 @@ import productsComponent from './productsComponent.js';
 import spinnerComponent from './spinnerComponent.js';
 import logsComponent from './logsComponent.js';
 import routeLinkComponent from './routeLinkComponent.js';
-import routes from './routes.js'
+import router from '../navigation/router.js'
 import layouttemplate from './layouttemplate.js';
-
-const router = {
-    data: () =>({
-        currentRoute: window.location.pathname
-    }),
-    computed:{
-        ViewComponent(){
-            console.log(this.currentRoute)
-            const matchingPage = routes[this.currentRoute]
-            return matchingPage;
-        }
-    },
-    render(){
-        return Vue.h(this.ViewComponent);
-    },
-    created(){
-        window.addEventListener('popstate', ()=>{
-            this.currentRoute = window.location.pathname;
-        })
-    }
-}
 
 const app = Vue.createApp(router);
 app.config.globalProperties.$filters = {
