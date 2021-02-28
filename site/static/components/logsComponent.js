@@ -6,6 +6,7 @@ export default{
             logentries:[],
             pages:[],
             totallogcount:0,
+            maxPages:1,
             pagesize:20,
             currentPage:1,
             currentSort:'createdat',
@@ -21,6 +22,7 @@ export default{
             const result = await fetch('/api/logs/'+this.pagesize+'/'+this.currentPage+'/'+this.currentSort+'/'+this.currentSortDir, { method: "GET"});
             const data = await result.json();
             this.totallogcount = data.totalcount;
+            this.maxPages = Math.ceil(this.totallogcount/this.pagesize);
             this.logentries = data.data;
             this.setPages();
             this.isloading = false;
@@ -41,30 +43,29 @@ export default{
             this.refresh();
         },
         setPages(){
-            var maxpages = this.maxPages();
             this.pages=[1];
             var min = 2;
-            var max = maxpages-1;
+            var max = this.maxPages-1;
             if (max > 6){
                 max = 5;
-                if (this.currentPage>maxpages-4)
-                    max = maxpages-1
+                if (this.currentPage>this.maxPages-4)
+                    max = this.maxPages-1
                 else if (this.currentPage>4)
                     max = this.currentPage+1;
                 if (this.currentPage<5)
                     min=2;
                 else
-                    min = Math.min(this.currentPage-1, maxpages-4);
+                    min = Math.min(this.currentPage-1, this.maxPages-4);
             }
             if (min > 3)
                 this.pages.push('..');
             for (var x = min;x <= max;x++){
                 this.pages.push(x);
             }
-            if (max < maxpages-1)
+            if (max < this.maxPages-1)
                 this.pages.push('..');
-            if (maxpages > 1)
-                this.pages.push(maxpages);
+            if (this.maxPages > 1)
+                this.pages.push(this.maxPages);
         },
         getLogLevel(loglevel){
             switch(loglevel){
@@ -79,15 +80,17 @@ export default{
                 case "CRITICAL":
                     return 'table-danger';
             }
-        },
-        maxPages(){
-            return Math.ceil(this.totallogcount/this.pagesize);
         }
     },
     template:   `<div class="card">
                     <div class="card-header">
                         <h4>
                             Logs
+                            <loading-button-component class="btn-primary btn-sm" @click="refresh" :exloading=isloading>
+                                <template #defaultLabel>
+                                    <i class="fa fa-sync-alt"></i>
+                                </template>
+                            </loading-button-component>
                             <nav class="float-right">
                                 <ul class="pagination pagination-sm">
                                     <li class="page-item" :class="{ disabled: currentPage == 1 }">
@@ -100,7 +103,7 @@ export default{
                                             {{ page }}
                                         </a>
                                     </li>
-                                    <li class="page-item" :class="{ disabled: currentPage == maxPages() }">
+                                    <li class="page-item" :class="{ disabled: currentPage == maxPages }">
                                         <a class="page-link" @click="next">
                                             <i class="fa fa-step-forward"></i>
                                         </a>

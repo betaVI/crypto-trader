@@ -1,5 +1,5 @@
 import logging
-from dbloghandler import DbLogHandler
+from bots.dbloghandler import DbLogHandler
 from bots.cpapi import CbApi
 from bots.datamanager import DataManager
 

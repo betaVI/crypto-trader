@@ -21,12 +21,24 @@ class DataAccess():
                 c.close()
         return error
 
-    def executeRead(self,statement):
+    def executeRead(self,statement, values=None):
         with self._create_connection() as conn:
             c = conn.cursor(cursor_factory=RealDictCursor)
             try:
-                c.execute(statement)
+                c.execute(statement, values)
                 result = c.fetchall()
+                return result
+            except (Exception, psycopg2.DatabaseError) as e:
+                print(f"Sql Read Error: '{e}'")
+            finally:
+                c.close()
+    
+    def executeScalar(self,statement, values=None):
+        with self._create_connection() as conn:
+            c = conn.cursor(cursor_factory=RealDictCursor)
+            try:
+                c.execute(statement,values)
+                result = c.fetchone()
                 return result
             except (Exception, psycopg2.DatabaseError) as e:
                 print(f"Sql Read Error: '{e}'")
@@ -74,18 +86,29 @@ class DataAccess():
                                     )"""
 
         create_orders_table = """CREATE TABLE IF NOT EXISTS orders (
-                                    id SERIAL PRIMARY KEY,
-                                    productid INT NOT NULL REFERENCES products(id),
+                                    id BIGSERIAL PRIMARY KEY,
+                                    ordergroupid BIGINT NOT NULL REFERENCES ordergroups(id) ON DELETE CASCADE,
                                     side TEXT NOT NULL,
                                     referenceid UUID NOT NULL,
                                     size NUMERIC(16,10) NOT NULL,
+                                    funds NUMERIC(16,10) NOT NULL,
                                     price NUMERIC(16,10) NOT NULL,
                                     fee NUMERIC(16,10) NOT NULL,
                                     createdat TIMESTAMP NOT NULL DEFAULT now()
                                 )"""
+        
+        create_ordergroups_table = """CREATE TABLE IF NOT EXISTS ordergroups (
+                                        id BIGSERIAL PRIMARY KEY,
+                                        productid INT NOT NULL REFERENCES products(id),
+                                        totalearned NUMERIC(16,10) NULL,
+                                        totalsize NUMERIC(16,10) NULL,
+                                        totalfees NUMERIC(16,10) NULL,
+                                        updatedat TIMESTAMP NULL,
+                                        createdat TIMESTAMP NOT NULL DEFAULT now()
+                                    )"""
 
         create_log_table = """CREATE TABLE IF NOT EXISTS traderlogs (
-                                id SERIAL PRIMARY KEY,
+                                id BIGSERIAL PRIMARY KEY,
                                 loggername TEXT NOT NULL,
                                 loglevel INT NULL,
                                 filename TEXT NULL,
@@ -104,6 +127,7 @@ class DataAccess():
         self.execute(create_traders_table)
         self.execute(create_status_table)
         self.execute(create_orders_table)
+        self.execute(create_ordergroups_table)
         self.execute(create_log_table)
         self.execute("INSERT INTO exchanges (name) VALUES ('CoinbasePro') ON CONFLICT DO NOTHING")
         self.execute("INSERT INTO status (name) VALUES ('Active'),('Disabled') ON CONFLICT DO NOTHING")

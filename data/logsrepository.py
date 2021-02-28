@@ -3,8 +3,10 @@ class LogsRepository():
         self.dataaccess = dataaccess
     
     def createLog(self, loggername, loglevel, loglevelname, filename, lineno, message):
-        query = "INSERT INTO traderlogs (loggername, loglevel, loglevelname, filename, lineno, message) VALUES ('{}',{},'{}','{}',{},'{}')".format(loggername, loglevel, loglevelname, filename, lineno, message)
-        error = self.dataaccess.execute(query)
+        values = (loggername, loglevel, loglevelname, filename, lineno, message)
+        query = ','.join(['%s']*len(values))
+        query = "INSERT INTO traderlogs (loggername, loglevel, loglevelname, filename, lineno, message) VALUES ({})".format(query)
+        error = self.dataaccess.execute(query, values)
         if error != None:
             print('Log Entry error: ' + error)
         

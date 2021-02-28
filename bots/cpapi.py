@@ -47,11 +47,10 @@ class CbApi:
 
     def placeMarketOrder(self, product_id, side, funds = None, size = None):
         result = self.client.place_market_order(product_id=product_id, side=side, size=size, funds=funds)
-        logging.info('[API] Market Order Result: ' + str(result))
+        log.info('[API] Market Order Result: ' + str(result))
         orderid = result['id']
         fill = self._getOrderDetails(orderid)
-        logging.info('[{}] {} BTC for ${} at {}/BTC'.format(side.upper(), fill['size'], fill['usd_volume'], fill['price']))
-        return float(fill['price']), float(fill['usd_volume']), float(fill['size']), float(fill['fee'])
+        return orderid, float(fill['price']), float(fill['usd_volume']), float(fill['size']), float(fill['fee'])
 
     def placeLimitOrder(self, product_id, side, price, size):
         result = self.client.place_limit_order(product_id=product_id, side=side, price=price, size=size)

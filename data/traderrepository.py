@@ -29,8 +29,8 @@ class TraderRepository:
                         traders t inner join 
                         products p on p.id = t.productid 
                     WHERE 
-                        t.id = {}""".format(id)
-        return next(iter(self.dataaccess.executeRead(query)), None)
+                        t.id = %s"""
+        return self.dataaccess.executeScalar(query,(id,))
 
     def updateTraderStatus(self, id, status):
         values = (status, id)
@@ -52,15 +52,16 @@ class TraderRepository:
         return self.dataaccess.execute(query,values)
 
     def deleteTrader(self, id):
-        query = "DELETE FROM traders WHERE id = {}".format(id)
-        return self.dataaccess.execute(query)
+        query = "DELETE FROM traders WHERE id = %s"
+        return self.dataaccess.execute(query,(id,))
 
     def updateProduct(self, exchangeid, product, currentprice):
-
-        update_product_query = "INSERT INTO products (exchangeid, name, currentprice) VALUES ({},'{}',{}) ".format(exchangeid,product, currentprice)
+        values =(exchangeid,product, currentprice)
+        update_product_query = ','.join(['%s']*len(values))
+        update_product_query = "INSERT INTO products (exchangeid, name, currentprice) VALUES ({}) ".format(update_product_query)
         update_product_query += "ON CONFLICT (name) DO UPDATE SET currentprice = {}, updatedat = CURRENT_TIMESTAMP".format(currentprice)
 
         self.dataaccess.execute(update_product_query)
 
-        row = self.dataaccess.executeRead("SELECT ID FROM products WHERE name = '{}'".format(product))
-        return row[0]['id']
+        row = self.dataaccess.executeScalar("SELECT ID FROM products WHERE name = '{}'".format(product))
+        return row['id']
