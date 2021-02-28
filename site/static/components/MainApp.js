@@ -57,22 +57,24 @@ export default {
             this.alertModel = alert;
         }
     },
-    template:   `<alert-component :model=alertModel></alert-component>
-                <div class="row">
-                    <div class="col-xl-2 col-lg-3 col-md-4 col-sm-6">
-                        <products-component :product="product" @showAlert=showAlert></products-component>
+    template:   `<layout>
+                    <alert-component :model=alertModel></alert-component>
+                    <div class="row">
+                        <div class="col-xl-2 col-lg-3 col-md-4 col-sm-6">
+                            <products-component :product="product" @showAlert=showAlert></products-component>
+                        </div>
+                        <div class="col-xl-6 col-lg-7 col-md-8 col-sm-6">
+                        </div>
+                        <div class="col-xl-4 col-lg-4 col-md-7 col-sm-6">
+                            <account-component :product="product"></account-component>
+                            <logs-component></logs-component>
+                        </div>
                     </div>
-                    <div class="col-xl-6 col-lg-7 col-md-8 col-sm-6">
+                    <div class="row">
+                        <div class="col-lg-6 col-md-8">
+                        </div>
+                        <div class="col-lg-6 col-md-8">
+                        </div>
                     </div>
-                    <div class="col-xl-4 col-lg-4 col-md-7 col-sm-6">
-                        <account-component :product="product"></account-component>
-                        <logs-component></logs-component>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-lg-6 col-md-8">
-                    </div>
-                    <div class="col-lg-6 col-md-8">
-                    </div>
-                </div>`
+                </layout>`
 }

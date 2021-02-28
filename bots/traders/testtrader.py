@@ -68,7 +68,7 @@ class TestTrader():
         self.log.debug("Attempting to place a Buy Order")
         totalspent = self._getTotalSpent()
         if self.maxPurchaseAmount - totalspent<0:
-            self.log.info('[BALANCE] NSF {} - {} = {}'.format(self.maxPurchaseAmount, totalspent, self.maxPurchaseAmount - totalspent))
+            self.log.warn('[BALANCE] NSF {} - {} = {}'.format(self.maxPurchaseAmount, totalspent, self.maxPurchaseAmount - totalspent))
             return
         remainingbalance = max(self.maxPurchaseAmount - totalspent,.5)
         fundsToUse = round(remainingbalance * 0.5, 2)
@@ -83,8 +83,6 @@ class TestTrader():
         amountToSell = float(account['balance'])
         id, price, funds, size, fee = self.api.placeMarketOrder(self.product_id, 'sell', size=amountToSell)
         self.log.info('[SELL] {} {} for ${} at {}/{}'.format(size, self.product_id, funds, price, self.product_id))
-        # self.dm.addOperation({ 'operation': 'sell', 'lastOpPrice': newPrice })
-        # totalfees = sum([o['fee'] for o in self.state['orders']]) + fee
         self.orderrepo.createOrder(self.group['id'], 'sell', funds, id, size, price, fee)
         self.orderrepo.updateOrderGroup(self.group['id'], funds, size, fee)
         self.group = self.orderrepo.createOrderGroup(self.product_id)

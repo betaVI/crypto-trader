@@ -1,14 +1,36 @@
-import SpinnerComponent from './spinnerComponent.js';
 import accountsComponent from './accountsComponent.js';
 import modalComponent from './modalComponent.js';
 import loadingButtonComponent from './loadingButtonComponent.js';
 import alertComponent from './alertComponent.js';
 import productsComponent from './productsComponent.js';
-import mainApp from './MainApp.js';
 import spinnerComponent from './spinnerComponent.js';
 import logsComponent from './logsComponent.js';
+import routeLinkComponent from './routeLinkComponent.js';
+import routes from './routes.js'
+import layouttemplate from './layouttemplate.js';
 
-const app = Vue.createApp(mainApp);
+const router = {
+    data: () =>({
+        currentRoute: window.location.pathname
+    }),
+    computed:{
+        ViewComponent(){
+            console.log(this.currentRoute)
+            const matchingPage = routes[this.currentRoute]
+            return matchingPage;
+        }
+    },
+    render(){
+        return Vue.h(this.ViewComponent);
+    },
+    created(){
+        window.addEventListener('popstate', ()=>{
+            this.currentRoute = window.location.pathname;
+        })
+    }
+}
+
+const app = Vue.createApp(router);
 app.config.globalProperties.$filters = {
     currencyUSD(value, decimalplaces){
         var currencyFormat = new Intl.NumberFormat('en-US',options={ minimumFractionDigits: decimalplaces, style: 'currency', currency: 'USD' });
@@ -19,7 +41,9 @@ app.config.globalProperties.$filters = {
         return currencyFormat.format(value);
     }
 };
-app.component("loading-button-component", loadingButtonComponent)
+app.component("layout", layouttemplate);
+app.component("router-link", routeLinkComponent);
+app.component("loading-button-component", loadingButtonComponent);
 app.component("alert-component", alertComponent);
 app.component("spinner-component", spinnerComponent);
 app.component("products-component", productsComponent);
