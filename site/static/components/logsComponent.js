@@ -67,8 +67,9 @@ export default{
             if (this.maxPages > 1)
                 this.pages.push(this.maxPages);
         },
-        getLogLevel(loglevel){
-            switch(loglevel){
+        getLogLevel(loglevelname){
+            console.log(loglevelname);
+            switch(loglevelname){
                 case "DEBUG":
                     return 'table-default';
                 case "INFO":
@@ -114,22 +115,13 @@ export default{
                     </div> 
                     <div class="card-body">
                         <spinner-component :isloading="isloading"></spinner-component>
-                        <table id="logs" class="table table-bordered table-sm" v-if="!isloading">
-                            <thead>
-                                <tr>
-                                    <th>Timestamp</th>
-                                    <th>Logger</th>
-                                    <th>Message</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr v-for="log in logentries" :key="log.id" :class=getLogLevel(log.loglevelname)>
-                                    <td class="column-fit">{{ log.createdat }}</td>
-                                    <td class="column-fit">{{ log.loggername }}</td>
-                                    <td>{{ log.message }}</td>
-                                </tr>
-                            </tbody>
-                        </table>
+                        <v-table v-if="!isloading" :columns="['Timestamp','Logger','Message']" :rows=logentries v-slot:default="row">
+                            <tr :class=getLogLevel(row.item.loglevelname)>
+                                <td class="column-fit">{{ row.item.createdat }}</td>
+                                <td class="column-fit">{{ row.item.loggername }}</td>
+                                <td>{{ row.item.message }}</td>
+                            </tr>
+                        </v-table>
                     </div>
                 </div>`
 }

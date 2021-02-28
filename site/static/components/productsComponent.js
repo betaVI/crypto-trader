@@ -154,42 +154,34 @@ export default{
         }
     },
     template:   `<spinner-component :isloading="isloading"></spinner-component>
-                 <table class="table table-striped table-bordered table-sm" v-if="!isloading">
-                    <thead>
-                        <tr>
-                            <th>Product</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr v-for="trader in traders" :key="trader.product">
-                            <td>{{ trader.product }}<span class="badge badge-secondary float-right">{{ $filters.currencyUSD(trader.price, 3) }}</span></td>
-                            <td v-if="hasTrader(trader)">
-                                <loading-button-component v-if="trader.statusname == 'Active'" class="btn-primary btn-sm" @click="updateStatus(trader.id, 'Disabled')">
-                                    <template #defaultLabel>
-                                        <i class="fa fa-pause"></i>
-                                    </template>
-                                </loading-button-component>
-                                <loading-button-component v-else-if="trader.statusname == 'Disabled'" class="btn-primary btn-sm" @click="updateStatus(trader.id, 'Active')">
-                                    <template #defaultLabel>
-                                        <i class="fa fa-play"></i>
-                                    </template>
-                                </loading-button-component>
-                                <button type="button" class="btn btn-info btn-sm" @click="showEditTrader(trader.id)">
-                                    <i class="fa fa-edit"></i>
-                                </button>
-                                <button type="button" class="btn btn-danger btn-sm" @click="showDeleteTrader(trader)">
-                                    <i class="fa fa-trash"></i>
-                                </button>
-                            </td>
-                            <td v-else>
-                                <button type="button" class="btn btn-success btn-sm" data-id="0" @click="showCreateTrader(trader.product)">
-                                    <i class="fa fa-plus"></i>
-                                </button>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
+                <v-table :columns="['Product','Actions']" :rows="traders" v-slot:default="row">
+                    <tr>
+                        <td>{{ row.item.product }}<span class="badge badge-secondary float-right">{{ $filters.currencyUSD(row.item.price, 3) }}</span></td>
+                        <td v-if="hasTrader(row.item)">
+                            <loading-button-component v-if="row.item.statusname == 'Active'" class="btn-primary btn-sm" @click="updateStatus(row.item.id, 'Disabled')">
+                                <template #defaultLabel>
+                                    <i class="fa fa-pause"></i>
+                                </template>
+                            </loading-button-component>
+                            <loading-button-component v-else-if="row.item.statusname == 'Disabled'" class="btn-primary btn-sm" @click="updateStatus(row.item.id, 'Active')">
+                                <template #defaultLabel>
+                                    <i class="fa fa-play"></i>
+                                </template>
+                            </loading-button-component>
+                            <button type="button" class="btn btn-info btn-sm" @click="showEditTrader(row.item.id)">
+                                <i class="fa fa-edit"></i>
+                            </button>
+                            <button type="button" class="btn btn-danger btn-sm" @click="showDeleteTrader(row.item)">
+                                <i class="fa fa-trash"></i>
+                            </button>
+                        </td>
+                        <td v-else>
+                            <button type="button" class="btn btn-success btn-sm" data-id="0" @click="showCreateTrader(row.item.product)">
+                                <i class="fa fa-plus"></i>
+                            </button>
+                        </td>
+                    </tr>
+                </v-table>
                 <trader-modal ref="deletemodal" @accepted="deleteTrader" :model=tradermodel :alertmodel=alert>
                     <template v-slot:header>
                         <h5 class="modal-title">{{ tradermodel.title }}</h5>

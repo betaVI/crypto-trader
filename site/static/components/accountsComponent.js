@@ -44,24 +44,14 @@ export default {
                     </div>
                     <div class="card-body">
                         <spinner-component :isloading="isloading"></spinner-component>
-                        <table id="accounts" class="table table-striped table-bordered table-sm" v-if="!isloading">
-                            <thead>
-                                <tr>
-                                    <th>Currency</th>
-                                    <th class="text-right">Quantity</th>
-                                    <th class="text-right">Price</th>
-                                    <th class="text-right">Balance</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr v-for="account in accounts" :key="account.currency" :data-currency="account.currency">
-                                    <td class="column-fit">{{ account.currency }}</td>
-                                    <td class="text-right">{{ $filters.decimal(account.balance, 5) }}</td>
-                                    <td class="text-right">{{ $filters.currencyUSD(account.currencyvalue, 5) }}</td>
-                                    <td class="text-right">{{ $filters.currencyUSD(account.balance * account.currencyvalue, 2) }}</td>
-                                </tr>
-                            </tbody>
-                        </table>
+                        <v-table :columns="['Currency','Quantity','Price','Balance']" :rows=accounts v-slot:default="row">
+                            <tr>
+                                <td class="column-fit">{{ row.item.currency }}</td>
+                                <td class="text-right">{{ $filters.decimal(row.item.balance, 5) }}</td>
+                                <td class="text-right">{{ $filters.currencyUSD(row.item.currencyvalue, 5) }}</td>
+                                <td class="text-right">{{ $filters.currencyUSD(row.item.balance * row.item.currencyvalue, 2) }}</td>
+                            </tr>
+                        </v-table>
                     </div>
                 </div>`
 }

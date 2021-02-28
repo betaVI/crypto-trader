@@ -1,13 +1,14 @@
-import accountsComponent from './accountsComponent.js';
-import modalComponent from './modalComponent.js';
-import loadingButtonComponent from './loadingButtonComponent.js';
-import alertComponent from './alertComponent.js';
-import productsComponent from './productsComponent.js';
-import spinnerComponent from './spinnerComponent.js';
-import logsComponent from './logsComponent.js';
-import routeLinkComponent from './routeLinkComponent.js';
-import router from '../navigation/router.js'
-import layouttemplate from './layouttemplate.js';
+import accountsComponent from './components/accountsComponent.js';
+import modalComponent from './components/modalComponent.js';
+import loadingButtonComponent from './components/loadingButtonComponent.js';
+import alertComponent from './components/alertComponent.js';
+import productsComponent from './components/productsComponent.js';
+import spinnerComponent from './components/spinnerComponent.js';
+import logsComponent from './components/logsComponent.js';
+import routeLinkComponent from './components/routeLinkComponent.js';
+import router from './navigation/router.js'
+import layouttemplate from './components/layouttemplate.js';
+import tableComponent from './components/tableComponent.js';
 
 const app = Vue.createApp(router);
 app.config.globalProperties.$filters = {
@@ -20,6 +21,7 @@ app.config.globalProperties.$filters = {
         return currencyFormat.format(value);
     }
 };
+app.component("v-table", tableComponent);
 app.component("layout", layouttemplate);
 app.component("router-link", routeLinkComponent);
 app.component("loading-button-component", loadingButtonComponent);

@@ -1,5 +1,5 @@
 export default {
-    name: 'Main App',
+    name: 'Dashboard',
     data() {
         return {
             wsconnection: null,
