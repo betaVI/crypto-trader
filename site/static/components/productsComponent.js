@@ -153,8 +153,8 @@ export default{
             return statusname=='Active';
         }
     },
-    template:   `<spinner-component :isloading="isloading"></spinner-component>
-                <v-table :columns="['Product','Actions']" :rows="traders" v-slot:default="row">
+    template:   `<spinner-component v-if="isloading"></spinner-component>
+                <v-table v-if="!isloading" :columns="[{name:'Product'},{name:'Actions'}]" :rows="traders" v-slot:default="row">
                     <tr>
                         <td>{{ row.item.product }}<span class="badge badge-secondary float-right">{{ $filters.currencyUSD(row.item.price, 3) }}</span></td>
                         <td v-if="hasTrader(row.item)">

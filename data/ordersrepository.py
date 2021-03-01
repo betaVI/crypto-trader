@@ -1,6 +1,12 @@
 class OrdersRepository():
     def __init__(self, dataaccess):
         self.dataaccess = dataaccess
+
+    def fetchOrders(self, pageno, pagesize, sort, sortdir):
+        query = "SELECT p.name as product, og.id as ordergroup, side, funds, size, price, fee, to_char(o.createdat, 'MM-DD-YYYY HH24:MI:SS') as createdat FROM orders o inner join ordergroups og on og.id = o.ordergroupid inner join products p on og.productid = p.id"
+        query += " ORDER BY o.{} {} LIMIT {} OFFSET {}".format(sort,sortdir, pagesize, (pageno-1)*pagesize)
+        countquery = "SELECT count(*) as totalcount from orders"
+        return self.dataaccess.executeRead(query), self.dataaccess.executeScalar(countquery)['totalcount']
     
     def fetchRecentOrderGroup(self, product):
         query = "SELECT id FROM ordergroups WHERE productid = (SELECT id FROM products WHERE name = %s) AND updatedat IS NULL ORDER BY createdat DESC LIMIT 1"

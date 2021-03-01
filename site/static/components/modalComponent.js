@@ -10,7 +10,7 @@ export default{
                             </div>
                             <div class="modal-body">
                                 <alert-component :model=alertmodel @dismissed="$emit('alertDismissed')"></alert-component>
-                                <spinner-component :isloading=model.isloading></spinner-component>
+                                <spinner-component v-if=model.isloading></spinner-component>
                                 <slot name="body"></slot>
                             </div>
                             <div class="modal-footer">

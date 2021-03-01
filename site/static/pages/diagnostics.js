@@ -6,6 +6,7 @@ export default{
                             <logs-component></logs-component>
                         </div>
                         <div class="col-xl-6 col-lg-7 col-md-8 col-sm-6">
+                            <orders-component></orders-component>
                         </div>
                     </div>
                 </layout>`

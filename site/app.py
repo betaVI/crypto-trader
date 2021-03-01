@@ -19,6 +19,7 @@ db = DataAccess()
 
 import traderscontroller
 import logscontroller
+import orderscontroller
 
 @app.route('/')
 def index():

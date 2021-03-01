@@ -9,6 +9,9 @@ import routeLinkComponent from './components/routeLinkComponent.js';
 import router from './navigation/router.js'
 import layouttemplate from './components/layouttemplate.js';
 import tableComponent from './components/tableComponent.js';
+import paginationComponent from './components/paginationComponent.js';
+import ordersComponent from './components/ordersComponent.js';
+import apiTableComponent from './components/apiTableComponent.js';
 
 const app = Vue.createApp(router);
 app.config.globalProperties.$filters = {
@@ -21,9 +24,12 @@ app.config.globalProperties.$filters = {
         return currencyFormat.format(value);
     }
 };
+app.component("api-table", apiTableComponent);
+app.component("v-paging", paginationComponent);
 app.component("v-table", tableComponent);
 app.component("layout", layouttemplate);
 app.component("router-link", routeLinkComponent);
+app.component("orders-component", ordersComponent);
 app.component("loading-button-component", loadingButtonComponent);
 app.component("alert-component", alertComponent);
 app.component("spinner-component", spinnerComponent);
