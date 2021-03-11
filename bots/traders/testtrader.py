@@ -34,24 +34,28 @@ class TestTrader():
             else:
                 marketPrice = self.api.getMarketPrice(self.product_id)
                 avgPrice = self._getAveragePricePaid()
-                difference = marketPrice - avgPrice
-                percentDiff = difference/avgPrice*100
+                differenceMax = marketPrice - avgPrice
+                percentDiffMax = differenceMax/avgPrice*100
+                lastpurchaseprice = self._getLastPurchasePrice()
+                differenceMin = marketPrice - lastpurchaseprice
+                percentDiffMin = differenceMin/lastpurchaseprice*100
                 profitMargin = self._getProfitMargin()
-                maxAmount = avgPrice + (avgPrice * profitMargin) / 100
-                minAmount = avgPrice + (avgPrice * self.Dip_Threshold) / 100
-                self.log.info('[CHECK] {} - {} = {} {}% (MAX: {} | MIN: {})'.format(marketPrice, avgPrice, round(difference,2), round(percentDiff,2), round(maxAmount,2), round(minAmount,2)))
                 # logging.info('[PROFITMARGIN] ' +str(profitMargin))
-                if percentDiff <= self.Dip_Threshold:
+                maxAmount = avgPrice + (avgPrice * profitMargin) / 100
+                minAmount = lastpurchaseprice + (lastpurchaseprice * self.Dip_Threshold) / 100
+                self.log.info('[CHECK MAX] {} - {} = {} {}% {}'.format(marketPrice, avgPrice, round(differenceMax,2), round(percentDiffMax,2), round(maxAmount,2)))
+                self.log.info('[CHECK MIN] {} - {} = {} {}% {}'.format(marketPrice, lastpurchaseprice, round(differenceMin,2), round(percentDiffMin,2), round(minAmount,2)))
+                if percentDiffMin <= self.Dip_Threshold:
                     isStable = self._isPriceStable(marketPrice, 'buy')
                     if isStable:
                         self._placeBuyOrder()
-                elif percentDiff >= profitMargin:
+                elif percentDiffMax >= profitMargin:
                     isStable = self._isPriceStable(marketPrice, 'sell')
                     if isStable:
                         self._placeSellOrder()
             self.log.info("Finished")
         except Exception: # as e:
-            self.log.exception(traceback.format_exc())
+            self.log.critical(traceback.format_exc())
 
     def _isPriceStable(self, marketPrice, side):
         self.log.debug("Checking price stability")
@@ -61,7 +65,7 @@ class TestTrader():
         highStd = round(avgTradePrice + standardDeviation,5)
         lowStd = round(avgTradePrice - standardDeviation,5)
         isstable = lowStd <= marketPrice and marketPrice <= highStd
-        self.log.info('[{}] AVG: {} | STD: {} | HIGH: {} | LOW: {}'.format("STABLE" if isstable else "UNSTABLE", avgTradePrice, standardDeviation, highStd, lowStd))
+        self.log.debug('[{}] AVG: {} | STD: {} | HIGH: {} | LOW: {}'.format("STABLE" if isstable else "UNSTABLE", avgTradePrice, standardDeviation, highStd, lowStd))
         return isstable
 
     def _placeBuyOrder(self):
@@ -84,10 +88,13 @@ class TestTrader():
         id, price, funds, size, fee = self.api.placeMarketOrder(self.product_id, 'sell', size=amountToSell)
         self.log.info('[SELL] {} {} for ${} at {}/{}'.format(size, self.product_id, funds, price, self.product_id))
         self.orderrepo.createOrder(self.group['id'], 'sell', funds, id, size, price, fee)
-        self.orderrepo.updateOrderGroup(self.group['id'], funds, size, fee)
+        self.orderrepo.updateOrderGroup(self.group['id'], price, funds, size, fee)
         self.group = self.orderrepo.createOrderGroup(self.product_id)
         self._updateFees()
         return price
+
+    def _getLastPurchasePrice(self):
+        return min([float(o['price']) for o in self.group['orders']])
 
     def _getAveragePricePaid(self):
         return round(sum([float(o['funds']) for o in self.group['orders']])/sum([float(o['size']) for o in self.group['orders']]), 2)

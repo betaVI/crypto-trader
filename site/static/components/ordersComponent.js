@@ -5,11 +5,20 @@ export default{
             columns:[
                 {
                     name:'Timestamp',
-                    class:'column-fit'
+                    class:'column-fit',
+                    type:Date,
+                    filter:{
+                        value:''
+                    }
                 },
                 {
                     name:'Product',
-                    class:'column-fit'
+                    class:'column-fit',
+                    filter:{
+                        type:'dropdown',
+                        value:'',
+                        choices:[]
+                    }
                 },
                 {
                     name:'Funds',
@@ -30,7 +39,23 @@ export default{
             ]
         }
     },
+    mounted(){
+        this.loadProducts();
+    },
     methods:{
+        async loadProducts(){
+            const result = await fetch('/api/orders/products', { method: "GET" });
+            const data = await result.json()
+            if (data.success){
+                var column = this.columns.find(c=>c.name=='Product');
+                if (column){
+                    column.filter.choices.push({ text:"Any", value:''});
+                    data.data.forEach(p=>{
+                        column.filter.choices.push({ text: p.name, value: p.name});
+                    })
+                }
+            }
+        },
         getSide(side){
             return side=='sell'?'table-success':'table-danger';
         },
@@ -40,7 +65,7 @@ export default{
                         <h4>Orders</h4>
                     </div> 
                     <div class="card-body">
-                        <api-table endpoint="/api/orders/" :columns=columns v-slot:default="row">
+                        <api-table endpoint="/api/orders/" filtertitle="Order filter" :columns=columns v-slot:default="row">
                             <tr :class=getSide(row.item.side)>
                                 <td class="column-fit">{{ row.item.createdat }}</td>
                                 <td class="column-fit">{{ row.item.product }}</td>

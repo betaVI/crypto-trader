@@ -1,10 +1,10 @@
 export default{
     name: "API Table",
-    props: ['endpoint', 'columns'],
+    props: ['endpoint', 'columns', 'filtertitle'],
+    emits: ['dataloaded'],
     data(){
         return {
             rows:[],
-            // columns:[],
             isloading:false,
             currentSort:'createdat',
             currentSortDir: 'desc',
@@ -13,6 +13,12 @@ export default{
                 currentPage:1,
                 pagesize:20,
                 maxPages:1
+            },
+            filtermodel:{
+                title:"",
+                content:"",
+                issubmitting:false,
+                isloading:false,
             },
             alertModel:{
                 success: false,
@@ -33,17 +39,31 @@ export default{
         async loadTable(){
             this.isloading = true;
             try{
-                const result = await fetch(this.endpoint+this.paginationModel.pagesize+'/'+this.paginationModel.currentPage+'/'+this.currentSort+'/'+this.currentSortDir, { method: "GET"});
+                if (this.hasFilters()){
+                    var filters=[];
+                    this.columns.forEach(c=>{
+                        if (c.filter && c.filter.value){
+                            filters.push({
+                                name: c.name,
+                                value: c.filter.value,
+                                operator: '='
+                            })
+                        }
+                    });
+                }
+                var body = JSON.stringify({filters:filters});
+                const result = await fetch(this.endpoint+this.paginationModel.pagesize+'/'+this.paginationModel.currentPage+'/'+this.currentSort+'/'+this.currentSortDir, { 
+                    method: "POST",
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: body
+                });
                 const data = await result.json();
                 if (data.success){
                     this.paginationModel.maxPages = Math.ceil(data.totalcount/this.paginationModel.pagesize);
                     this.rows = data.data;
-                    // if (this.rows.length>0){
-                    //     Object.keys(this.rows[0]).forEach(function(key){
-                    //         console.log(key);
-                    //         this.columns.push(key);
-                    //     })
-                    // }                        
+                    this.$emit('dataloaded',data);
                     this.setPages();
                 }
                 else
@@ -93,6 +113,19 @@ export default{
                 this.paginationModel.pages.push('..');
             if (this.paginationModel.maxPages > 1)
                 this.paginationModel.pages.push(this.paginationModel.maxPages);
+        },
+        hasFilters(){
+            var filter = this.columns.find(c=>c.filter!=null)
+            return filter!=null;
+        },
+        openFilters(){
+            this.filtermodel.title = this.filtertitle;
+            $(this.$refs.filters.$el).modal('show');
+        },
+        applyFilters(){
+            this.currentPage=1;
+            this.refresh();
+            $(this.$refs.filters.$el).modal('hide');
         }
     },
     template:   `<alert-component :model=alertModel></alert-component>
@@ -102,10 +135,58 @@ export default{
                             <i class="fa fa-sync-alt"></i>
                         </template>
                     </loading-button-component>
-                    <v-paging :model=paginationModel @previous=previous @next=next @goToPage=goToPage></v-paging>
+                    <button v-if="hasFilters()" class="btn btn-secondary btn-sm" @click=openFilters>
+                        <i class="fa fa-filter"></i>
+                    </button>
+                    <v-paging class="float-right" :model=paginationModel @previous=previous @next=next @goToPage=goToPage></v-paging>
                 </div>
                 <spinner-component v-if="isloading"></spinner-component>
-                <v-table v-if="!isloading" :columns="columns" :rows=rows>
+                <modal ref="filters" @accepted=applyFilters :model=filtermodel>
+                    <template v-slot:header>
+                        <h5 class="modal-title">{{ filtermodel.title }}</h5>
+                    </template>
+                    <template v-slot:body>
+                        <template v-for="column in columns">
+                            <div class="form-group row" v-if="column.filter != null">
+                                <label class="col-lg-2 col-md-2 col-sm-2" v-if="column.filter != null">{{ column.name }}:</label>
+                                <div v-if="column.type == Date" class="btn-group btn-group-sm btn-group-toggle">
+                                    <label class="btn btn-outline-primary" :class="{ active: column.filter.value == ''}">
+                                        <input type="radio" value="" v-model="column.filter.value"/>
+                                        All
+                                    </label>
+                                    <label class="btn btn-outline-primary" :class="{ active: column.filter.value == '1m'}">
+                                        <input type="radio" value="1m" v-model="column.filter.value"/>
+                                        1 m
+                                    </label>
+                                    <label class="btn btn-outline-primary" :class="{ active: column.filter.value == '15m'}">
+                                        <input type="radio" value="15m" v-model="column.filter.value"/>
+                                        15 m
+                                    </label>
+                                    <label class="btn btn-outline-primary" :class="{ active: column.filter.value == '1h'}">
+                                        <input type="radio" value="1h" v-model="column.filter.value"/>
+                                        1 h
+                                    </label>
+                                    <label class="btn btn-outline-primary" :class="{ active: column.filter.value == '6h'}">
+                                        <input type="radio" value="6h" v-model="column.filter.value"/>
+                                        6 h
+                                    </label>
+                                    <label class="btn btn-outline-primary" :class="{ active: column.filter.value == '1d'}">
+                                        <input type="radio" value="1d" v-model="column.filter.value"/>
+                                        1 d
+                                    </label>
+                                    <label class="btn btn-outline-primary" :class="{ active: column.filter.value == '1w'}">
+                                        <input type="radio" value="1w" v-model="column.filter.value"/>
+                                        1 w
+                                    </label>
+                                </div>
+                                <select class="col-lg-6 col-md-4 col-sm-2 form-control" v-if="column.filter.type == 'dropdown'" v-model="column.filter.value">
+                                    <option v-for="choice in column.filter.choices" :value="choice.value">{{ choice.text }}</option>
+                                </select>
+                            </div>
+                        </template>
+                    </template>
+                </modal>
+                <v-table v-if="!isloading" :columns=columns :rows=rows>
                     <template v-slot:default="row">
                         <slot v-bind="row"/>
                     </template>

@@ -182,7 +182,7 @@ export default{
                         </td>
                     </tr>
                 </v-table>
-                <trader-modal ref="deletemodal" @accepted="deleteTrader" :model=tradermodel :alertmodel=alert>
+                <modal ref="deletemodal" @accepted="deleteTrader" :model=tradermodel :alertmodel=alert>
                     <template v-slot:header>
                         <h5 class="modal-title">{{ tradermodel.title }}</h5>
                     </template>
@@ -192,13 +192,13 @@ export default{
                     <template v-slot:btnSubmit>
                         Confirm
                     </template>
-                </trader-modal>
-                <trader-modal ref="editmodal" @accepted="submitForm" :model=tradermodel :alertmodel=alert>
+                </modal>
+                <modal ref="editmodal" @accepted="submitForm" :model=tradermodel :alertmodel=alert>
                     <template v-slot:header>
                         <h5 class="modal-title">{{ tradermodel.title }}</h5>
                     </template>
                     <template v-slot:body>
                         <span v-html=tradermodel.content></span>
                     </template>
-                </trader-modal>`
+                </modal>`
 }

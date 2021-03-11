@@ -40,7 +40,7 @@ class TestApi():
 
     def placeMarketOrder(self, product_id, side, funds = None, size = None):
         orderid = str(uuid.uuid4())
-        price = self.api.getMarketPrice(product_id)
+        price = self.getMarketPrice(product_id)
         feepercent = self.getFees()
         if side == 'buy':
             fee = funds*feepercent

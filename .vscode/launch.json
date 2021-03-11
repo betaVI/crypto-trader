@@ -5,19 +5,10 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Python: Current File",
-            "type": "python",
-            "request": "launch",
-            "program": "${file}",
-            "console": "integratedTerminal"
-        },
-        {
             "name": "Python: TradingBot",
             "type": "python",
             "request": "launch",
-            "env": {
-                "PYTHONPATH": "${workspaceFolder};${workspaceFolder}/bots"
-            },
+            "env": { "PYTHONPATH": "${workspaceFolder};${workspaceFolder}/bots"},
             "cwd": "${workspaceFolder}/bots",
             "program": "tradingbot.py",
             "console": "integratedTerminal"
@@ -26,9 +17,7 @@
             "name": "Python: DataBot",
             "type": "python",
             "request": "launch",
-            "env": {
-                "PYTHONPATH": "${workspaceFolder};${workspaceFolder}/bots"
-            },
+            "env": { "PYTHONPATH": "${workspaceFolder};${workspaceFolder}/bots"},
             "cwd": "${workspaceFolder}/bots",
             "program": "databot.py",
             "console": "integratedTerminal"
@@ -37,10 +26,8 @@
             "name": "Python: Site",
             "type": "python",
             "request": "launch",
-            "env": {
-                "PYTHONPATH": "${workspaceFolder};${workspaceFolder}/site"
-            },
-            "cwd": "/site",
+            "env": { "PYTHONPATH": "${workspaceFolder};${workspaceFolder}/site"},
+            "cwd": "${workspaceFolder}/site",
             "program": "app.py",
             "console": "integratedTerminal"
         },
@@ -48,10 +35,7 @@
     "compounds": [
         {
             "name": "Site/DataBot",
-            "configurations": [
-                "Python: Site",
-                "Python: DataBot"
-            ]
+            "configurations": ["Python: Site", "Python: DataBot"]
         }
     ]
 }

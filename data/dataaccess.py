@@ -6,6 +6,14 @@ class DataAccess():
     def __init__(self):
         self._initializeTables()
 
+    def createFilter(self,filters):
+        where =''
+        for filter in filters:
+            where = ' {} {} %s'.format(filter['name'],filter['operator'])
+        if len(where) > 0:
+            where = 'WHERE ' + where
+        return where, tuple([f['value'] for f in filters])
+
     def execute(self, statement, params=None):
         error = None
         with self._create_connection() as conn:
@@ -100,6 +108,7 @@ class DataAccess():
         create_ordergroups_table = """CREATE TABLE IF NOT EXISTS ordergroups (
                                         id BIGSERIAL PRIMARY KEY,
                                         productid INT NOT NULL REFERENCES products(id),
+                                        saleprice NUMERIC(16,10) NULL,
                                         totalearned NUMERIC(16,10) NULL,
                                         totalsize NUMERIC(16,10) NULL,
                                         totalfees NUMERIC(16,10) NULL,

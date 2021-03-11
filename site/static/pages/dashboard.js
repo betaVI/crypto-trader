@@ -68,9 +68,9 @@ export default {
                         <div class="col-xl-2 col-lg-3 col-md-4 col-sm-6">
                             <products-component :product="product" @showAlert=showAlert></products-component>
                         </div>
-                        <div class="col-xl-6 col-lg-7 col-md-8 col-sm-6">
+                        <div class="col-xl col-lg-7 col-md-8 col-sm-6">
                         </div>
-                        <div class="col-xl-4 col-lg-4 col-md-7 col-sm-6">
+                        <div class="col-xl-3 col-lg-3 col-md-6 col-sm-7">
                             <account-component :product="product"></account-component>
                         </div>
                     </div>

@@ -26,7 +26,7 @@ class CbApi:
     
     def getAccountDetails(self, account_id):
         account = self.client.get_account(account_id)
-        logging.info('[BALANCE] {}: {}'.format(account['currency'], account['balance']))
+        # logging.info('[BALANCE] {}: {}'.format(account['currency'], account['balance']))
         return account
 
     def getMarketPrice(self, product_id):
@@ -37,6 +37,8 @@ class CbApi:
     def getRecentTrades(self, product_id, side, count):
         results = []
         trades = list(self.client.get_product_trades(product_id))
+        # logging.getLogger(product_id).debug(str(trades))
+        # print(str(trades))
         for trade in trades:
             if trade['side'] == side:
                 results.append(trade)
@@ -47,15 +49,15 @@ class CbApi:
 
     def placeMarketOrder(self, product_id, side, funds = None, size = None):
         result = self.client.place_market_order(product_id=product_id, side=side, size=size, funds=funds)
-        log.info('[API] Market Order Result: ' + str(result))
+        logging.getLogger(product_id).debug('[API] Market Order Result: ' + str(result))
         orderid = result['id']
         fill = self._getOrderDetails(orderid)
         return orderid, float(fill['price']), float(fill['usd_volume']), float(fill['size']), float(fill['fee'])
 
     def placeLimitOrder(self, product_id, side, price, size):
         result = self.client.place_limit_order(product_id=product_id, side=side, price=price, size=size)
-        logging.info('[API] result: ' + str(result))
-        logging.info('[{}] Created {} order for price {}'.format(side.upper(), size, price))
+        logging.getLogger(product_id).info('[API] result: ' + str(result))
+        # logging.info('[{}] Created {} order for price {}'.format(side.upper(), size, price))
         return result['id']
 
     def checkIfOrdersFilled(self, orderids):

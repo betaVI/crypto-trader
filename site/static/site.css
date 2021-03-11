@@ -8,3 +8,6 @@
 .table-sm tr td{
     padding: 1px;
 }
+.table-critical{
+    background-color: red;
+}

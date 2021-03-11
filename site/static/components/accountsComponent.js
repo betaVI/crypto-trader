@@ -10,26 +10,12 @@ export default {
             var account = this.accounts.find(a=>a.currency == currency);
             if (account){
                 account.currencyvalue = product.price;
-                var balance = parseFloat(account.currencyvalue)* parseFloat(account.balance);
-                if (this.piechart){
-                    var index = this.piechart.data.labels.indexOf(currency);
-                    if (index > 0){
-                        console.log(balance);
-                        this.piechart.data.datasets[0].data[index] = balance;
-                    }
-                    this.piechart.update(0);
-                }
-                var total = 0;
-                for (var x = 0;x<this.accounts.length; x++){
-                    total += parseFloat(this.accounts[x].currencyvalue)* parseFloat(this.accounts[x].balance);
-                }
-                this.accountbalance = total;
             }
         },
     },
     data(){
         return {
-            piechart: null,
+            accountbalances: null,
             isloading: false,
             accountbalance: 0,
             accounts: []
@@ -46,8 +32,29 @@ export default {
             });
             const data = await result.json();
             this.accounts = data.data;
-            this.loadPieGraph();
-            this.isloading = false;
+            setTimeout(() => {
+                this.loadPieGraph();
+                this.isloading = false;
+            }, 2000);
+            setInterval(() => {
+                this.updatePieGraph();
+            }, 10000);
+        },
+        updatePieGraph(){
+            if (this.accountbalances){
+                var total = 0;
+                for (var x=0; x<this.accounts.length;x++){
+                    var account = this.accounts[x];
+                    var balance = parseFloat(account.currencyvalue)* parseFloat(account.balance);
+                    var index = this.accountbalances.data.labels.findIndex(l=>l.startsWith(account.currency));
+                    if (index > -1){
+                        this.accountbalances.data.datasets[0].data[index] = balance;
+                    }
+                    total+=balance;
+                }
+                this.accountbalances.options.title.text = "Account Balance "+ this.$filters.currencyUSD(total);
+                this.accountbalances.update(0);
+            }
         },
         loadPieGraph(){
             var dynamicColors = function() {
@@ -61,12 +68,13 @@ export default {
             var labels = [];
             this.accounts.forEach((a)=>{
                 labels.push(a.currency);
-                data.push(a.balance * a.currencyvalue);
+                data.push(parseFloat((a.balance * a.currencyvalue).toFixed(2)));
                 colors.push(dynamicColors());
             });
 
-            var ctx = document.getElementById('piegraph').getContext('2d');
-            this.piechart = new Chart(ctx,{
+            var ctx = this.$refs.accountbalances.getContext('2d');
+            var self = this;
+            this.accountbalances = new Chart(ctx,{
                 type:'pie',
                 data:{
                     datasets:[{
@@ -76,26 +84,29 @@ export default {
                     labels:labels
                 },
                 options:{
-
+                    title:{
+                        display:true,
+                        text:'Account Balances ' + this.$filters.currencyUSD(data.reduce((acc,val)=>acc+val))
+                    },
+                    tooltips: {
+                        callbacks:{
+                            label: function(toolTipItem, data){
+                                var dataset = data.datasets[toolTipItem.datasetIndex];
+                                var dataLabel = data.labels[toolTipItem.index];
+                                var total = dataset.data.reduce(function(prevValue,currentValue, currentIndex, array){
+                                    return prevValue+currentValue;
+                                })
+                                var value = dataset.data[toolTipItem.index];
+                                var percent = ((value/total)*100).toFixed(2);
+                                var newlabel = ': ' + self.$filters.currencyUSD(value)+' ' + percent+'%';
+                                return dataLabel+newlabel;
+                            }
+                        }
+                    }
                 }
             })
         }
     },
-    template:  `<div class="card">
-                    <div class="card-header">
-                        <h4>Accounts<span id="lblTotalPortfolio" class="float-right">{{ $filters.currencyUSD(accountbalance, 2) }}</span></h4>
-                    </div>
-                    <div class="card-body">
-                        <spinner-component v-if="isloading"></spinner-component>
-                        <v-table v-if="!isloading" :columns="[{name:'Currency',class:'column-fit'},{name:'Quantity',class:'text-right'},{name:'Price',class:'text-right'},{name:'Balance',class:'text-right'}]" :rows=accounts v-slot:default="row">
-                            <tr>
-                                <td class="column-fit">{{ row.item.currency }}</td>
-                                <td class="text-right">{{ $filters.decimal(row.item.balance, 5) }}</td>
-                                <td class="text-right">{{ $filters.currencyUSD(row.item.currencyvalue, 5) }}</td>
-                                <td class="text-right">{{ $filters.currencyUSD(row.item.balance * row.item.currencyvalue, 2) }}</td>
-                            </tr>
-                        </v-table>
-                        <canvas id="piegraph"/>
-                    </div>
-                </div>`
+    template:  `<spinner-component v-if="isloading"></spinner-component>
+                <canvas ref="accountbalances" v-show="!isloading"/>`
 }

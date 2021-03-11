@@ -14,6 +14,7 @@ import ordersComponent from './components/ordersComponent.js';
 import apiTableComponent from './components/apiTableComponent.js';
 
 const app = Vue.createApp(router);
+app.config.productionTip = false;
 app.config.globalProperties.$filters = {
     currencyUSD(value, decimalplaces){
         var currencyFormat = new Intl.NumberFormat('en-US',options={ minimumFractionDigits: decimalplaces, style: 'currency', currency: 'USD' });
@@ -36,5 +37,5 @@ app.component("spinner-component", spinnerComponent);
 app.component("products-component", productsComponent);
 app.component("logs-component", logsComponent)
 app.component("account-component", accountsComponent);
-app.component("trader-modal", modalComponent);
+app.component("modal", modalComponent);
 app.mount('#mainContent');

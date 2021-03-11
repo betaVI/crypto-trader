@@ -2,11 +2,17 @@ class OrdersRepository():
     def __init__(self, dataaccess):
         self.dataaccess = dataaccess
 
-    def fetchOrders(self, pageno, pagesize, sort, sortdir):
-        query = "SELECT p.name as product, og.id as ordergroup, side, funds, size, price, fee, to_char(o.createdat, 'MM-DD-YYYY HH24:MI:SS') as createdat FROM orders o inner join ordergroups og on og.id = o.ordergroupid inner join products p on og.productid = p.id"
+    def getOrderProducts(self):
+        query = "SELECT distinct p.name from ordergroups og inner join products p on p.id = og.productid"
+        return self.dataaccess.executeRead(query)
+
+    def fetchOrders(self, pageno, pagesize, sort, sortdir, filters):
+        where, values = self.dataaccess.createFilter(filters)
+        query = "SELECT p.name as product, og.id as ordergroup, side, funds, size, price, fee, to_char(o.createdat, 'MM-DD-YYYY HH24:MI:SS') as createdat FROM orders o inner join ordergroups og on og.id = o.ordergroupid inner join products p on og.productid = p.id "
+        query += where
         query += " ORDER BY o.{} {} LIMIT {} OFFSET {}".format(sort,sortdir, pagesize, (pageno-1)*pagesize)
-        countquery = "SELECT count(*) as totalcount from orders"
-        return self.dataaccess.executeRead(query), self.dataaccess.executeScalar(countquery)['totalcount']
+        countquery = "SELECT count(*) as totalcount from orders o inner join ordergroups og on og.id = o.ordergroupid inner join products p on p.id = og.productid " + where
+        return self.dataaccess.executeRead(query, values), self.dataaccess.executeScalar(countquery, values)['totalcount']
     
     def fetchRecentOrderGroup(self, product):
         query = "SELECT id FROM ordergroups WHERE productid = (SELECT id FROM products WHERE name = %s) AND updatedat IS NULL ORDER BY createdat DESC LIMIT 1"
@@ -23,10 +29,10 @@ class OrdersRepository():
         row['orders'] = []
         return row
 
-    def updateOrderGroup(self, ordergroupid, totalearned, totalsize, totalfees):
-        values = (totalearned, totalsize, totalfees, ordergroupid)
+    def updateOrderGroup(self, ordergroupid, sellprice, totalearned, totalsize, totalfees):
+        values = (sellprice, totalearned, totalsize, totalfees, ordergroupid)
         query = """UPDATE ordergroups
-                        SET totalearned = %s, totalsize = %s, totalfees = %s, updatedat = now()
+                        SET sellprice = %s, totalearned = %s, totalsize = %s, totalfees = %s, updatedat = now()
                     WHERE
                         id = %s"""
         self.dataaccess.execute(query, values)

@@ -10,7 +10,12 @@ class LogsRepository():
         if error != None:
             print('Log Entry error: ' + error)
         
-    def fetchLogs(self, pageno, pagesize, sort, sortdir):
-        logquery = "SELECT id, loggername, loglevelname, filename, lineno, message, to_char(createdat, 'MM-DD-YYYY HH24:MI:SS') as createdat FROM traderlogs ORDER BY {} {} LIMIT {} OFFSET {}".format(sort,sortdir,pagesize,(pageno-1)*pagesize)
-        pagequery = "SELECT count(*) as totalcount FROM traderlogs"
-        return self.dataaccess.executeRead(logquery),self.dataaccess.executeRead(pagequery)[0]['totalcount']
+    def getLoggers(self):
+        query = "SELECT distinct loggername from traderlogs"
+        return self.dataaccess.executeRead(query)
+    
+    def fetchLogs(self, pageno, pagesize, sort, sortdir, filters):
+        where, values = self.dataaccess.createFilter(filters)
+        logquery = "SELECT id, loggername, loglevelname, filename, lineno, message, to_char(createdat, 'MM-DD-YY HH24:MI:SS.MS') as createdat FROM traderlogs {} ORDER BY {} {} LIMIT {} OFFSET {}".format(where,sort,sortdir,pagesize,(pageno-1)*pagesize)
+        pagequery = "SELECT count(*) as totalcount FROM traderlogs " + where
+        return self.dataaccess.executeRead(logquery,values),self.dataaccess.executeRead(pagequery, values)[0]['totalcount']
