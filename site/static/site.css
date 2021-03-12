@@ -9,5 +9,13 @@
     padding: 1px;
 }
 .table-critical{
-    background-color: red;
+    background-color: #d14545;
+}
+.table-critical td{
+    border-bottom-color: #a63737;
+    border-left-color: #a63737;
+    border-right-color: #a63737;
+}
+.btn-outline-primary{
+    color: #fff;
 }

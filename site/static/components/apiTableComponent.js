@@ -135,7 +135,7 @@ export default{
                             <i class="fa fa-sync-alt"></i>
                         </template>
                     </loading-button-component>
-                    <button v-if="hasFilters()" class="btn btn-secondary btn-sm" @click=openFilters>
+                    <button v-if="hasFilters()" class="btn btn-primary btn-sm" @click=openFilters>
                         <i class="fa fa-filter"></i>
                     </button>
                     <v-paging class="float-right" :model=paginationModel @previous=previous @next=next @goToPage=goToPage></v-paging>

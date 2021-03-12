@@ -79,14 +79,23 @@ export default {
                 data:{
                     datasets:[{
                         data:data,
-                        backgroundColor:colors
+                        backgroundColor:colors,
+                        borderColor:'#ccc',
+                        borderWidth:1
                     }],
                     labels:labels
                 },
                 options:{
                     title:{
                         display:true,
+                        fontColor: '#ccc',
+                        fontSize:'18',
                         text:'Account Balances ' + this.$filters.currencyUSD(data.reduce((acc,val)=>acc+val))
+                    },
+                    legend:{
+                        labels:{
+                            fontColor:'#ccc'
+                        }
                     },
                     tooltips: {
                         callbacks:{
