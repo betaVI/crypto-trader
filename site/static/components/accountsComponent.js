@@ -71,7 +71,7 @@ export default {
                 data.push(parseFloat((a.balance * a.currencyvalue).toFixed(2)));
                 colors.push(dynamicColors());
             });
-
+            
             var ctx = this.$refs.accountbalances.getContext('2d');
             var self = this;
             this.accountbalances = new Chart(ctx,{

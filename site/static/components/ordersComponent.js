@@ -57,7 +57,7 @@ export default{
             }
         },
         getSide(side){
-            return side=='sell'?'table-success':'table-danger';
+            return side=='sell'?'text-success':'text-danger';
         },
     },
     template:   `<div class="card">

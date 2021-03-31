@@ -1,7 +1,6 @@
 export default{
     name: "ProductsComponent",
     props: ["product"],
-    emits: ['showAlert'],
     watch:{
         product: function(product){
             for (var x = 0;x<this.traders.length; x++){
@@ -23,6 +22,11 @@ export default{
                 isloading:false,
             },
             alert: {
+                success: false,
+                message: "",
+                showalert: false
+            },
+            modalAlert:{
                 success: false,
                 message: "",
                 showalert: false
@@ -49,11 +53,7 @@ export default{
             if (data.success && trader){
                 trader.statusname = status;
             }
-            this.$emit('showAlert',{
-                display: true,
-                success: data.success,
-                message: data.message,
-            });
+            this.showAlert(data.success, data.message)
         },
         async showCreateTrader(product){
             this.tradermodel.title = 'Create Trader';
@@ -98,18 +98,14 @@ export default{
                 });
                 const data = await result.json();
                 if (data.success){
-                    this.$emit('showAlert',{
-                        display: true,
-                        success: data.success,
-                        message: data.message,
-                    });
+                    this.showAlert(data.success,data.message);
                     $(this.$refs.editmodal.$el).modal('hide');
                     this.fetchProducts();
                 }
                 else{
                     console.log(data.message);
                     if (data.message){
-                        this.showAlert(false,data.message);
+                        this.showModalAlert(false,data.message);
                     }
                     form.find("div[data-error]").remove();
                     for (const property in data.errors)
@@ -118,11 +114,7 @@ export default{
             }
             catch(err){
                 console.log('Failed to create trader: ' + err);
-                this.$emit('showAlert',{
-                    display: true,
-                    success: false,
-                    message: 'Exception: ' + err,
-                });
+                this.showModalAlert(false, 'Exception: ' + err);
             }
             this.tradermodel.issubmitting = false;
         },
@@ -131,17 +123,18 @@ export default{
             const result = await fetch('/api/traders/'+this.deleteid, { method: "DELETE" });
             const data = await result.json();
             $(this.$refs.deletemodal.$el).modal('hide');
-            this.$emit('showAlert',{
-                display: true,
-                success: data.success,
-                message: data.message,
-            });
+            this.showAlert(data.success, data.message);
             if (data.success){
                 this.fetchProducts();
             }
             this.tradermodel.issubmitting = false;
         },
         showAlert(success,message){
+            this.alert.display = true;
+            this.alert.success = success;
+            this.alert.message = message;
+        },
+        showModalAlert(success,message){
             this.alert.display = true;
             this.alert.success = success;
             this.alert.message = message;
@@ -153,7 +146,8 @@ export default{
             return statusname=='Active';
         }
     },
-    template:   `<spinner-component v-if="isloading"></spinner-component>
+    template:   `<alert-component :model=alert></alert-component>
+                <spinner-component v-if="isloading"></spinner-component>
                 <v-table v-if="!isloading" :columns="[{name:'Product'},{name:'Actions'}]" :rows="traders" v-slot:default="row">
                     <tr>
                         <td>{{ row.item.product }}<span class="badge badge-secondary float-right">{{ $filters.currencyUSD(row.item.price, 3) }}</span></td>
@@ -182,7 +176,7 @@ export default{
                         </td>
                     </tr>
                 </v-table>
-                <modal ref="deletemodal" @accepted="deleteTrader" :model=tradermodel :alertmodel=alert>
+                <modal ref="deletemodal" @accepted="deleteTrader" :model=tradermodel :alertmodel=modalAlert>
                     <template v-slot:header>
                         <h5 class="modal-title">{{ tradermodel.title }}</h5>
                     </template>
@@ -193,7 +187,7 @@ export default{
                         Confirm
                     </template>
                 </modal>
-                <modal ref="editmodal" @accepted="submitForm" :model=tradermodel :alertmodel=alert>
+                <modal ref="editmodal" @accepted="submitForm" :model=tradermodel :alertmodel=modalAlert>
                     <template v-slot:header>
                         <h5 class="modal-title">{{ tradermodel.title }}</h5>
                     </template>

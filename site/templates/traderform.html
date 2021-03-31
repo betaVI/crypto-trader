@@ -39,6 +39,15 @@
     </div>
     <div class="row">
         <div class="col-md-4">
+            <div class="form-group">
+                {{ form.loglevel.label }}
+                {{ form.loglevel(class_="form-control")}}
+                {% if form.loglevel.errors %}
+                    {% for error in form.loglevel.errors %}
+                        <div class="text-danger">{{ error }}</div>
+                    {% endfor %}
+                {% endif %}
+            </div>
         </div>
         <div class="col-md-4">
             <div class="form-group">

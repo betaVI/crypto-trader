@@ -3,7 +3,7 @@ class TraderRepository:
         self.dataaccess = dataaccess
 
     def getActiveTraders(self):
-        query = """SELECT p.name as product, baseaccount, quoteaccount, buyupperthreshold, buylowerthreshold, sellupperthreshold, selllowerthreshold, maxpurchaseamount
+        query = """SELECT p.name as product, loglevel, baseaccount, quoteaccount, buyupperthreshold, buylowerthreshold, sellupperthreshold, selllowerthreshold, maxpurchaseamount
                     FROM traders t 
                     INNER JOIN products p on p.id = t.productid
                     INNER JOIN status s on s.id = t.statusid
@@ -24,7 +24,7 @@ class TraderRepository:
 
     def fetchTrader(self, id):
         query = """SELECT 
-                        t.id as traderid, p.name as product, baseaccount, quoteaccount, buyupperthreshold, buylowerthreshold, sellupperthreshold, selllowerthreshold, maxpurchaseamount, statusid as status 
+                        t.id as traderid, loglevel, p.name as product, baseaccount, quoteaccount, buyupperthreshold, buylowerthreshold, sellupperthreshold, selllowerthreshold, maxpurchaseamount, statusid as status 
                     FROM 
                         traders t inner join 
                         products p on p.id = t.productid 
@@ -37,16 +37,16 @@ class TraderRepository:
         query = "UPDATE traders SET statusid = (SELECT id FROM status WHERE name = %s) WHERE id = %s"
         return self.dataaccess.execute(query, values)
 
-    def alterTrader(self, id, product, baseaccount, quoteaccount, buyupperthreshold, buylowerthreshold, sellupperthreshold, selllowerthreshold, maxpurchaseamount):
+    def alterTrader(self, id, product, loglevel, baseaccount, quoteaccount, buyupperthreshold, buylowerthreshold, sellupperthreshold, selllowerthreshold, maxpurchaseamount):
         productid = self.updateProduct(1, product, 0)
-        values = (productid, baseaccount, quoteaccount, float(buyupperthreshold), float(buylowerthreshold), float(sellupperthreshold), float(selllowerthreshold), float(maxpurchaseamount))
+        values = (productid, loglevel, baseaccount, quoteaccount, float(buyupperthreshold), float(buylowerthreshold), float(sellupperthreshold), float(selllowerthreshold), float(maxpurchaseamount))
         if id != '0':
             query = """UPDATE traders 
-                            SET productid = %s, baseaccount=%s, quoteaccount=%s, buyupperthreshold=%s, buylowerthreshold=%s, sellupperthreshold=%s, selllowerthreshold=%s, maxpurchaseamount=%s
+                            SET productid = %s, loglevel = %s, baseaccount=%s, quoteaccount=%s, buyupperthreshold=%s, buylowerthreshold=%s, sellupperthreshold=%s, selllowerthreshold=%s, maxpurchaseamount=%s
                             WHERE id = {}""".format(id)
         else:
             query = ",".join(['%s']*len(values))
-            query = """INSERT INTO traders (productid, baseaccount, quoteaccount, buyupperthreshold, buylowerthreshold, sellupperthreshold, selllowerthreshold, maxpurchaseamount) 
+            query = """INSERT INTO traders (productid, loglevel, baseaccount, quoteaccount, buyupperthreshold, buylowerthreshold, sellupperthreshold, selllowerthreshold, maxpurchaseamount) 
                         VALUES ({})""".format(query)
         
         return self.dataaccess.execute(query,values)

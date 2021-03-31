@@ -63,13 +63,13 @@ export default{
         getLogLevel(loglevelname){
             switch(loglevelname){
                 case "DEBUG":
-                    return 'table-default';
+                    return 'text-default';
                 case "INFO":
-                    return 'table-info';
+                    return 'text-info';
                 case "WARNING":
-                    return 'table-warning';
+                    return 'text-warning';
                 case "ERROR":
-                    return 'table-danger';
+                    return 'text-danger';
                 case "CRITICAL":
                     return 'table-critical';
             }

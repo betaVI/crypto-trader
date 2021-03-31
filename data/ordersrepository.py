@@ -29,12 +29,26 @@ class OrdersRepository():
         row['orders'] = []
         return row
 
-    def updateOrderGroup(self, ordergroupid, sellprice, totalearned, totalsize, totalfees):
+    def updateOrderGroup(self, referenceid, ordergroupid, sellprice, totalearned, totalsize, totalfees):
         values = (sellprice, totalearned, totalsize, totalfees, ordergroupid)
-        query = """UPDATE ordergroups
-                        SET sellprice = %s, totalearned = %s, totalsize = %s, totalfees = %s, updatedat = now()
+        query =  """UPDATE ordergroups og
+                    SET 
+                        sellprice = %s, 
+                        totalearned = %s, 
+                        totalsize = %s, 
+                        totalfees = o.fee + %s, 
+                        totalspent = o.funds, 
+                        updatedat = now()
+                    FROM
+                        (SELECT ordergroupid, sum(funds) as funds, sum(fee) as fee from orders where side = 'buy' group by ordergroupid) o
                     WHERE
-                        id = %s"""
+                        o.ordergroupid = og.id
+                    and og.id = %s"""
+        self.dataaccess.execute(query, values)
+
+        values = (ordergroupid, 'sell', totalearned, referenceid, totalsize, sellprice, totalfees)
+        query = "INSERT INTO orders (ordergroupid, side, funds, referenceid, size, price, fee) "
+        query += "VALUES (%s, %s, %s, %s, %s, %s, %s)"
         self.dataaccess.execute(query, values)
 
     def createOrder(self, ordergroupid, side, funds, referenceid, size, price, fee):

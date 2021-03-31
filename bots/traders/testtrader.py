@@ -4,7 +4,7 @@ from bots.traders.trader import Trader
 from bots.dbloghandler import DbLogHandler
 
 class TestTrader():
-    def __init__(self, orderrepo, dbtrader, api):
+    def __init__(self, orderrepo, dbtrader, api, dbloghandler):
         self.cash_account_id = dbtrader['quoteaccount']
         self.crypto_account_id = dbtrader['baseaccount']
         self.product_id = dbtrader['product']
@@ -15,6 +15,7 @@ class TestTrader():
         self.orderrepo = orderrepo
 
         self.log = logging.getLogger(self.product_id)
+        dbloghandler.setLevel(int(dbtrader['loglevel']))
         self.log.setLevel(logging.DEBUG)
 
         self._updateFees()
@@ -71,11 +72,11 @@ class TestTrader():
     def _placeBuyOrder(self):
         self.log.debug("Attempting to place a Buy Order")
         totalspent = self._getTotalSpent()
-        if self.maxPurchaseAmount - totalspent<0:
+        if self.maxPurchaseAmount - totalspent <= 0:
             self.log.warn('[BALANCE] NSF {} - {} = {}'.format(self.maxPurchaseAmount, totalspent, self.maxPurchaseAmount - totalspent))
             return
-        remainingbalance = max(self.maxPurchaseAmount - totalspent,.5)
-        fundsToUse = round(remainingbalance * 0.5, 2)
+        remainingbalance = self.maxPurchaseAmount - totalspent
+        fundsToUse = round(max(remainingbalance * 0.5, 0.5), 2)
         id, price, funds, size, fee = self.api.placeMarketOrder(self.product_id, 'buy', funds=fundsToUse)
         self.log.info('[BUY] {} {} for ${} at {}/{}'.format(size, self.product_id, funds, price, self.product_id))
         self.orderrepo.createOrder(self.group['id'], 'buy', funds, id, size, price, fee)
@@ -87,8 +88,8 @@ class TestTrader():
         amountToSell = float(account['balance'])
         id, price, funds, size, fee = self.api.placeMarketOrder(self.product_id, 'sell', size=amountToSell)
         self.log.info('[SELL] {} {} for ${} at {}/{}'.format(size, self.product_id, funds, price, self.product_id))
-        self.orderrepo.createOrder(self.group['id'], 'sell', funds, id, size, price, fee)
-        self.orderrepo.updateOrderGroup(self.group['id'], price, funds, size, fee)
+        # self.orderrepo.createOrder(self.group['id'], 'sell', funds, id, size, price, fee)
+        self.orderrepo.updateOrderGroup(id, self.group['id'], price, funds, size, fee)
         self.group = self.orderrepo.createOrderGroup(self.product_id)
         self._updateFees()
         return price

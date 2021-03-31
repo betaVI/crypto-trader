@@ -1,4 +1,5 @@
 import accountsComponent from './components/accountsComponent.js';
+import productprofit from './components/profitComponent.js';
 import modalComponent from './components/modalComponent.js';
 import loadingButtonComponent from './components/loadingButtonComponent.js';
 import alertComponent from './components/alertComponent.js';
@@ -37,5 +38,6 @@ app.component("spinner-component", spinnerComponent);
 app.component("products-component", productsComponent);
 app.component("logs-component", logsComponent)
 app.component("account-component", accountsComponent);
+app.component("productprofit", productprofit);
 app.component("modal", modalComponent);
 app.mount('#mainContent');

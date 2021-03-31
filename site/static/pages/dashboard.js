@@ -7,11 +7,6 @@ export default {
             product: {
                 id:null,
                 price:0
-            },
-            alertModel:{
-                success: false,
-                message: "",
-                showalert: false
             }
         }
     },
@@ -57,21 +52,18 @@ export default {
             this.wsconnection.addEventListener('error', (event) => {
                 console.log('error: '+event)
             });
-        },
-        showAlert(alert){
-            this.alertModel = alert;
         }
     },
     template:   `<layout>
-                    <alert-component :model=alertModel></alert-component>
                     <div class="row">
                         <div class="col-xl-2 col-lg-3 col-md-4 col-sm-6">
-                            <products-component :product="product" @showAlert=showAlert></products-component>
+                            <products-component :product="product"></products-component>
                         </div>
                         <div class="col-xl col-lg-7 col-md-8 col-sm-6">
                         </div>
                         <div class="col-xl-3 col-lg-3 col-md-6 col-sm-7">
                             <account-component :product="product"></account-component>
+                            <productprofit></productprofit>
                         </div>
                     </div>
                     <div class="row">

@@ -1,4 +1,4 @@
-import os, time
+import os, time, logging
 from __main__ import app, cbapi, db
 from forms.TraderForm import TraderForm
 from flask import Flask, request, jsonify, render_template
@@ -51,7 +51,7 @@ def createTrader():
     print(baseaccount)
     quoteaccount = next(iter([a['id'] for a in accounts if a['currency'] == product['quote_currency']]), None)
     print(quoteaccount)
-    result = tradersrepo.alterTrader(id, form.product.data, baseaccount, quoteaccount, form.buyupperthreshold.data, form.buylowerthreshold.data, form.sellupperthreshold.data, form.selllowerthreshold.data, form.maxpurchaseamount.data)
+    result = tradersrepo.alterTrader(id, form.product.data, form.loglevel.data, baseaccount, quoteaccount, form.buyupperthreshold.data, form.buylowerthreshold.data, form.sellupperthreshold.data, form.selllowerthreshold.data, form.maxpurchaseamount.data)
     action = 'update' if id != '0' else 'create'
     if result == None:
         return jsonify(success=True, message="Successfully {}d".format(action)), 201
@@ -69,5 +69,6 @@ def initializeTraderForm(id='0', product=''):
     if id != '0':
         form = TraderForm(data=tradersrepo.fetchTrader(id))
     else:
-        form = TraderForm(product=product)
+        form = TraderForm(product=product, loglevel=10)
+    form.loglevel.choices = [(key,value) for key,value in logging._levelToName.items() if key > 0]
     return form

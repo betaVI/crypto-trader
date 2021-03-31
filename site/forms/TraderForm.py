@@ -6,6 +6,7 @@ class TraderForm(FlaskForm):
     title = "Add Trader"
     traderid = HiddenField(u'TraderId')
     product = HiddenField(u'Product', validators=[DataRequired()])
+    loglevel = SelectField(u'Log Level', validators=[DataRequired()], coerce=int)
     maxpurchaseamount = DecimalField(u'MAX purchase amount',validators=[NumberRange(min=0, message='Must be greater than 0')], number_format="#.00")
     buyupperthreshold = DecimalField(u'BUY Upper Threshold',validators=[NumberRange(min=0,max=100, message='Must be between 0-100')], number_format="#.00")
     buylowerthreshold = DecimalField(u'BUY Lower Threshold',validators=[NumberRange(min=-100,max=0, message='Must be between -100-0')], places=2)

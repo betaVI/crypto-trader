@@ -110,7 +110,7 @@ if __name__ == "__main__":
     while True:
         activeTraders = getActiveTraders(traderrepo)
         for traderconfig in activeTraders:
-            trader = TestTrader(orderrepo, traderconfig, testapi)
+            trader = TestTrader(orderrepo, traderconfig, testapi, loghandler)
             trader.attemptToMakeTrade()
         print('Waiting ' + str(runinterval) + ' seconds')
         time.sleep(runinterval)

@@ -90,7 +90,8 @@ class DataAccess():
                                         buylowerthreshold Numeric(3,2) NOT NULL,
                                         sellupperthreshold Numeric(3,2) NOT NULL,
                                         selllowerthreshold Numeric(3,2) NOT NULL,
-                                        statusid smallint NOT NULL references status(id)
+                                        statusid smallint NOT NULL references status(id),
+                                        loglevel smallint NOT NULL
                                     )"""
 
         create_orders_table = """CREATE TABLE IF NOT EXISTS orders (
@@ -112,6 +113,7 @@ class DataAccess():
                                         totalearned NUMERIC(16,10) NULL,
                                         totalsize NUMERIC(16,10) NULL,
                                         totalfees NUMERIC(16,10) NULL,
+                                        totalspent NUMERIC(16,10) NULL,
                                         updatedat TIMESTAMP NULL,
                                         createdat TIMESTAMP NOT NULL DEFAULT now()
                                     )"""
