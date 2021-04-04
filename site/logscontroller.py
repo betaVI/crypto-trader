@@ -13,9 +13,11 @@ def getLoggers():
 @app.route('/api/logs/<pagesize>/<pageno>/<sort>/<sortdir>', methods=["POST"])
 def getLogs(pagesize='10',pageno='1',sort='createdat',sortdir='desc'):
     filters = []
-    if len(request.json) >0:
+    if 'filters' in request.json and len(request.json['filters']) >0:
         for f in request.json['filters']:
             filters.append(translateFilter(f))
+    else:
+        filters.append(translateFilter({ 'name':'Timestamp', 'value':'1h'}))
     logs, totalcount = logsrepo.fetchLogs(int(pageno), int(pagesize), sort, sortdir, filters)
     return jsonify(success=True, totalcount=totalcount, data=logs)
 

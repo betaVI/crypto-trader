@@ -18,7 +18,7 @@ export default{
                     type:Date,
                     filter:{
                         type:'range',
-                        value:'',
+                        value:'1h',
                         low:{
                             text:'Start Date'
                         },
