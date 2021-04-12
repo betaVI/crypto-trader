@@ -83,9 +83,7 @@ export default{
                         text:'Product Profitability'
                     },
                     legend:{
-                        labels:{
-                            fontColor:'#ccc'
-                        }
+                        display: false
                     }
                 }
             })

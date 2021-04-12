@@ -9,7 +9,7 @@ class ReportRepository():
                         sum(TotalEarned) - sum(TotalSpent) - sum(totalfees) as grossprofit
                     from ordergroups og
                     inner join products p on p.id = og.productid
-                    where og.updatedat is not null
+                    where og.updatedat > current_date - 90
                     group by p.name
                     order by name'''
         return self.dataaccess.executeRead(query)
