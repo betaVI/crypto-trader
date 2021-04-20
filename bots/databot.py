@@ -16,7 +16,6 @@ orderrepo = OrdersRepository(db)
 loghandler = DbLogHandler(logrepo)
 
 console = logging.StreamHandler()
-console.setLevel(logging.DEBUG)
 console.setFormatter(logging.Formatter(fmt='%(asctime)s | %(levelname)-8s | %(name)-8s | %(message)s', datefmt='%m-%d-%Y %H:%M:%S'))
 logging.getLogger('').addHandler(loghandler)
 logging.getLogger('').addHandler(console)
@@ -105,12 +104,18 @@ if __name__ == "__main__":
     testapi = TestApi(api, db)
     print('cwd is %s' %(os.getcwd()))
     signal.signal(signal.SIGINT, handle_cancel)
-    runinterval = 5
 
     while True:
+        settings = db.executeScalar("SELECT * FROM settings")
+        runinterval = int(settings['interval'])
+        loglevel = int(settings['loglevel'])
+        console.setLevel(loglevel)
+
         activeTraders = getActiveTraders(traderrepo)
         for traderconfig in activeTraders:
-            trader = TestTrader(orderrepo, traderconfig, testapi, loghandler)
-            trader.attemptToMakeTrade()
+            loghandler.setLevel(int(traderconfig['loglevel']))
+            trader = TestTrader(orderrepo, traderconfig, testapi)
+            if trader.attemptToMakeTrade() and trader.cashout:
+                traderrepo.deleteTrader(int(traderconfig['id']))
         print('Waiting ' + str(runinterval) + ' seconds')
         time.sleep(runinterval)

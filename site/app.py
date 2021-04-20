@@ -1,4 +1,4 @@
-import os, sys, time, decimal, flask.json, traceback
+import os, sys, time, decimal, flask.json, traceback, logging
 from flask import Flask, render_template, request, redirect, url_for, flash, jsonify
 from data.dataaccess import DataAccess
 from forms.TraderForm import TraderForm
@@ -39,6 +39,27 @@ def getAccounts():
 def getProducts():
     products = [p['id'] for p in cbapi.getProducts() if p['id'].endswith('USD')]
     return jsonify(success=True, data=products)
+
+@app.route('/api/settings', methods=["GET"])
+def getSettings():
+    try:
+        loglevels = [(key,value) for key,value in logging._levelToName.items() if key > 0]
+        settings = db.executeRead("SELECT interval, loglevel FROM settings")
+        return jsonify(success=True, loglevels=loglevels, interval=int(settings[0]['interval']), loglevel=int(settings[0]['loglevel']))
+    except Exception:
+        return jsonify(success=False, message=traceback.format_exc())
+
+@app.route('/api/settings', methods=["POST"])
+def postSettings():
+    try:
+        if 'interval' not in request.json or 'loglevel' not in request.json:
+            return jsonify(success=False, message='Missing parameters')
+        interval = request.json['interval']
+        loglevel = request.json['loglevel']
+        db.execute('UPDATE settings SET interval=%s, loglevel=%s',(interval,loglevel))
+        return jsonify(success=True, message='Successfully updated settings')
+    except Exception:
+        return jsonify(success=False, message=traceback.format_exc())
 
 @app.route('/api/system/')
 def systemAction():

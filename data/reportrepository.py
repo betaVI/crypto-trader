@@ -5,8 +5,8 @@ class ReportRepository():
     def getProductProfit(self):
         query =  '''select 
                         p.name as product,
-                        sum(totalearned) - sum(totalspent) as netprofit,
-                        sum(TotalEarned) - sum(TotalSpent) - sum(totalfees) as grossprofit
+                        round(sum(totalearned) - sum(totalspent), 4) as netprofit,
+                        round(sum(TotalEarned) - sum(TotalSpent) - sum(totalfees), 4) as grossprofit
                     from ordergroups og
                     inner join products p on p.id = og.productid
                     where og.updatedat > current_date - 90

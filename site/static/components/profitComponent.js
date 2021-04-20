@@ -58,7 +58,7 @@ export default{
 
             this.data.forEach(p=>{
                 labels.push(p.product);
-                data.push(p.grossprofit);
+                data.push(p.netprofit);
                 colors.push(dynamicColors());
             });
             
@@ -84,6 +84,15 @@ export default{
                     },
                     legend:{
                         display: false
+                    },
+                    tooltips: {
+                        callbacks:{
+                            label: function(toolTipItem, data){
+                                var dataset = data.datasets[toolTipItem.datasetIndex];
+                                var value = dataset.data[toolTipItem.index];
+                                return self.$filters.currencyUSD(value);
+                            }
+                        }
                     }
                 }
             })

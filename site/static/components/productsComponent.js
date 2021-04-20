@@ -165,9 +165,11 @@ export default{
                             <button type="button" class="btn btn-info btn-sm" @click="showEditTrader(row.item.id)">
                                 <i class="fa fa-edit"></i>
                             </button>
-                            <button type="button" class="btn btn-danger btn-sm" @click="showDeleteTrader(row.item)">
-                                <i class="fa fa-trash"></i>
-                            </button>
+                            <loading-button-component class="btn-danger btn-sm" @click="updateStatus(row.item.id, 'Cash Out')">
+                                <template #defaultLabel>
+                                    <i class="fa fa-money-bill-wave"></i>
+                                </template>
+                            </loading-button-component>
                         </td>
                         <td v-else>
                             <button type="button" class="btn btn-success btn-sm" data-id="0" @click="showCreateTrader(row.item.product)">

@@ -133,12 +133,21 @@ class DataAccess():
                                     name text NOT NULL UNIQUE
                                 )"""
 
+        create_settings_table = """CREATE TABLE IF NOT EXISTS settings(
+                                        interval INT NOT NULL DEFAULT 5,
+                                        loglevel INT NOT NULL DEFAULT 10
+                                    )"""
+
         self.execute(create_exchanges_table)
         self.execute(create_products_table)
         self.execute(create_traders_table)
         self.execute(create_status_table)
+        self.execute(create_settings_table)
         self.execute(create_orders_table)
         self.execute(create_ordergroups_table)
         self.execute(create_log_table)
         self.execute("INSERT INTO exchanges (name) VALUES ('CoinbasePro') ON CONFLICT DO NOTHING")
-        self.execute("INSERT INTO status (name) VALUES ('Active'),('Disabled') ON CONFLICT DO NOTHING")
+        self.execute("INSERT INTO status (name) VALUES ('Active'),('Disabled'),('Cash Out') ON CONFLICT DO NOTHING")
+        record = self.executeScalar("SELECT count(*) FROM settings")
+        if int(record['count']) == 0:
+            self.execute("INSERT INTO settings (interval,loglevel) VALUES (5,10)")

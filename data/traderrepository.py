@@ -3,11 +3,18 @@ class TraderRepository:
         self.dataaccess = dataaccess
 
     def getActiveTraders(self):
-        query = """SELECT p.name as product, loglevel, baseaccount, quoteaccount, buyupperthreshold, buylowerthreshold, sellupperthreshold, selllowerthreshold, maxpurchaseamount
+        query = """SELECT p.name as product, s.name as status, t.id, loglevel, baseaccount, quoteaccount, buyupperthreshold, buylowerthreshold, sellupperthreshold, selllowerthreshold, maxpurchaseamount, f.totalspent
                     FROM traders t 
                     INNER JOIN products p on p.id = t.productid
                     INNER JOIN status s on s.id = t.statusid
-                    WHERE s.name = 'Active'"""
+                    INNER JOIN (
+                        select og.productid, sum(funds) as totalspent 
+                        from orders o 
+                        inner join ordergroups og on og.id = o.ordergroupid 
+                        where og.updatedat is null 
+                        and o.side = 'buy'
+                        group by og.productid) f on f.productid = p.id
+                    WHERE s.name != 'Disabled'"""
         return self.dataaccess.executeRead(query)
 
     def fetchConfiguredProducts(self):
