@@ -74,11 +74,23 @@ export default{
                     labels:this.dates
                 },
                 options:{
-                    title:{
-                        display:true,
-                        fontColor: '#ccc',
-                        fontSize:'18',
-                        text:'Product Profitability'
+                    plugins:{
+                        title:{
+                            display:true,
+                            color: '#fff',
+                            size:'24',
+                            text:'Product Profitability'
+                        },
+                        tooltip: {
+                            callbacks:{
+                                label: function(context){
+                                    var dataset = context.dataset;
+                                    var value = dataset.data[context.dataIndex];
+                                    var label = dataset.label;
+                                    return label + ': ' + self.$filters.currencyUSD(value);
+                                }
+                            }
+                        }
                     },
                     scales:{
                         x:{
@@ -91,15 +103,6 @@ export default{
                             stacked:true,
                         }
                     },
-                    tooltips: {
-                        callbacks:{
-                            label: function(toolTipItem, data){
-                                var dataset = data.datasets[toolTipItem.datasetIndex];
-                                var value = dataset.data[toolTipItem.index];
-                                return self.$filters.currencyUSD(value);
-                            }
-                        }
-                    }
                 }
             })
 
