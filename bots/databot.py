@@ -91,11 +91,6 @@ class TestApi():
 #     def setTraders(self, traders):
 #         self.traders = traders
 
-def getActiveTraders(traderrepo):
-    return traderrepo.getActiveTraders()
-    # dicttraders = {t['product']:t for t in traders}
-    # return dicttraders
-
 def handle_cancel(sig, frame):
     print('Cancelled')
     sys.exit(0)
@@ -111,7 +106,11 @@ if __name__ == "__main__":
         loglevel = int(settings['loglevel'])
         console.setLevel(loglevel)
 
-        activeTraders = getActiveTraders(traderrepo)
+        products =[p for p in api.getProducts() if p['id'].endswith('USD')]
+        for product in products:
+            traderrepo.updateProduct(1, product['id'], 0)
+
+        activeTraders = traderrepo.getActiveTraders()
         for traderconfig in activeTraders:
             loghandler.setLevel(int(traderconfig['loglevel']))
             trader = TestTrader(orderrepo, traderconfig, testapi)

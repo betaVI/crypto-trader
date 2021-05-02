@@ -31,12 +31,10 @@ class TestTrader():
         try:
             length = len(self.group['orders'])
             if length == 0:
-                self.log.info('Placing Buy Order because none were found')
+                self.log.debug('Placing Buy Order because none were found')
                 self._placeBuyOrder()
-            elif self.maxPurchaseAmount-self.totalSpent <= 0:
-                self.log.warn('[BALANCE] NSF {} - {} = {}'.format(self.maxPurchaseAmount, self.totalSpent, self.maxPurchaseAmount - self.totalSpent))
             elif self.cashout:
-                self.log.info('[CASH OUT]')
+                self.log.warn('[CASH OUT]')
                 self._placeSellOrder()
             else:
                 marketPrice = self.api.getMarketPrice(self.product_id)
@@ -53,9 +51,12 @@ class TestTrader():
                 self.log.debug('[CHECK MAX] {} - {} = {} {}% {}'.format(marketPrice, avgPrice, round(differenceMax,2), round(percentDiffMax,2), round(maxAmount,2)))
                 self.log.debug('[CHECK MIN] {} - {} = {} {}% {}'.format(marketPrice, lastpurchaseprice, round(differenceMin,2), round(percentDiffMin,2), round(minAmount,2)))
                 if percentDiffMin <= self.Dip_Threshold:
-                    isStable = self._isPriceStable(marketPrice, 'buy')
-                    if isStable:
-                        self._placeBuyOrder()
+                    if self.maxPurchaseAmount - self.totalSpent <=0:
+                        self.log.warn('[BALANCE] NSF {} - {} = {}'.format(self.maxPurchaseAmount, self.totalSpent, self.maxPurchaseAmount - self.totalSpent))
+                    else:
+                        isStable = self._isPriceStable(marketPrice, 'buy')
+                        if isStable:
+                            self._placeBuyOrder()
                 elif percentDiffMax >= profitMargin:
                     isStable = self._isPriceStable(marketPrice, 'sell')
                     if isStable:

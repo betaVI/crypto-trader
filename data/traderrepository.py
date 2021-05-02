@@ -3,11 +3,11 @@ class TraderRepository:
         self.dataaccess = dataaccess
 
     def getActiveTraders(self):
-        query = """SELECT p.name as product, s.name as status, t.id, loglevel, baseaccount, quoteaccount, buyupperthreshold, buylowerthreshold, sellupperthreshold, selllowerthreshold, maxpurchaseamount, f.totalspent
+        query = """SELECT p.name as product, s.name as status, t.id, loglevel, baseaccount, quoteaccount, buyupperthreshold, buylowerthreshold, sellupperthreshold, selllowerthreshold, maxpurchaseamount, COALESCE(f.totalspent,0) as totalspent
                     FROM traders t 
                     INNER JOIN products p on p.id = t.productid
                     INNER JOIN status s on s.id = t.statusid
-                    INNER JOIN (
+                    LEFT JOIN (
                         select og.productid, sum(funds) as totalspent 
                         from orders o 
                         inner join ordergroups og on og.id = o.ordergroupid 
@@ -68,7 +68,7 @@ class TraderRepository:
         update_product_query = "INSERT INTO products (exchangeid, name, currentprice) VALUES ({}) ".format(update_product_query)
         update_product_query += "ON CONFLICT (name) DO UPDATE SET currentprice = {}, updatedat = CURRENT_TIMESTAMP".format(currentprice)
 
-        self.dataaccess.execute(update_product_query)
+        self.dataaccess.execute(update_product_query, values)
 
         row = self.dataaccess.executeScalar("SELECT ID FROM products WHERE name = '{}'".format(product))
         return row['id']
