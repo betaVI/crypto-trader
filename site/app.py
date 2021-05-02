@@ -29,7 +29,8 @@ def index():
 @app.route('/api/accounts', methods=["GET"])
 def getAccounts():
     accounts=[]
-    for account in cbapi.getAccounts():
+    result = cbapi.getAccounts()
+    for account in result:
         if float(account['balance'])>0:
             account['currencyvalue'] = 1 if account['currency']=='USD' else 0
             accounts.append(account)

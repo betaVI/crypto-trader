@@ -15,9 +15,7 @@ export default {
     },
     data(){
         return {
-            accountbalances: null,
             isloading: false,
-            accountbalance: 0,
             accounts: []
         };
     },
@@ -32,28 +30,29 @@ export default {
             });
             const data = await result.json();
             this.accounts = data.data;
+            var chart = null
             setTimeout(() => {
-                this.loadPieGraph();
+                chart = this.loadPieGraph();
                 this.isloading = false;
             }, 2000);
             setInterval(() => {
-                this.updatePieGraph();
+                this.updatePieGraph(chart);
             }, 10000);
         },
-        updatePieGraph(){
-            if (this.accountbalances){
+        updatePieGraph(chart){
+            if (chart){
                 var total = 0;
                 for (var x=0; x<this.accounts.length;x++){
                     var account = this.accounts[x];
                     var balance = parseFloat(account.currencyvalue)* parseFloat(account.balance);
-                    var index = this.accountbalances.data.labels.findIndex(l=>l.startsWith(account.currency));
+                    var index = chart.data.labels.findIndex(l=>l.startsWith(account.currency));
                     if (index > -1){
-                        this.accountbalances.data.datasets[0].data[index] = balance;
+                        chart.data.datasets[0].data[index] = balance;
                     }
                     total+=balance;
                 }
-                this.accountbalances.options.title.text = "Account Balance "+ this.$filters.currencyUSD(total);
-                this.accountbalances.update(0);
+                chart.options.plugins.title.text = "Account Balance "+ this.$filters.currencyUSD(total);
+                chart.update('none');
             }
         },
         loadPieGraph(){
@@ -74,46 +73,52 @@ export default {
             
             var ctx = this.$refs.accountbalances.getContext('2d');
             var self = this;
-            this.accountbalances = new Chart(ctx,{
-                type:'pie',
+            var graph = new Chart(ctx,{
+                type:'doughnut',
                 data:{
                     datasets:[{
                         data:data,
                         backgroundColor:colors,
-                        borderColor:'#ccc',
+                        borderColor:'#ddd',
                         borderWidth:1
                     }],
                     labels:labels
                 },
                 options:{
-                    title:{
-                        display:true,
-                        fontColor: '#ccc',
-                        fontSize:'18',
-                        text:'Account Balances ' + this.$filters.currencyUSD(data.reduce((acc,val)=>acc+val))
+                    layout:{
+                        padding:'10px',
                     },
-                    legend:{
-                        labels:{
-                            fontColor:'#ccc'
-                        }
-                    },
-                    tooltips: {
-                        callbacks:{
-                            label: function(toolTipItem, data){
-                                var dataset = data.datasets[toolTipItem.datasetIndex];
-                                var dataLabel = data.labels[toolTipItem.index];
-                                var total = dataset.data.reduce(function(prevValue,currentValue, currentIndex, array){
-                                    return prevValue+currentValue;
-                                })
-                                var value = dataset.data[toolTipItem.index];
-                                var percent = ((value/total)*100).toFixed(2);
-                                var newlabel = ': ' + self.$filters.currencyUSD(value)+' ' + percent+'%';
-                                return dataLabel+newlabel;
+                    plugins:{
+                        title:{
+                            display:true,
+                            color: '#ddd',
+                            fontSize:'18',
+                            text:'Account Balances ' + this.$filters.currencyUSD(data.reduce((acc,val)=>acc+val))
+                        },
+                        legend:{
+                            labels:{
+                                color:'#ddd'
+                            }
+                        },
+                        tooltip: {
+                            callbacks:{
+                                label: function(context){
+                                    var dataset = context.dataset;
+                                    var dataLabel = context.label;
+                                    var total = dataset.data.reduce(function(prevValue,currentValue, currentIndex, array){
+                                        return prevValue+currentValue;
+                                    })
+                                    var value =  context.parsed;
+                                    var percent = ((value/total)*100).toFixed(2);
+                                    var newlabel = ': ' + self.$filters.currencyUSD(value)+' ' + percent+'%';
+                                    return dataLabel+newlabel;
+                                }
                             }
                         }
                     }
                 }
             })
+            return graph;
         }
     },
     template:  `<spinner-component v-if="isloading"></spinner-component>

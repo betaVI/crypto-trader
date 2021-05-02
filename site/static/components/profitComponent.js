@@ -3,6 +3,7 @@ export default{
     data(){
         return {
             data: [],
+            dates: [],
             isloading:false,
             productprofit: null,
             alertModel:{
@@ -34,6 +35,7 @@ export default{
                     }
                     else{
                         this.data = data.data;
+                        this.dates = data.dates;
                         this.initializeGraph();
                     }
                 }
@@ -52,28 +54,24 @@ export default{
                 var b = Math.floor(Math.random() * 255);
                 return "rgb(" + r + "," + g + "," + b + ")";
             };
-            var colors =[];
-            var data = [];
-            var labels = [];
+            var datasets=[]
 
             this.data.forEach(p=>{
-                labels.push(p.product);
-                data.push(p.netprofit);
-                colors.push(dynamicColors());
+                datasets.push({
+                    label: p.product,
+                    data: p.values,
+                    backgroundColor:dynamicColors(),
+                    borderWidth:1
+                })
             });
             
             var ctx = this.$refs.productprofit.getContext('2d');
             var self = this;
             this.productprofit = new Chart(ctx,{
-                type:'horizontalBar',
+                type:'bar',
                 data:{
-                    datasets:[{
-                        data:data,
-                        backgroundColor:colors,
-                        // borderColor:'#ccc',
-                        borderWidth:1
-                    }],
-                    labels:labels
+                    datasets:datasets,
+                    labels:this.dates
                 },
                 options:{
                     title:{
@@ -82,8 +80,16 @@ export default{
                         fontSize:'18',
                         text:'Product Profitability'
                     },
-                    legend:{
-                        display: false
+                    scales:{
+                        x:{
+                            stacked:true,
+                            grid:{
+                                display:false
+                            }
+                        },
+                        y:{
+                            stacked:true,
+                        }
                     },
                     tooltips: {
                         callbacks:{
