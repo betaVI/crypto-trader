@@ -35,7 +35,7 @@ export default{
                     }
                     else{
                         this.data = data.data;
-                        this.dates = data.dates;
+                        this.dates = data.dates; 
                         this.initializeGraph();
                     }
                 }
@@ -83,6 +83,18 @@ export default{
                         },
                         tooltip: {
                             callbacks:{
+                                title: function(context){
+                                    var label = context[0].label;
+                                    var total = context.reduce(function(prevValue,currentValue, currentIndex, array){
+                                        if (prevValue.raw != undefined){
+                                            return parseFloat(prevValue.raw)+parseFloat(currentValue.raw);
+                                        }
+                                        else{
+                                            return parseFloat(prevValue)+parseFloat(currentValue.raw);
+                                        }
+                                    })
+                                    return label +' - '+ self.$filters.currencyUSD(total);
+                                },
                                 label: function(context){
                                     var dataset = context.dataset;
                                     var value = dataset.data[context.dataIndex];

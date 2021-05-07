@@ -74,7 +74,7 @@ export default {
             var ctx = this.$refs.accountbalances.getContext('2d');
             var self = this;
             var graph = new Chart(ctx,{
-                type:'doughnut',
+                type:'pie',
                 data:{
                     datasets:[{
                         data:data,
@@ -85,9 +85,9 @@ export default {
                     labels:labels
                 },
                 options:{
-                    layout:{
-                        padding:'10px',
-                    },
+                    responsive:true,
+                    aspectRatio:1.8,
+                    maintainAspectRation: false,
                     plugins:{
                         title:{
                             display:true,
