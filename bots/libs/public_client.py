@@ -163,8 +163,11 @@ class PublicClient(object):
                      "side": "sell"
          }]
         """
+        params = {}
+        if limit is not None:
+            params['limit'] = limit
         return self._send_paginated_message('/products/{}/trades'
-                                            .format(product_id))
+                                            .format(product_id), params)
 
     def get_product_historic_rates(self, product_id, start=None, end=None,
                                    granularity=None):
@@ -325,7 +328,8 @@ class PublicClient(object):
             # If this request included `before` don't get any more pages - the
             # cbpro API doesn't support multiple pages in that case.
             if not r.headers.get('cb-after') or \
-                    params.get('before') is not None:
+                    params.get('before') is not None or \
+                        (params.get('limit') is not None and params.get('limit') == len(results)):
                 break
             else:
                 params['after'] = r.headers['cb-after']

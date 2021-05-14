@@ -35,17 +35,9 @@ class CbApi:
         return float(result['price'])
 
     def getRecentTrades(self, product_id, side, count):
-        results = []
-        trades = list(self.client.get_product_trades(product_id))
+        trades = list(self.client.get_product_trades(product_id, limit=count))
         # logging.getLogger(product_id).debug(str(trades))
-        # print(str(trades))
-        for trade in trades:
-            if trade['side'] == side:
-                results.append(trade)
-            if len(results) == count:
-                break
-        # logging.info("[TRADES] result: " + str(results))
-        return [float(t['price']) for t in results]
+        return [float(t['price']) for t in trades]
 
     def placeMarketOrder(self, product_id, side, funds = None, size = None):
         result = self.client.place_market_order(product_id=product_id, side=side, size=size, funds=funds)

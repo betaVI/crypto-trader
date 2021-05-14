@@ -5,7 +5,7 @@ export default{
             data: [],
             dates: [],
             isloading:false,
-            productprofit: null,
+            timer: null,
             alertModel:{
                 display:false,
                 success:true,
@@ -14,30 +14,46 @@ export default{
         }
     },
     mounted(){
-        this.loadData();
+        this.initialize();
+    },
+    unmounted(){
+        if (this.timer!=null){
+            clearInterval(this.timer);
+        }
     },
     methods:{
-        async loadData(){
+        async initialize(){
+            var chart = null;
             this.isloading = true;
+            await this.loadData((data)=>{
+                this.data = data.data;
+                this.dates = data.dates; 
+                chart = this.initializeGraph();
+                this.isloading = false;
+                this.timer = setInterval(() => {
+                    this.updateGraph(chart);
+                }, 10000);
+            })
+        },
+        async updateGraph(chart){
+            self = this;
+            await this.loadData((data)=>{
+                data.data.forEach(d=>{
+                    var product = self.data.find(p=>p.product == d.product);
+                    if (product){
+                        product.netprofit = d.netprofit;
+                        product.grossprofit = d.grossprofit;
+                    }
+                });
+                chart.update('none');
+            })
+        },
+        async loadData(onsuccess){
             try{
                 const result = await fetch('/api/reports/profit', { method: "GET" });
                 const data = await result.json();
                 if (data.success){
-                    if (this.data.length>0){
-                        data.data.forEach(d=>{
-                            var product = this.data.find(p=>p.product == d.product);
-                            if (product){
-                                product.netprofit = d.netprofit;
-                                product.grossprofit = d.grossprofit;
-                            }
-                        });
-                        this.productprofit.update(0);
-                    }
-                    else{
-                        this.data = data.data;
-                        this.dates = data.dates; 
-                        this.initializeGraph();
-                    }
+                    onsuccess(data);
                 }
                 else
                     this.displayAlert(data.success,data.message);
@@ -45,7 +61,6 @@ export default{
             catch(error){
                 this.displayAlert(false, 'Failed to load data: ' + error);
             }
-            this.isloading = false;
         },
         initializeGraph(){
             var dynamicColors = function() {
@@ -67,7 +82,7 @@ export default{
             
             var ctx = this.$refs.productprofit.getContext('2d');
             var self = this;
-            this.productprofit = new Chart(ctx,{
+            var chart = new Chart(ctx,{
                 type:'bar',
                 data:{
                     datasets:datasets,
@@ -117,7 +132,7 @@ export default{
                     },
                 }
             })
-
+            return chart;
         },
         displayAlert(success,message){
             this.alertModel.display = true;

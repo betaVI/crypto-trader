@@ -68,7 +68,7 @@ class TestTrader():
             return False
 
     def _isPriceStable(self, marketPrice, side):
-        self.log.debug("Checking price stability")
+        self.log.debug("[{}] Checking price stability".format(side.upper()))
         trades = self.api.getRecentTrades(self.product_id, side, 40)
         avgTradePrice = np.mean(trades)
         standardDeviation = np.std(trades)

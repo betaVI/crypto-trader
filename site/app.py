@@ -23,6 +23,8 @@ import orderscontroller
 import reportcontroller
 
 @app.route('/')
+@app.route('/diagnostics')
+@app.route('/settings')
 def index():
     return render_template('index.html')
 

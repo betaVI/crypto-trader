@@ -19,3 +19,9 @@
 .btn-outline-primary{
     color: #fff;
 }
+.dropdown-menu{
+    min-width: 1rem;
+}
+.dropdown-item{
+    padding: 0.12rem .75rem;
+}

@@ -77,6 +77,11 @@ export default{
         refresh(){
             this.loadTable();
         },
+        setPageSize(value){
+            this.paginationModel.currentPage = 1;
+            this.paginationModel.pagesize = value;
+            this.refresh();
+        },
         goToPage(page){
             this.paginationModel.currentPage=page;
             this.refresh();
@@ -138,7 +143,7 @@ export default{
                     <button v-if="hasFilters()" class="btn btn-primary btn-sm" @click=openFilters>
                         <i class="fa fa-filter"></i>
                     </button>
-                    <v-paging class="float-right" :model=paginationModel @previous=previous @next=next @goToPage=goToPage></v-paging>
+                    <v-paging class="float-right" :model=paginationModel @previous=previous @next=next @goToPage=goToPage @setPageSize=setPageSize></v-paging>
                 </div>
                 <spinner-component v-if="isloading"></spinner-component>
                 <modal ref="filters" @accepted=applyFilters :model=filtermodel>
