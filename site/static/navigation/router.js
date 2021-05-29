@@ -6,7 +6,7 @@ export default{
     }),
     computed:{
         ViewComponent(){
-            console.log(this.currentRoute)
+            // console.log(this.currentRoute)
             const matchingPage = routes[this.currentRoute]
             return matchingPage;
         }
