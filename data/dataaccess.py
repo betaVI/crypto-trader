@@ -7,9 +7,8 @@ class DataAccess():
         self._initializeTables()
 
     def createFilter(self,filters):
-        where =''
-        for filter in filters:
-            where = ' {} {} %s'.format(filter['name'],filter['operator'])
+        conditions = [' {} {} %s'.format(filter['name'],filter['operator']) for filter in filters]
+        where =' AND '.join(conditions)
         if len(where) > 0:
             where = 'WHERE ' + where
         return where, tuple([f['value'] for f in filters])

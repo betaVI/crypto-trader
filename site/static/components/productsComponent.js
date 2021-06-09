@@ -144,12 +144,17 @@ export default{
         },
         isActive(statusname){
             return statusname=='Active';
+        },
+        isOutOfFunds(trader){
+            if (trader.maxpurchaseamount && parseFloat(trader.totalspent) >= parseFloat(trader.maxpurchaseamount))
+                return 'text-warning'
+            return '';
         }
     },
     template:   `<alert-component :model=alert></alert-component>
                 <spinner-component v-if="isloading"></spinner-component>
                 <v-table v-if="!isloading" :columns="[{name:'Product'},{name:'Actions'}]" :rows="traders" v-slot:default="row">
-                    <tr>
+                    <tr :class="isOutOfFunds(row.item)">
                         <td>{{ row.item.product }}<span class="badge badge-secondary float-right">{{ $filters.currencyUSD(row.item.price, 3) }}</span></td>
                         <td v-if="hasTrader(row.item)">
                             <loading-button-component v-if="row.item.statusname == 'Active'" class="btn-primary btn-sm" @click="updateStatus(row.item.id, 'Disabled')">

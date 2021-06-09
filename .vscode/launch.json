@@ -17,7 +17,7 @@
             "name": "Python: DataBot",
             "type": "python",
             "request": "launch",
-            "env": { "PYTHONPATH": "${workspaceFolder};${workspaceFolder}/bots"},
+            "env": { "PYTHONPATH": "${workspaceFolder}"},
             "cwd": "${workspaceFolder}/bots",
             "program": "databot.py",
             "console": "integratedTerminal"
@@ -26,7 +26,7 @@
             "name": "Python: Site",
             "type": "python",
             "request": "launch",
-            "env": { "PYTHONPATH": "${workspaceFolder};${workspaceFolder}/site"},
+            "env": { "PYTHONPATH": "${workspaceFolder}"},
             "cwd": "${workspaceFolder}/site",
             "program": "app.py",
             "console": "integratedTerminal"

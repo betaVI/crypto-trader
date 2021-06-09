@@ -21,11 +21,22 @@ class TraderRepository:
         query = "SELECT p.name as product FROM traders t INNER JOIN status s on s.id = t.statusid INNER JOIN products p on p.id = t.productid"
         return self.dataaccess.executeRead(query)
 
+    def getTotalAllowedForTraders(self):
+        query = "SELECT SUM(maxpurchaseamount) as total FROM traders"
+        return float(self.dataaccess.executeScalar(query)['total'])
+
     def fetchProductTraders(self):
-        query = """select 0 as price, p.name as product, s.name as statusname, t.*
+        query = """select 0 as price, p.name as product, s.name as statusname, COALESCE(f.totalspent,0) as totalspent, t.*
                     from products p
                     left join traders t on t.productid = p.id
                     left join status s on s.id = t.statusid
+                    LEFT JOIN (
+                        select og.productid, sum(funds) as totalspent 
+                        from orders o 
+                        inner join ordergroups og on og.id = o.ordergroupid 
+                        where og.updatedat is null 
+                        and o.side = 'buy'
+                        group by og.productid) f on f.productid = p.id
                     order by p.name"""
         return self.dataaccess.executeRead(query)
 

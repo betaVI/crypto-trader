@@ -4,6 +4,7 @@ from wtforms.validators import DataRequired, NumberRange
 
 class TraderForm(FlaskForm):
     title = "Add Trader"
+    availablefunds = 0
     traderid = HiddenField(u'TraderId')
     product = HiddenField(u'Product', validators=[DataRequired()])
     loglevel = SelectField(u'Log Level', validators=[DataRequired()], coerce=int)

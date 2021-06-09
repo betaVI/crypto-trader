@@ -1,4 +1,5 @@
 import traceback
+import dateutil.relativedelta
 from datetime import datetime, timedelta
 from __main__ import app, db
 from flask import Flask, jsonify, request
@@ -9,7 +10,7 @@ reportrepo = ReportRepository(db)
 @app.route('/api/reports/profit',methods=["GET"])
 def getProductProfit():
     try:
-        dates = [((datetime.now() + timedelta(days=i*-30)).strftime('%m/%Y')) for i in range(6)]
+        dates = [((datetime.now().replace(day=1) + dateutil.relativedelta.relativedelta(months=-i)).strftime('%m/%Y')) for i in range(6)]
         profits = reportrepo.getProductProfit()
         products = list(set([p['product'] for p in profits]))
         data = []

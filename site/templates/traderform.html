@@ -5,7 +5,7 @@
     <div class="row">
         <div class="col-md-4">
             <div class="form-group">
-                {{ form.maxpurchaseamount.label }}
+                {{ form.maxpurchaseamount.label }} {{ form.availablefunds }} available
                 {{ form.maxpurchaseamount(class_="form-control")}}
                 {% if form.maxpurchaseamount.errors %}
                     {% for error in form.maxpurchaseamount.errors %}

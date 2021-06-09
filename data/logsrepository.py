@@ -18,7 +18,9 @@ class LogsRepository():
         where, values = self.dataaccess.createFilter(filters)
         logquery = "SELECT id, loggername, loglevelname, filename, lineno, message, to_char(createdat, 'MM-DD-YY HH24:MI:SS.MS') as createdat FROM traderlogs {} ORDER BY {} {} LIMIT {} OFFSET {}".format(where,sort,sortdir,pagesize,(pageno-1)*pagesize)
         pagequery = "SELECT count(*) as totalcount FROM traderlogs " + where
-        return self.dataaccess.executeRead(logquery,values),self.dataaccess.executeRead(pagequery, values)[0]['totalcount']
+        logs = self.dataaccess.executeRead(logquery,values)
+        count = self.dataaccess.executeRead(pagequery, values)
+        return logs,count[0]['totalcount']
 
     def purgeLogs(self):
         query = "DELETE FROM traderlogs WHERE createdat > "

@@ -1,6 +1,5 @@
 import os, sys, time, signal, json, logging, uuid, random
 from bots.cpapi import CbApi
-from bots.libs.websocket_client import WebsocketClient
 from bots.traders.testtrader import TestTrader
 from data.dataaccess import DataAccess
 from data.traderrepository import TraderRepository
@@ -59,37 +58,6 @@ class TestApi():
             usd_volume -= fee
 
         return orderid, price, usd_volume, size, fee
-        
-
-# class TradersWebSocket(WebsocketClient):
-#     def __init__(self, products):
-#         super().__init__(channels=None)
-#         self.products = products
-#         self.traders = []
-
-#     def on_open(self):
-#         print('Websocket opened')
-
-#     def on_message(self, msg):
-#         print(json.dumps(msg, indent=4, sort_keys=True))
-#         if msg['type'] != "ticker":
-#             return
-
-#         if msg['product_id'] in self.traders:
-#             trader = self.traders[msg['product_id']]
-#             log = logging.getLogger(trader['product'])
-#             log.setLevel(logging.DEBUG)
-#             log.debug('debug')
-#             log.info('info')
-#             log.warning('warning')
-#             log.error('error')
-#             log.critical('critical')
-
-#     def on_close(self):
-#         print("Websocket closed")
-
-#     def setTraders(self, traders):
-#         self.traders = traders
 
 def handle_cancel(sig, frame):
     print('Cancelled')

@@ -45,12 +45,14 @@ class TestTrader():
                 differenceMin = marketPrice - lastpurchaseprice
                 percentDiffMin = differenceMin/lastpurchaseprice*100
                 profitMargin = self._getProfitMargin()
-                # logging.info('[PROFITMARGIN] ' +str(profitMargin))
+                # self.log.debug('[PROFITMARGIN] ' +str(profitMargin))
+                dipThreshold = self._getDipMargin()
+                # self.log.debug('[DIPTHRESHOLD] ' +str(dipThreshold))
                 maxAmount = avgPrice + (avgPrice * profitMargin) / 100
-                minAmount = lastpurchaseprice + (lastpurchaseprice * self.Dip_Threshold) / 100
+                minAmount = lastpurchaseprice + (lastpurchaseprice * dipThreshold) / 100
                 self.log.debug('[CHECK MAX] {} - {} = {} {}% {}'.format(marketPrice, avgPrice, round(differenceMax,2), round(percentDiffMax,2), round(maxAmount,2)))
                 self.log.debug('[CHECK MIN] {} - {} = {} {}% {}'.format(marketPrice, lastpurchaseprice, round(differenceMin,2), round(percentDiffMin,2), round(minAmount,2)))
-                if percentDiffMin <= self.Dip_Threshold:
+                if percentDiffMin <= dipThreshold:
                     if self.maxPurchaseAmount - self.totalSpent <=0:
                         self.log.warn('[BALANCE] NSF {} - {} = {}'.format(self.maxPurchaseAmount, self.totalSpent, self.maxPurchaseAmount - self.totalSpent))
                     else:
@@ -75,7 +77,7 @@ class TestTrader():
         highStd = round(avgTradePrice + standardDeviation,5)
         lowStd = round(avgTradePrice - standardDeviation,5)
         isstable = lowStd <= marketPrice and marketPrice <= highStd
-        self.log.debug('[{}] AVG: {} | STD: {} | HIGH: {} | LOW: {}'.format("STABLE" if isstable else "UNSTABLE", avgTradePrice, standardDeviation, highStd, lowStd))
+        self.log.debug('[{}] AVG: {} | STD: {} | HIGH: {} | LOW: {}'.format("STABLE" if isstable else "UNSTABLE", avgTradePrice, round(standardDeviation,5), highStd, lowStd))
         return isstable
 
     def _placeBuyOrder(self):
@@ -105,8 +107,19 @@ class TestTrader():
     def _getAveragePricePaid(self):
         return round(sum([float(o['funds']) for o in self.group['orders']])/sum([float(o['size']) for o in self.group['orders']]), 2)
 
+    def _getDipMargin(self):
+        fee = -self.fee * 100
+        count = len(self.group['orders'])
+        margin = (fee + self.Dip_Threshold) * count
+        self.log.debug("[getDipMargin] ({} + {}) * {} = {}".format(fee, self.Dip_Threshold, count, margin))
+        return margin
+
     def _getProfitMargin(self):
-        return (self.fee * 100) * len(self.group['orders']) + self.Profit_Threshold
+        fee = self.fee * 100
+        count = len(self.group['orders'])
+        margin = (fee + self.Profit_Threshold) * count
+        self.log.debug("[getProfitMargin] ({} + {}) * {} = {}".format(fee, self.Profit_Threshold, count, margin))
+        return margin
 
     def _updateFees(self):
         self.fee = self.api.getFees()

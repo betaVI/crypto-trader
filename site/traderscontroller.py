@@ -27,7 +27,12 @@ def loadTraderForm():
     product = ''
     if 'product' in request.values:
         product = request.values['product']
-    form = initializeTraderForm(id, product)
+    
+    accounts = cbapi.getAccounts()
+    balance = next(iter([a['balance'] for a in accounts if a['currency'] == 'USD']))
+    totalused = tradersrepo.getTotalAllowedForTraders()
+
+    form = initializeTraderForm(round(float(balance)-totalused, 2), id, product)
     return render_template('traderform.html', form=form)
     
 @app.route('/api/traders/<id>/<status>', methods=["GET"])
@@ -65,10 +70,11 @@ def deleteTrader(id='0'):
     tradersrepo.deleteTrader(id)
     return jsonify(success=True, message="Successfully deleted"), 200
 
-def initializeTraderForm(id='0', product=''):
+def initializeTraderForm(availablefunds, id='0', product=''):
     if id != '0':
         form = TraderForm(data=tradersrepo.fetchTrader(id))
     else:
         form = TraderForm(product=product, loglevel=10)
+    form.availablefunds = availablefunds
     form.loglevel.choices = [(key,value) for key,value in logging._levelToName.items() if key > 0]
     return form
