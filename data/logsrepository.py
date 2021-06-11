@@ -23,4 +23,5 @@ class LogsRepository():
         return logs,count[0]['totalcount']
 
     def purgeLogs(self):
-        query = "DELETE FROM traderlogs WHERE createdat > "
+        query = "DELETE from traderlogs where createdat < now() - interval '60 days'"
+        self.dataaccess.execute(query)

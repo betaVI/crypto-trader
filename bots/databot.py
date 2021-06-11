@@ -84,5 +84,8 @@ if __name__ == "__main__":
             trader = TestTrader(orderrepo, traderconfig, testapi)
             if trader.attemptToMakeTrade() and trader.cashout:
                 traderrepo.deleteTrader(int(traderconfig['id']))
+        
         print('Waiting ' + str(runinterval) + ' seconds')
+        logrepo.purgeLogs()
+
         time.sleep(runinterval)
