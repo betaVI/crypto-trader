@@ -110,14 +110,14 @@ class TestTrader():
     def _getDipMargin(self):
         fee = -self.fee * 100
         count = len(self.group['orders'])
-        margin = (fee + self.Dip_Threshold) * count
+        margin = (fee * count) + self.Dip_Threshold
         self.log.debug("[getDipMargin] ({} + {}) * {} = {}".format(fee, self.Dip_Threshold, count, margin))
         return margin
 
     def _getProfitMargin(self):
         fee = self.fee * 100
         count = len(self.group['orders'])
-        margin = (fee + self.Profit_Threshold) * count
+        margin = (fee * count) + self.Profit_Threshold
         self.log.debug("[getProfitMargin] ({} + {}) * {} = {}".format(fee, self.Profit_Threshold, count, margin))
         return margin
 

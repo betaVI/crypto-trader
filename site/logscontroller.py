@@ -16,8 +16,6 @@ def getLogs(pagesize='10',pageno='1',sort='createdat',sortdir='desc'):
     if 'filters' in request.json and len(request.json['filters']) >0:
         for f in request.json['filters']:
             filters.append(translateFilter(f))
-    else:
-        filters.append(translateFilter({ 'name':'Timestamp', 'value':'1h'}))
     logs, totalcount = logsrepo.fetchLogs(int(pageno), int(pagesize), sort, sortdir, filters)
     return jsonify(success=True, totalcount=totalcount, data=logs)
 
@@ -38,7 +36,7 @@ def getInterval(interval):
         "15m":  datetime.timedelta(minutes=-15),
         "1h":  datetime.timedelta(hours=-1),
         "6h":  datetime.timedelta(hours=-6),
-        "1d":  datetime.timedelta(days=1),
-        "1w":  datetime.timedelta(weeks=1),
+        "1d":  datetime.timedelta(days=-1),
+        "1w":  datetime.timedelta(weeks=-1),
     }
     return now + mapping[interval]

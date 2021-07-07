@@ -12,5 +12,6 @@ class ReportRepository():
                     inner join products p on p.id = og.productid
                     where og.updatedat > current_date - 180
                     group by p.name, to_char(og.updatedat, 'MM/YYYY')
+                    having sum(totalearned) - sum(totalspent) > 0
                     order by name'''
         return self.dataaccess.executeRead(query)
