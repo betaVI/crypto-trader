@@ -1,8 +1,11 @@
-import os, sys, time, decimal, flask.json, traceback, logging
-from flask import Flask, render_template, request, redirect, url_for, flash, jsonify
+import os, decimal, flask.json, traceback, logging
+from dotenv import load_dotenv
+from flask import Flask, render_template, request, jsonify
 from data.dataaccess import DataAccess
 from forms.TraderForm import TraderForm
 from bots.cpapi import CbApi
+
+load_dotenv()
 
 class JsonEncoder(flask.json.JSONEncoder):
     def default(self, obj):

@@ -1,0 +1,43 @@
+version: '3.3'
+
+services:
+  trader-site:
+    container_name: trader-site
+    image: ${SITE_CONTAINER_IMAGE}
+    restart: always
+    build:
+      context: .
+      dockerfile: ./site/Dockerfile
+    ports:
+      - "420:18256"
+    environment:
+      VIRTUAL_HOST: tradersite.betavi.local
+      PGHOST: trader-db
+      PGDATABASE: ${PGDATABASE}
+      PGUSER: ${PGUSER}
+      PGPASSWORD: ${PGPASSWORD}
+    depends_on:
+      - trader-db
+
+  trader-bot:
+    container_name: trader-bot
+    image: ${BOT_CONTAINER_IMAGE}
+    restart: always
+    build:
+      context: .
+      dockerfile: ./bots/Dockerfile
+    environment:
+      PGHOST: trader-db
+      PGDATABASE: ${PGDATABASE}
+      PGUSER: ${PGUSER}
+      PGPASSWORD: ${PGPASSWORD}
+    depends_on:
+      - trader-db
+
+  trader-db:
+    container_name: trader-db
+    image: postgres:latest
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: ${PGPASSWORD}
+      POSTGRES_DB: ${PGDATABASE}

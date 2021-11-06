@@ -1,3 +1,4 @@
+import os
 from configLoader import loadConfig
 from psycopg2.extras import RealDictCursor
 import psycopg2
@@ -55,8 +56,8 @@ class DataAccess():
     def _create_connection(self):
         connection = None
         try:
-            dbconfig = loadConfig('../database.ini', 'postgresdb')
-            connection = psycopg2.connect(**dbconfig)
+            # dbconfig = loadConfig('../database.ini', 'postgresdb')
+            connection = psycopg2.connect(host=os.getenv('PGHOST'), dbname=os.getenv('PGDATABASE'), user=os.getenv('PGUSER'), password=os.getenv('PGPASSWORD'))#(**dbconfig)
         except (Exception, psycopg2.DatabaseError) as e:
             print(f"The error '{e}' occurred")
         return connection
@@ -121,6 +122,7 @@ class DataAccess():
                                 id BIGSERIAL PRIMARY KEY,
                                 loggername TEXT NOT NULL,
                                 loglevel INT NULL,
+                                loglevelname TEXT NULL,
                                 filename TEXT NULL,
                                 lineno INT NULL,
                                 message TEXT NOT NULL,
@@ -137,13 +139,13 @@ class DataAccess():
                                         loglevel INT NOT NULL DEFAULT 10
                                     )"""
 
+        self.execute(create_status_table)
         self.execute(create_exchanges_table)
         self.execute(create_products_table)
         self.execute(create_traders_table)
-        self.execute(create_status_table)
         self.execute(create_settings_table)
-        self.execute(create_orders_table)
         self.execute(create_ordergroups_table)
+        self.execute(create_orders_table)
         self.execute(create_log_table)
         self.execute("INSERT INTO exchanges (name) VALUES ('CoinbasePro') ON CONFLICT DO NOTHING")
         self.execute("INSERT INTO status (name) VALUES ('Active'),('Disabled'),('Cash Out') ON CONFLICT DO NOTHING")
