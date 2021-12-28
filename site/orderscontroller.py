@@ -1,11 +1,13 @@
-import os, time, traceback, datetime
-from __main__ import app, db
-from flask import Flask, request, jsonify, render_template
+import traceback, datetime
+from flask import Blueprint, request, jsonify
+from data.dataaccess import DataAccess
 from data.ordersrepository import OrdersRepository
 
+orders_api = Blueprint('orders_api',__name__)
+db = DataAccess()
 orderrepo = OrdersRepository(db)
 
-@app.route('/api/orders/<pagesize>/<pageno>/<sort>/<sortdir>', methods=["POST"])
+@orders_api.route('/api/orders/<pagesize>/<pageno>/<sort>/<sortdir>', methods=["POST"])
 def getOrders(pagesize='10', pageno='1',sort='createdat',sortdir='desc'):
     try:
         filters = []
@@ -17,7 +19,7 @@ def getOrders(pagesize='10', pageno='1',sort='createdat',sortdir='desc'):
     except Exception:
         return jsonify(success=False, message="Exception: " +traceback.format_exc()),500
 
-@app.route('/api/orders/products', methods=["GET"])
+@orders_api.route('/api/orders/products', methods=["GET"])
 def getOrderProducts():
     products = orderrepo.getOrderProducts()
     return jsonify(success=True, data=products)

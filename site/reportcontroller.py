@@ -1,13 +1,15 @@
 import traceback
 import dateutil.relativedelta
-from datetime import datetime, timedelta
-from __main__ import app, db
-from flask import Flask, jsonify, request
+from datetime import datetime
+from flask import Blueprint, jsonify
+from data.dataaccess import DataAccess
 from data.reportrepository import ReportRepository
 
+reports_api = Blueprint('reports_api',__name__)
+db = DataAccess()
 reportrepo = ReportRepository(db)
 
-@app.route('/api/reports/profit',methods=["GET"])
+@reports_api.route('/api/reports/profit',methods=["GET"])
 def getProductProfit():
     try:
         dates = [((datetime.now().replace(day=1) + dateutil.relativedelta.relativedelta(months=-i)).strftime('%m/%Y')) for i in range(6)]

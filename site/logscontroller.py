@@ -1,16 +1,18 @@
-import os, time, datetime
-from __main__ import app, db
-from flask import Flask, request, jsonify, render_template
+import datetime
+from flask import Blueprint, request, jsonify
+from data.dataaccess import DataAccess
 from data.logsrepository import LogsRepository
 
+logs_api = Blueprint('logs_api',__name__)
+db = DataAccess()
 logsrepo = LogsRepository(db)
 
-@app.route('/api/loggers', methods=["GET"])
+@logs_api.route('/api/loggers', methods=["GET"])
 def getLoggers():
     loggers = logsrepo.getLoggers()
     return jsonify(success=True, data=loggers)
 
-@app.route('/api/logs/<pagesize>/<pageno>/<sort>/<sortdir>', methods=["POST"])
+@logs_api.route('/api/logs/<pagesize>/<pageno>/<sort>/<sortdir>', methods=["POST"])
 def getLogs(pagesize='10',pageno='1',sort='createdat',sortdir='desc'):
     filters = []
     if 'filters' in request.json and len(request.json['filters']) >0:

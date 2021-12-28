@@ -4,6 +4,10 @@ from flask import Flask, render_template, request, jsonify
 from data.dataaccess import DataAccess
 from forms.TraderForm import TraderForm
 from bots.cpapi import CbApi
+from traderscontroller import trader_api
+from reportcontroller import reports_api
+from orderscontroller import orders_api
+from logscontroller import logs_api
 
 load_dotenv()
 
@@ -20,10 +24,10 @@ app.config['SECRET_KEY'] = str(os.urandom(32))
 cbapi = CbApi()
 db = DataAccess()
 
-import traderscontroller
-import logscontroller
-import orderscontroller
-import reportcontroller
+app.register_blueprint(trader_api)
+app.register_blueprint(reports_api)
+app.register_blueprint(orders_api)
+app.register_blueprint(logs_api)
 
 @app.route('/')
 @app.route('/diagnostics')

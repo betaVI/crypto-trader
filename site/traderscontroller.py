@@ -1,25 +1,28 @@
-import os, time, logging
-from __main__ import app, cbapi, db
+import logging
+from data.dataaccess import DataAccess;
 from forms.TraderForm import TraderForm
-from flask import Flask, request, jsonify, render_template
+from flask import Blueprint, request, jsonify, render_template
 from bots.cpapi import CbApi
 from data.traderrepository import TraderRepository
 
+trader_api = Blueprint('trader_api',__name__)
+cbapi = CbApi()
+db = DataAccess()
 tradersrepo = TraderRepository(db)
 
-@app.route('/api/traders', methods=["GET"])
+@trader_api.route('/api/traders', methods=["GET"])
 def getTraders():
     traders = tradersrepo.fetchProductTraders()
     return jsonify(success=True, data=traders)
 
-@app.route('/api/traders/<id>', methods=["GET"])
+@trader_api.route('/api/traders/<id>', methods=["GET"])
 def getTrader(id='0'):
     if id == '0':
         return jsonify(success=False, message="Missing ID"), 400
     trader = tradersrepo.fetchTrader(id)
     return jsonify(success=True, data=trader), 200
 
-@app.route('/form/traders', methods=["GET"])
+@trader_api.route('/form/traders', methods=["GET"])
 def loadTraderForm():
     id = '0'
     if 'id' in request.values:
@@ -31,7 +34,7 @@ def loadTraderForm():
     form = initializeTraderForm(id, product)
     return render_template('traderform.html', form=form)
     
-@app.route('/api/traders/<id>/<status>', methods=["GET"])
+@trader_api.route('/api/traders/<id>/<status>', methods=["GET"])
 def updateTraderStatus(id, status):
     result = tradersrepo.updateTraderStatus(id, status)
     if result == None:
@@ -39,7 +42,7 @@ def updateTraderStatus(id, status):
     else:
         return jsonify(success=False, message="Failed to update status: "+ result)
 
-@app.route('/api/traders', methods=["POST"])
+@trader_api.route('/api/traders', methods=["POST"])
 def createTrader():
     form = initializeTraderForm()
     if not form.validate_on_submit():
@@ -59,7 +62,7 @@ def createTrader():
     else:
         return jsonify(success=False, message="Failed to {}: {}".format(action, result)), 400
 
-@app.route('/api/traders/<id>', methods=['DELETE'])
+@trader_api.route('/api/traders/<id>', methods=['DELETE'])
 def deleteTrader(id='0'):
     if id == '0':
         return jsonify(success=False, message="Missing ID"), 400
