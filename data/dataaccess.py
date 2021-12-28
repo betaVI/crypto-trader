@@ -1,5 +1,4 @@
 import os
-from configLoader import loadConfig
 from psycopg2.extras import RealDictCursor
 import psycopg2
 

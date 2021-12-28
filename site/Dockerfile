@@ -9,5 +9,7 @@ RUN pip3 install -r requirements.txt
 WORKDIR /app/site
 
 ENV PYTHONPATH="/app"
-ENTRYPOINT [ "python3" ]
-CMD [ "app.py" ]
+
+EXPOSE 18256
+
+CMD ["gunicorn","--bind","0.0.0.0:18256","app:app"]
