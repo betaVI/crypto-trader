@@ -1,12 +1,19 @@
-from configLoader import loadConfig
-import time
-import logging
+# from configLoader import loadConfig
+import time, os, logging
 from bots.libs.authenticated_client import AuthenticatedClient
 
 class CbApi:
     def __init__(self):
-        config = loadConfig('../coinbase.ini','credentials')
-        self.client = AuthenticatedClient(config['key'], config['b64secret'], config['passphrase'], api_url=config['url'])
+        # config = loadConfig('../coinbase.ini','credentials')
+        key = os.getenv('CB_KEY')
+        secret = os.getenv('CB_SECRET')
+        passphrase = os.getenv('CB_PASSPHRASE')
+        url = os.getenv('CB_URL')
+        print('key: '+key)
+        print('secret: '+secret)
+        print('passphrase: '+passphrase)
+        print('url: '+url)
+        self.client = AuthenticatedClient(key, secret, passphrase, api_url=url)
     
     def getProducts(self):
         products = self.client.get_products()

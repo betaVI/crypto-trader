@@ -16,6 +16,10 @@ services:
       PGDATABASE: ${PGDATABASE}
       PGUSER: ${PGUSER}
       PGPASSWORD: ${PGPASSWORD}
+      CB_URL: ${CB_URL}
+      CB_KEY: ${CB_KEY}
+      CB_SECRET: ${CB_SECRET}
+      CB_PASSPHRASE: ${CB_PASSPHRASE}
     depends_on:
       - trader-db
 

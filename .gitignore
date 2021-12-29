@@ -4,3 +4,4 @@ datasets/
 *.db
 *.ini
 trading/
+.env*
