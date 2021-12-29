@@ -3,7 +3,7 @@ from dotenv import load_dotenv
 from flask import Flask, render_template, request, jsonify
 from data.dataaccess import DataAccess
 from forms.TraderForm import TraderForm
-from bots.cpapi import CbApi
+from services.cpapi import CbApi
 from traderscontroller import trader_api
 from reportcontroller import reports_api
 from orderscontroller import orders_api

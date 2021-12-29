@@ -1,10 +1,8 @@
-# from configLoader import loadConfig
 import time, os, logging
-from bots.libs.authenticated_client import AuthenticatedClient
+from services.libs.authenticated_client import AuthenticatedClient
 
 class CbApi:
     def __init__(self):
-        # config = loadConfig('../coinbase.ini','credentials')
         key = os.getenv('CB_KEY')
         secret = os.getenv('CB_SECRET')
         passphrase = os.getenv('CB_PASSPHRASE')

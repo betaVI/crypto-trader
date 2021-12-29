@@ -1,7 +1,7 @@
 import sys
 import logging
 from bots.datamanager import DataManager
-from bots.cpapi import CbApi
+from services.cpapi import CbApi
 from bots.libs.authenticated_client import AuthenticatedClient
 from bots.traders.trader import Trader
 

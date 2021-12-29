@@ -1,6 +1,6 @@
 import os, sys, time, signal, json, logging, uuid, random
 from dotenv import load_dotenv
-from bots.cpapi import CbApi
+from services.cpapi import CbApi
 from bots.traders.testtrader import TestTrader
 from data.dataaccess import DataAccess
 from data.traderrepository import TraderRepository

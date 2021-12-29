@@ -55,8 +55,7 @@ class DataAccess():
     def _create_connection(self):
         connection = None
         try:
-            # dbconfig = loadConfig('../database.ini', 'postgresdb')
-            connection = psycopg2.connect(host=os.getenv('PG_HOST'), dbname=os.getenv('PG_DATABASE'), user=os.getenv('PG_USER'), password=os.getenv('PG_PASSWORD'))#(**dbconfig)
+            connection = psycopg2.connect(host=os.getenv('PG_HOST'), dbname=os.getenv('PG_DATABASE'), user=os.getenv('PG_USER'), password=os.getenv('PG_PASSWORD'))
         except (Exception, psycopg2.DatabaseError) as e:
             print(f"The error '{e}' occurred")
         return connection

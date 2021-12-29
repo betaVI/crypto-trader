@@ -1,5 +1,5 @@
 import logging
-from bots.cpapi import CbApi
+from services.cpapi import CbApi
 from bots.datamanager import DataManager
 from bots.traders.trader import Trader
 

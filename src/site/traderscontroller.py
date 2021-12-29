@@ -2,7 +2,7 @@ import logging
 from data.dataaccess import DataAccess;
 from forms.TraderForm import TraderForm
 from flask import Blueprint, request, jsonify, render_template
-from bots.cpapi import CbApi
+from services.cpapi import CbApi
 from data.traderrepository import TraderRepository
 
 trader_api = Blueprint('trader_api',__name__)

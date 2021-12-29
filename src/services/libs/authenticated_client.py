@@ -11,8 +11,8 @@ import requests
 import base64
 import json
 from requests.auth import AuthBase
-from bots.libs.public_client import PublicClient
-from bots.libs.cbpro_auth import CBProAuth
+from services.libs.public_client import PublicClient
+from services.libs.cbpro_auth import CBProAuth
 
 
 class AuthenticatedClient(PublicClient):

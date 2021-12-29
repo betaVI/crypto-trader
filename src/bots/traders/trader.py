@@ -1,6 +1,6 @@
 import logging
 from bots.dbloghandler import DbLogHandler
-from bots.cpapi import CbApi
+from services.cpapi import CbApi
 from bots.datamanager import DataManager
 
 class Trader:
