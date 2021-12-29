@@ -7,7 +7,7 @@ services:
     restart: always
     build:
       context: .
-      dockerfile: ./site/Dockerfile
+      dockerfile: ./src/site/Dockerfile
     ports:
       - "420:18256"
     environment:
@@ -29,7 +29,7 @@ services:
     restart: always
     build:
       context: .
-      dockerfile: ./bots/Dockerfile
+      dockerfile: ./src/bots/Dockerfile
     environment:
       PG_HOST: trader-db
       PG_DATABASE: ${PG_DATABASE}
