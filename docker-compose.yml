@@ -12,10 +12,10 @@ services:
       - "420:18256"
     environment:
       VIRTUAL_HOST: tradersite.betavi.local
-      PGHOST: trader-db
-      PGDATABASE: ${PGDATABASE}
-      PGUSER: ${PGUSER}
-      PGPASSWORD: ${PGPASSWORD}
+      PG_HOST: trader-db
+      PG_DATABASE: ${PG_DATABASE}
+      PG_USER: ${PG_USER}
+      PG_PASSWORD: ${PG_PASSWORD}
       CB_URL: ${CB_URL}
       CB_KEY: ${CB_KEY}
       CB_SECRET: ${CB_SECRET}
@@ -31,10 +31,14 @@ services:
       context: .
       dockerfile: ./bots/Dockerfile
     environment:
-      PGHOST: trader-db
-      PGDATABASE: ${PGDATABASE}
-      PGUSER: ${PGUSER}
-      PGPASSWORD: ${PGPASSWORD}
+      PG_HOST: trader-db
+      PG_DATABASE: ${PG_DATABASE}
+      PG_USER: ${PG_USER}
+      PG_PASSWORD: ${PG_PASSWORD}
+      CB_URL: ${CB_URL}
+      CB_KEY: ${CB_KEY}
+      CB_SECRET: ${CB_SECRET}
+      CB_PASSPHRASE: ${CB_PASSPHRASE}
     depends_on:
       - trader-db
 
@@ -43,5 +47,5 @@ services:
     image: postgres:latest
     restart: always
     environment:
-      POSTGRES_PASSWORD: ${PGPASSWORD}
-      POSTGRES_DB: ${PGDATABASE}
+      POSTGRES_PASSWORD: ${PG_PASSWORD}
+      POSTGRES_DB: ${PG_DATABASE}
