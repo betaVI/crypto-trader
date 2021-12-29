@@ -5,3 +5,4 @@ datasets/
 *.ini
 trading/
 .env*
+.vscode
