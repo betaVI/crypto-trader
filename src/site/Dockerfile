@@ -3,12 +3,13 @@ RUN apt-get update
 RUN apt-get install -y --no-install-recommends
 RUN python3 -m pip install --upgrade pip
 
-WORKDIR /app
-COPY ./src /app
+RUN mkdir --parents /app/share/trader
+WORKDIR /app/share/trader
+COPY ./src /app/share/trader
 RUN pip3 install -r requirements.txt
-WORKDIR /app/site
+WORKDIR /app/share/trader/site
 
-ENV PYTHONPATH="/app"
+ENV PYTHONPATH="/app/share/trader"
 
 EXPOSE 18256
 
