@@ -9,10 +9,6 @@ class CbApi:
         secret = os.getenv('CB_SECRET')
         passphrase = os.getenv('CB_PASSPHRASE')
         url = os.getenv('CB_URL')
-        print('key: '+key)
-        print('secret: '+secret)
-        print('passphrase: '+passphrase)
-        print('url: '+url)
         self.client = AuthenticatedClient(key, secret, passphrase, api_url=url)
     
     def getProducts(self):
