@@ -1,4 +1,4 @@
-FROM python:3-buster
+FROM python:3.8-buster
 
 RUN python3 --version
 RUN python3 -m pip install --upgrade pip
