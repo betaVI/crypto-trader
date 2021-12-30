@@ -22,8 +22,8 @@ BUILD:
     - *docker-login
   script:
     - echo $CI_REGISTRY_IMAGE
-    - docker build -t $SITE_CONTAINER_IMAGE .
-    - docker build -t $BOT_CONTAINER_IMAGE .
+    - docker build -t $SITE_CONTAINER_IMAGE ./src/site
+    - docker build -t $BOT_CONTAINER_IMAGE ./src/bots
     - docker push $SITE_CONTAINER_IMAGE
     - docker push $BOT_CONTAINER_IMAGE
 
