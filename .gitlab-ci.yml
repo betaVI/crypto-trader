@@ -1,0 +1,43 @@
+image: docker:18.09.7
+
+stages:
+  - build
+  - deploy
+
+variables:
+  SITE_CONTAINER_IMAGE: $CI_REGISTRY_IMAGE/site:latest
+  BOT_CONTAINER_IMAGE: $CI_REGISTRY_IMAGE/bot:latest
+
+.docker_login_template: &docker-login
+  - ls -lah /usr/local/share/ca-certificates/
+  - update-ca-certificates --fresh
+  - docker info
+  - apk add --no-cache openssl curl
+  - openssl s_client -connect $CI_REGISTRY:443
+  - echo "$CI_REGISTRY_PASSWORD" | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
+
+BUILD:
+  stage: build
+  before_script:
+    - *docker-login
+  script:
+    - echo $CI_REGISTRY_IMAGE
+    - docker build -t $CONTAINER_IMAGE .
+    - docker push $CONTAINER_IMAGE
+
+# DEPLOY:
+#   stage: deploy
+#   before_script:
+#     - 'which ssh-agent || (apk update && apk add openssh-client)'
+#     - eval $(ssh-agent -s)
+#     - echo "$PROD_SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
+#     - mkdir -p ~/.ssh
+#     - chmod 700 ~/.ssh
+#     - ssh-keyscan $PROD_URL >> ~/.ssh/known_hosts
+#     - chmod 644 ~/.ssh/known_hosts
+#     - *docker-login
+#   script:
+#     - apk add docker-compose
+#     - docker-compose -H "ssh://$PROD_USER@$PROD_URL" down --remove-orphans
+#     - docker-compose -H "ssh://$PROD_USER@$PROD_URL" pull
+#     - docker-compose -H "ssh://$PROD_USER@$PROD_URL" up -d
