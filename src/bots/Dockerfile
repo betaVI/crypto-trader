@@ -1,6 +1,6 @@
 FROM python:3.8
-# RUN apt-get update
-# RUN apt-get upgrade -y --no-install-recommends
+
+RUN python3 --version
 RUN python3 -m pip install --upgrade pip
 
 RUN mkdir --parents /usr/share/trader
