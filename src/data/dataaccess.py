@@ -133,7 +133,7 @@ class DataAccess():
                                 )"""
 
         create_settings_table = """CREATE TABLE IF NOT EXISTS settings(
-                                        interval INT NOT NULL DEFAULT 5,
+                                        interval INT NOT NULL DEFAULT 60,
                                         loglevel INT NOT NULL DEFAULT 10
                                     )"""
 
