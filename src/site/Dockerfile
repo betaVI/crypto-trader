@@ -3,13 +3,13 @@ FROM python:3.8-buster
 RUN python3 --version
 RUN python3 -m pip install --upgrade pip
 
-RUN mkdir --parents /app/share/trader
-WORKDIR /app/share/trader
-COPY ./src /app/share/trader
+# RUN mkdir --parents /usr/share/trader
+WORKDIR /usr/share/trader
+COPY ./src /usr/share/trader/
 RUN pip3 install -r requirements.txt
-WORKDIR /app/share/trader/site
+WORKDIR /usr/share/trader/site
 
-ENV PYTHONPATH="/app/share/trader"
+ENV PYTHONPATH="/usr/share/trader"
 
 EXPOSE 18256
 
