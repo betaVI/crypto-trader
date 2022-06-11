@@ -1,29 +1,30 @@
 import logging
-from data.dataaccess import DataAccess;
-from forms.TraderForm import TraderForm
 from flask import Blueprint, request, jsonify, render_template
-from services.cpapi import CbApi
-from data.traderrepository import TraderRepository
+from dependency_injector.wiring import Provide, inject
+from src.site.forms.TraderForm import TraderForm
+from src.container import Container
+from src.services.cpapi import CbApi
+from src.data.traderrepository import TraderRepository
 
 trader_api = Blueprint('trader_api',__name__)
-cbapi = CbApi()
-db = DataAccess()
-tradersrepo = TraderRepository(db)
 
 @trader_api.route('/api/traders', methods=["GET"])
-def getTraders():
+@inject
+def getTraders(tradersrepo: TraderRepository = Provide[Container.traders_repo]):
     traders = tradersrepo.fetchProductTraders()
     return jsonify(success=True, data=traders)
 
 @trader_api.route('/api/traders/<id>', methods=["GET"])
-def getTrader(id='0'):
+@inject
+def getTrader(id='0', tradersrepo: TraderRepository = Provide[Container.traders_repo]):
     if id == '0':
         return jsonify(success=False, message="Missing ID"), 400
     trader = tradersrepo.fetchTrader(id)
     return jsonify(success=True, data=trader), 200
 
 @trader_api.route('/form/traders', methods=["GET"])
-def loadTraderForm():
+@inject
+def loadTraderForm(cbapi: CbApi = Provide[Container.cbapi_client], tradersrepo: TraderRepository = Provide[Container.traders_repo]):
     id = '0'
     if 'id' in request.values:
         id = request.values['id']
@@ -31,11 +32,12 @@ def loadTraderForm():
     if 'product' in request.values:
         product = request.values['product']
 
-    form = initializeTraderForm(id, product)
+    form = initializeTraderForm(cbapi,tradersrepo, id, product)
     return render_template('traderform.html', form=form)
-    
+
 @trader_api.route('/api/traders/<id>/<status>', methods=["GET"])
-def updateTraderStatus(id, status):
+@inject
+def updateTraderStatus(id, status, tradersrepo: TraderRepository = Provide[Container.traders_repo]):
     result = tradersrepo.updateTraderStatus(id, status)
     if result == None:
         return jsonify(success=True, message="Successfully updated status")
@@ -43,8 +45,9 @@ def updateTraderStatus(id, status):
         return jsonify(success=False, message="Failed to update status: "+ result)
 
 @trader_api.route('/api/traders', methods=["POST"])
-def createTrader():
-    form = initializeTraderForm()
+@inject
+def createTrader(cbapi: CbApi = Provide[Container.cbapi_client], tradersrepo: TraderRepository = Provide[Container.traders_repo]):
+    form = initializeTraderForm(cbapi, tradersrepo)
     if not form.validate_on_submit():
         return jsonify(success=False, errors = form.errors), 400
     id = form.traderid.data if form.traderid.data != '' else '0'
@@ -63,13 +66,14 @@ def createTrader():
         return jsonify(success=False, message="Failed to {}: {}".format(action, result)), 400
 
 @trader_api.route('/api/traders/<id>', methods=['DELETE'])
-def deleteTrader(id='0'):
+@inject
+def deleteTrader(id='0', cbapi:CbApi = Provide[Container.cbapi_client], tradersrepo: TraderRepository = Provide[Container.traders_repo]):
     if id == '0':
         return jsonify(success=False, message="Missing ID"), 400
     tradersrepo.deleteTrader(id)
     return jsonify(success=True, message="Successfully deleted"), 200
 
-def initializeTraderForm(id='0', product=''):
+def initializeTraderForm(cbapi: CbApi, tradersrepo: TraderRepository, id='0', product=''):
     accounts = cbapi.getAccounts()
     balance = next(iter([a['balance'] for a in accounts if a['currency'] == 'USD']))
     totalused = tradersrepo.getTotalAllowedForTraders()

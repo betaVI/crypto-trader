@@ -12,9 +12,9 @@ import hmac
 import hashlib
 import time
 from threading import Thread
-from websocket import create_connection, WebSocketConnectionClosedException
-from pymongo import MongoClient
-from cbpro_auth import get_auth_headers
+# from websocket import create_connection, WebSocketConnectionClosedException
+# from pymongo import MongoClient
+from src.services.libs.cbpro_auth import get_auth_headers
 
 
 class WebsocketClient(object):

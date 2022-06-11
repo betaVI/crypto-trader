@@ -1,14 +1,14 @@
 import traceback, datetime
 from flask import Blueprint, request, jsonify
-from data.dataaccess import DataAccess
-from data.ordersrepository import OrdersRepository
+from dependency_injector.wiring import Provide, inject
+from src.data.ordersrepository import OrdersRepository
+from src.container import Container
 
 orders_api = Blueprint('orders_api',__name__)
-db = DataAccess()
-orderrepo = OrdersRepository(db)
 
 @orders_api.route('/api/orders/<pagesize>/<pageno>/<sort>/<sortdir>', methods=["POST"])
-def getOrders(pagesize='10', pageno='1',sort='createdat',sortdir='desc'):
+@inject
+def getOrders(pagesize='10', pageno='1',sort='createdat',sortdir='desc', orderrepo: OrdersRepository = Provide[Container.orders_repo]):
     try:
         filters = []
         if len(request.json) >0:
@@ -20,7 +20,8 @@ def getOrders(pagesize='10', pageno='1',sort='createdat',sortdir='desc'):
         return jsonify(success=False, message="Exception: " +traceback.format_exc()),500
 
 @orders_api.route('/api/orders/products', methods=["GET"])
-def getOrderProducts():
+@inject
+def getOrderProducts(orderrepo: OrdersRepository = Provide[Container.orders_repo]):
     products = orderrepo.getOrderProducts()
     return jsonify(success=True, data=products)
 

@@ -1,7 +1,7 @@
 import logging, traceback
 import numpy as np
-from bots.traders.trader import Trader
-from bots.dbloghandler import DbLogHandler
+from src.bots.traders.trader import Trader
+from src.bots.dbloghandler import DbLogHandler
 
 class TestTrader():
     def __init__(self, orderrepo, dbtrader, api):

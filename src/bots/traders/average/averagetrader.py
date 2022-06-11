@@ -1,7 +1,7 @@
 import logging
 import traceback
 import numpy as np
-from bots.traders.trader import Trader
+from src.bots.traders.trader import Trader
 
 class AverageTrader(Trader):
     def __init__(self, productid, cashaccount, cryptaccount, dataaccess):

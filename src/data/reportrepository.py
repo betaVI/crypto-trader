@@ -1,5 +1,7 @@
+from src.data.dataaccess import DataAccess
+
 class ReportRepository():
-    def __init__(self, dataaccess):
+    def __init__(self, dataaccess: DataAccess):
         self.dataaccess = dataaccess
 
     def getProductProfit(self):

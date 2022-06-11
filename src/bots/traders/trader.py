@@ -1,7 +1,6 @@
 import logging
-from bots.dbloghandler import DbLogHandler
-from services.cpapi import CbApi
-from bots.datamanager import DataManager
+from src.bots.dbloghandler import DbLogHandler
+from src.services.cpapi import CbApi
 
 class Trader:
     def __init__(self, productid, cashaccount, cryptoaccount, dataaccess):

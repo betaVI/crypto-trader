@@ -23,7 +23,8 @@ class TraderRepository:
 
     def getTotalAllowedForTraders(self):
         query = "SELECT SUM(maxpurchaseamount) as total FROM traders"
-        return float(self.dataaccess.executeScalar(query)['total'])
+        total = self.dataaccess.executeScalar(query)['total']
+        return float(0 if total is None else total)
 
     def fetchProductTraders(self):
         query = """select 0 as price, p.name as product, s.name as statusname, COALESCE(f.totalspent,0) as totalspent, t.*

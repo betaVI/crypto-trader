@@ -1,73 +1,33 @@
-import os, sys, time, signal, json, logging, uuid, random
-from dotenv import load_dotenv
-from services.cpapi import CbApi
-from bots.traders.testtrader import TestTrader
-from data.dataaccess import DataAccess
-from data.traderrepository import TraderRepository
-from data.logsrepository import LogsRepository
-from data.ordersrepository import OrdersRepository
-from dbloghandler import DbLogHandler
-
-load_dotenv()
-
-api = CbApi()
-db = DataAccess()
-logrepo = LogsRepository(db)
-traderrepo = TraderRepository(db)
-orderrepo = OrdersRepository(db)
-loghandler = DbLogHandler(logrepo)
-
-console = logging.StreamHandler()
-console.setFormatter(logging.Formatter(fmt='%(asctime)s | %(levelname)-8s | %(name)-8s | %(message)s', datefmt='%m-%d-%Y %H:%M:%S'))
-logging.getLogger('').addHandler(loghandler)
-logging.getLogger('').addHandler(console)
-
-class TestApi():
-    def __init__(self, api, dataaccess):
-        self.api = api
-        self.dataaccess = dataaccess
-
-    def getMarketPrice(self, productid):
-        return self.api.getMarketPrice(productid)
-
-    def getRecentTrades(self, product, side, count):
-        return self.api.getRecentTrades(product, side, count)
-
-    def getAccountDetails(self, accountid):
-        return self.api.getAccountDetails(accountid)
-    
-    def getFees(self):
-        return self.api.getFees()
-
-    def placeMarketOrder(self, product_id, side, funds = None, size = None):
-        orderid = str(uuid.uuid4())
-        price = self.getMarketPrice(product_id)
-        feepercent = self.getFees()
-        if side == 'buy':
-            fee = funds*feepercent
-            size = (funds-fee)/price
-            usd_volume = funds
-        else:
-            query = """select sum(o.size) as totalsize
-                        from ordergroups og
-                        inner join products p on p.id = og.productid
-                        inner join orders o on o.ordergroupid = og.id
-                        where p.name = %s
-                        and og.updatedat is null"""
-            size = float(self.dataaccess.executeScalar(query,(product_id,))['totalsize'])
-
-            usd_volume = size*price
-            fee = usd_volume*feepercent
-            usd_volume -= fee
-
-        return orderid, price, usd_volume, size, fee
+import os, sys, time, signal, logging
+from dependency_injector.wiring import Provide, inject
+from src.bots.dbloghandler import DbLogHandler
+from src.container import Container, create_container
+from src.services.cpapi import CbApi
+from src.bots.traders.testtrader import TestTrader
+from src.data.dataaccess import DataAccess
+from src.data.traderrepository import TraderRepository
+from src.data.logsrepository import LogsRepository
+from src.data.ordersrepository import OrdersRepository
 
 def handle_cancel(sig, frame):
     print('Cancelled')
     sys.exit(0)
 
-if __name__ == "__main__":
-    testapi = TestApi(api, db)
+@inject
+def runapp(
+    api: CbApi = Provide[Container.cbapi_client],
+    db: DataAccess = Provide[Container.db],
+    logrepo: LogsRepository = Provide[Container.logs_repo],
+    traderrepo: TraderRepository = Provide[Container.traders_repo],
+    orderrepo: OrdersRepository = Provide[Container.orders_repo]
+    ):
+
+    loghandler = DbLogHandler(logrepo)
+    console = logging.StreamHandler()
+    console.setFormatter(logging.Formatter(fmt='%(asctime)s | %(levelname)-8s | %(name)-8s | %(message)s', datefmt='%m-%d-%Y %H:%M:%S'))
+    logging.getLogger('').addHandler(loghandler)
+    logging.getLogger('').addHandler(console)
+
     print('cwd is %s' %(os.getcwd()))
     signal.signal(signal.SIGINT, handle_cancel)
 
@@ -84,7 +44,7 @@ if __name__ == "__main__":
         activeTraders = traderrepo.getActiveTraders()
         for traderconfig in activeTraders:
             loghandler.setLevel(int(traderconfig['loglevel']))
-            trader = TestTrader(orderrepo, traderconfig, testapi)
+            trader = TestTrader(orderrepo, traderconfig, api)
             if trader.attemptToMakeTrade() and trader.cashout:
                 traderrepo.deleteTrader(int(traderconfig['id']))
         
@@ -92,3 +52,7 @@ if __name__ == "__main__":
         logrepo.purgeLogs()
 
         time.sleep(runinterval)
+
+if __name__ == "__main__":
+    container = create_container(__name__)
+    runapp()

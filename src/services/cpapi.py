@@ -1,12 +1,8 @@
-import time, os, logging
-from services.libs.authenticated_client import AuthenticatedClient
+import time, logging
+from src.services.libs.authenticated_client import AuthenticatedClient
 
 class CbApi:
-    def __init__(self):
-        key = os.getenv('CB_KEY')
-        secret = os.getenv('CB_SECRET')
-        passphrase = os.getenv('CB_PASSPHRASE')
-        url = os.getenv('CB_URL')
+    def __init__(self, key, secret, passphrase, url):
         self.client = AuthenticatedClient(key, secret, passphrase, api_url=url)
     
     def getProducts(self):

@@ -1,16 +1,16 @@
 import traceback
 import dateutil.relativedelta
+from dependency_injector.wiring import Provide, inject
 from datetime import datetime
 from flask import Blueprint, jsonify
-from data.dataaccess import DataAccess
-from data.reportrepository import ReportRepository
+from src.container import Container
+from src.data.reportrepository import ReportRepository
 
 reports_api = Blueprint('reports_api',__name__)
-db = DataAccess()
-reportrepo = ReportRepository(db)
 
 @reports_api.route('/api/reports/profit',methods=["GET"])
-def getProductProfit():
+@inject
+def getProductProfit(reportrepo: ReportRepository = Provide[Container.report_repo]):
     try:
         dates = [((datetime.now().replace(day=1) + dateutil.relativedelta.relativedelta(months=-i)).strftime('%m/%Y')) for i in range(6)]
         profits = reportrepo.getProductProfit()

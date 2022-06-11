@@ -1,42 +1,22 @@
-import os, decimal, flask.json, traceback, logging
-from dotenv import load_dotenv
-from flask import Flask, render_template, request, jsonify
-from data.dataaccess import DataAccess
-from forms.TraderForm import TraderForm
-from services.cpapi import CbApi
-from traderscontroller import trader_api
-from reportcontroller import reports_api
-from orderscontroller import orders_api
-from logscontroller import logs_api
+import os, traceback, logging
+from dependency_injector.wiring import Provide, inject
+from flask import Blueprint, request, jsonify, render_template
+from src.data.dataaccess import DataAccess
+from src.services.cpapi import CbApi
+from src.container import Container
 
-load_dotenv()
+main_api = Blueprint('main_api',__name__)
 
-class JsonEncoder(flask.json.JSONEncoder):
-    def default(self, obj):
-        if isinstance(obj, decimal.Decimal):
-            return str(obj)
-        return super(JsonEncoder, self).default()
-
-app = Flask(__name__)
-app.json_encoder = JsonEncoder
-app.config['SECRET_KEY'] = str(os.urandom(32))
-
-cbapi = CbApi()
-db = DataAccess()
-
-app.register_blueprint(trader_api)
-app.register_blueprint(reports_api)
-app.register_blueprint(orders_api)
-app.register_blueprint(logs_api)
-
-@app.route('/')
-@app.route('/diagnostics')
-@app.route('/settings')
+@main_api.route('/')
+@main_api.route('/diagnostics')
+@main_api.route('/settings')
+@inject
 def index():
     return render_template('index.html')
 
-@app.route('/api/accounts', methods=["GET"])
-def getAccounts():
+@main_api.route('/api/accounts', methods=["GET"])
+@inject
+def getAccounts(cbapi: CbApi = Provide[Container.cbapi_client]):
     accounts=[]
     result = cbapi.getAccounts()
     for account in result:
@@ -45,13 +25,15 @@ def getAccounts():
             accounts.append(account)
     return jsonify(success=True, data=accounts), 200
 
-@app.route('/api/products')
-def getProducts():
+@main_api.route('/api/products')
+@inject
+def getProducts(cbapi: CbApi = Provide[Container.cbapi_client]):
     products = [p['id'] for p in cbapi.getProducts() if p['id'].endswith('USD')]
     return jsonify(success=True, data=products)
 
-@app.route('/api/settings', methods=["GET"])
-def getSettings():
+@main_api.route('/api/settings', methods=["GET"])
+@inject
+def getSettings(db: DataAccess = Provide[Container.db]):
     try:
         loglevels = [(key,value) for key,value in logging._levelToName.items() if key > 0]
         settings = db.executeRead("SELECT interval, loglevel FROM settings")
@@ -59,8 +41,9 @@ def getSettings():
     except Exception:
         return jsonify(success=False, message=traceback.format_exc())
 
-@app.route('/api/settings', methods=["POST"])
-def postSettings():
+@main_api.route('/api/settings', methods=["POST"])
+@inject
+def postSettings(db: DataAccess = Provide[Container.db]):
     try:
         if 'interval' not in request.json or 'loglevel' not in request.json:
             return jsonify(success=False, message='Missing parameters')
@@ -71,7 +54,8 @@ def postSettings():
     except Exception:
         return jsonify(success=False, message=traceback.format_exc())
 
-@app.route('/api/system/')
+@main_api.route('/api/system/')
+@inject
 def systemAction():
     try:
         if 'action' not in request.json:
@@ -87,6 +71,3 @@ def systemAction():
             return jsonify(success=False, message='Unknown command "' + action +'" received')
     except Exception:
         return jsonify(success=False, message=traceback.format_exc())
-
-if __name__ == '__main__':
-    app.run(debug=True, port=18256, host='0.0.0.0')

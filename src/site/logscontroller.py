@@ -1,19 +1,20 @@
 import datetime
 from flask import Blueprint, request, jsonify
-from data.dataaccess import DataAccess
-from data.logsrepository import LogsRepository
+from dependency_injector.wiring import Provide, inject
+from src.data.logsrepository import LogsRepository
+from src.container import Container
 
 logs_api = Blueprint('logs_api',__name__)
-db = DataAccess()
-logsrepo = LogsRepository(db)
 
 @logs_api.route('/api/loggers', methods=["GET"])
-def getLoggers():
+@inject
+def getLoggers(logsrepo: LogsRepository = Provide[Container.logs_repo]):
     loggers = logsrepo.getLoggers()
     return jsonify(success=True, data=loggers)
 
 @logs_api.route('/api/logs/<pagesize>/<pageno>/<sort>/<sortdir>', methods=["POST"])
-def getLogs(pagesize='10',pageno='1',sort='createdat',sortdir='desc'):
+@inject
+def getLogs(pagesize='10',pageno='1',sort='createdat',sortdir='desc', logsrepo: LogsRepository = Provide[Container.logs_repo]):
     filters = []
     if 'filters' in request.json and len(request.json['filters']) >0:
         for f in request.json['filters']:

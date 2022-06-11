@@ -1,9 +1,8 @@
 import sys
 import logging
-from bots.datamanager import DataManager
-from services.cpapi import CbApi
-from bots.libs.authenticated_client import AuthenticatedClient
-from bots.traders.trader import Trader
+from src.services.cpapi import CbApi
+from src.services.libs.authenticated_client import AuthenticatedClient
+from src.bots.traders.trader import Trader
 
 class MarketTrader(Trader):
     def __init__(self, productid, cashaccount, cryptoaccount):

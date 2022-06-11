@@ -1,6 +1,5 @@
 import logging
 from services.cpapi import CbApi
-from bots.datamanager import DataManager
 from bots.traders.trader import Trader
 
 class LimitTrader(Trader):

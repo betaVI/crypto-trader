@@ -1,0 +1,52 @@
+version: '3.3'
+
+services:
+  trader-site:
+    command: ["sh", "-c", "pip install debugpy -t /tmp && python /tmp/debugpy --wait-for-client --listen 0.0.0.0:5679 app.py runserver 0.0.0.0:8000 --nothreading --noreload"]
+    ports:
+      - "5679:5679"
+    build:
+      context: .
+      dockerfile: ./src/site/Dockerfile
+    volumes:
+      - "./src:/usr/share/trader"
+    environment:
+      PG_TESTCB_HOST: trader-testcb-db
+      PG_TESTCB_DATABASE: ${PG_TESTCB_DATABASE}
+      PG_TESTCB_USER: ${PG_TESTCB_USER}
+      PG_TESTCB_PASSWORD: ${PG_TESTCB_PASSWORD}
+    depends_on:
+      - trader-db
+      - trader-testcb-db
+
+  trader-bot:
+    command: ["sh", "-c", "pip install debugpy -t /tmp && python /tmp/debugpy --wait-for-client --listen 0.0.0.0:5678 databot.py runserver 0.0.0.0:8000 --nothreading --noreload"]
+    ports:
+      - "5678:5678"
+    build:
+      context: .
+      dockerfile: ./src/bots/Dockerfile
+    volumes:
+      - "./src:/usr/share/trader"
+    environment:
+      PG_TESTCB_HOST: trader-testcb-db
+      PG_TESTCB_DATABASE: ${PG_TESTCB_DATABASE}
+      PG_TESTCB_USER: ${PG_TESTCB_USER}
+      PG_TESTCB_PASSWORD: ${PG_TESTCB_PASSWORD}
+    depends_on:
+      - trader-db
+      - trader-testcb-db
+
+  trader-db:
+    ports:
+      - "1024:5432"
+
+  trader-testcb-db:
+    container_name: trader-testcb-db
+    image: postgres:latest
+    ports:
+      - "1025:5432"
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: ${PG_TESTCB_PASSWORD}
+      POSTGRES_DB: ${PG_TESTCB_DATABASE}

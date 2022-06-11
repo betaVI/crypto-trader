@@ -3,14 +3,13 @@ FROM python:3.8-buster
 RUN python3 --version
 RUN python3 -m pip install --upgrade pip
 
-# RUN mkdir --parents /usr/share/trader
 WORKDIR /usr/share/trader
-COPY ./src /usr/share/trader/
+COPY ./src /usr/share/trader
 RUN pip3 install -r requirements.txt
-WORKDIR /usr/share/trader/site
+# WORKDIR /usr/share/trader/site
 
-ENV PYTHONPATH="/usr/share/trader"
+# ENV PYTHONPATH="/usr/share/trader"
 
 EXPOSE 18256
 
-CMD ["gunicorn","--bind","0.0.0.0:18256","app:app"]
+CMD ["gunicorn","--bind","0.0.0.0:18256","src.site.application:create_app()"]

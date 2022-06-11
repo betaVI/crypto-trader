@@ -1,9 +1,14 @@
-import os
 from psycopg2.extras import RealDictCursor
 import psycopg2
 
 class DataAccess():
-    def __init__(self):
+    def __init__(self, host, port, dbname, user, password):
+        self._host = host
+        self._port = port
+        self._dbname = dbname
+        self._user = user
+        self._password = password
+
         self._initializeTables()
 
     def createFilter(self,filters):
@@ -55,7 +60,7 @@ class DataAccess():
     def _create_connection(self):
         connection = None
         try:
-            connection = psycopg2.connect(host=os.getenv('PG_HOST'), dbname=os.getenv('PG_DATABASE'), user=os.getenv('PG_USER'), password=os.getenv('PG_PASSWORD'))
+            connection = psycopg2.connect(host=self._host, port=self._port, dbname=self._dbname, user=self._user, password=self._password)
         except (Exception, psycopg2.DatabaseError) as e:
             print(f"The error '{e}' occurred")
         return connection
