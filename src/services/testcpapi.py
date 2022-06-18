@@ -42,3 +42,5 @@ class TestCbApi(CbApi):
     def _loadAccounts(self, accounts):
         for a in accounts:
             self.dataaccess.createAccount(a['id'],a['currency'])
+
+        self.dataaccess.createOrder('buy','USD', str(uuid.uuid4()), 100, 0, 0, 0)

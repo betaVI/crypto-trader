@@ -5,15 +5,18 @@ class TestCbDataAccess(DataAccess):
         super().__init__(host, port, database, user, password)
 
     def getAccounts(self):
-        return self.executeRead("SELECT a.product, sum(case when side is null then 0 when side = 'sell' then -size else size end) as balance from account a left join productorder po on a.product = po.product group by a.product")
+        return self.executeRead("SELECT a.accountid as id, a.product as currency, sum(case when side is null then 0 when side = 'sell' then -size else size end) as balance from account a left join productorder po on a.product = po.product group by a.accountid, a.product")
 
     def getAccountBalance(self, accountid):
-        return self.executeRead("SELECT sum(case when side = 'sell' then -size else size end) as balance from productorder where accountid = %s",(accountid,))
+        results = self.executeRead("SELECT sum(case when side is null then 0 when side = 'sell' then -size else size end) as balance from productorder where accountid = %s",(accountid,))
+        return next(iter(results))
 
     def createAccount(self, accountid, product):
-        self.execute("INSERT INTO account (accountid, product) VALUES(%s,%s)",(accountid, product))
+        self.execute("INSERT INTO account (accountid, product) VALUES(%s,%s) ON CONFLICT DO NOTHING",(accountid, product))
 
     def createOrder(self, side, product, referenceid, size, funds, price, fee):
+        if '-USD' in product:
+            product = product[:product.find('-USD')]
         row = self.executeScalar("select accountid from account where product = %s",(product,))
         values = (side, product, row['accountid'], referenceid, size, funds, price, fee)
         query = ','.join(['%s']*len(values))
@@ -24,7 +27,8 @@ class TestCbDataAccess(DataAccess):
         create_accounts_table = """CREATE TABLE IF NOT EXISTS account (
                                         id BIGSERIAL PRIMARY KEY,
                                         product TEXT NOT NULL,
-                                        accountid TEXT NOT NULL
+                                        accountid TEXT NOT NULL,
+                                        CONSTRAINT unique_accountid UNIQUE (accountid)
                                     )"""
 
         create_order_table = """CREATE TABLE IF NOT EXISTS productorder (

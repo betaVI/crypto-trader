@@ -1,4 +1,3 @@
-import sys
 from dependency_injector import containers, providers
 from src.data.dataaccess import DataAccess
 from src.data.logsrepository import LogsRepository
@@ -8,6 +7,8 @@ from src.data.testcbdataaccess import TestCbDataAccess
 from src.data.traderrepository import TraderRepository
 from src.services.cpapi import CbApi
 from src.services.testcpapi import TestCbApi
+
+from . import bots, services, data, container
 
 class Container(containers.DeclarativeContainer):
 
@@ -62,37 +63,38 @@ class Container(containers.DeclarativeContainer):
     )
 
 def create_container(module_name):
-    container = Container()
-    container.init_resources()
-    container.wire(packages=[module_name, 'src.bots', 'src.data', 'src.services', 'src.site'])
+    c = Container()
+    c.init_resources()
+    # container.wire(modules=[module_name],packages=['src.bots', 'src.data', 'src.services', 'src.site'])
+    c.wire(modules=[module_name, container],packages=[bots, services, data, 'src.site'])
 
-    container.config.environment.from_env("ENVIRONMENT", as_=str, required=True)
+    c.config.environment.from_env("ENVIRONMENT", as_=str, required=True)
 
-    if not container.config.environment == 'PROD':
-        container.cbapi_client.override(providers.Singleton(
+    if not c.config.environment == 'PROD':
+        c.cbapi_client.override(providers.Singleton(
             TestCbApi,
-            key = container.config.cb.key,
-            secret = container.config.cb.secret,
-            passphrase = container.config.cb.passphrase,
-            url = container.config.cb.url,
-            db = container.testcb_db
+            key = c.config.cb.key,
+            secret = c.config.cb.secret,
+            passphrase = c.config.cb.passphrase,
+            url = c.config.cb.url,
+            db = c.testcb_db
         ))
 
-    container.config.cb.key.from_env('CB_KEY', as_=str, required=True)
-    container.config.cb.secret.from_env('CB_SECRET', as_=str, required=True)
-    container.config.cb.passphrase.from_env('CB_PASSPHRASE', as_=str, required=True)
-    container.config.cb.url.from_env('CB_URL', as_=str, required=True)
+    c.config.cb.key.from_env('CB_KEY', as_=str, required=True)
+    c.config.cb.secret.from_env('CB_SECRET', as_=str, required=True)
+    c.config.cb.passphrase.from_env('CB_PASSPHRASE', as_=str, required=True)
+    c.config.cb.url.from_env('CB_URL', as_=str, required=True)
     
-    container.config.db.host.from_env('PG_HOST', as_=str, required=True)
-    container.config.db.port.from_env('PG_PORT', as_=str)
-    container.config.db.database.from_env('PG_DATABASE', as_=str, required=True)
-    container.config.db.user.from_env('PG_USER', as_=str, required=True)
-    container.config.db.password.from_env('PG_PASSWORD', as_=str, required=True)
+    c.config.db.host.from_env('PG_HOST', as_=str, required=True)
+    c.config.db.port.from_env('PG_PORT', as_=int, default=0)
+    c.config.db.database.from_env('PG_DATABASE', as_=str, required=True)
+    c.config.db.user.from_env('PG_USER', as_=str, required=True)
+    c.config.db.password.from_env('PG_PASSWORD', as_=str, required=True)
 
-    container.config.testcbdb.host.from_env('PG_TESTCB_HOST', as_=str, required=True)
-    container.config.testcbdb.port.from_env('PG_TESTCB_PORT', as_=str)
-    container.config.testcbdb.database.from_env('PG_TESTCB_DATABASE', as_=str, required=True)
-    container.config.testcbdb.user.from_env('PG_TESTCB_USER', as_=str, required=True)
-    container.config.testcbdb.password.from_env('PG_TESTCB_PASSWORD', as_=str, required=True)
+    c.config.testcbdb.host.from_env('PG_TESTCB_HOST', as_=str, required=True)
+    c.config.testcbdb.port.from_env('PG_TESTCB_PORT', as_=int, default=0)
+    c.config.testcbdb.database.from_env('PG_TESTCB_DATABASE', as_=str, required=True)
+    c.config.testcbdb.user.from_env('PG_TESTCB_USER', as_=str, required=True)
+    c.config.testcbdb.password.from_env('PG_TESTCB_PASSWORD', as_=str, required=True)
 
-    return container
+    return c

@@ -51,7 +51,7 @@ export default {
                     }
                     total+=balance;
                 }
-                chart.options.plugins.title.text = "Account Balance "+ this.$filters.currencyUSD(total);
+                chart.options.plugins.title.text = "Account Balances "+ this.$filters.currencyUSD(total);
                 chart.update('none');
             }
         },

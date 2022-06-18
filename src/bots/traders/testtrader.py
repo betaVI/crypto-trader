@@ -105,7 +105,7 @@ class TestTrader():
         return min([float(o['price']) for o in self.group['orders']])
 
     def _getAveragePricePaid(self):
-        return round(sum([float(o['funds']) for o in self.group['orders']])/sum([float(o['size']) for o in self.group['orders']]), 2)
+        return round(sum([float(o['funds']) for o in self.group['orders']])/sum([float(o['size']) for o in self.group['orders']]), 5)
 
     def _getDipMargin(self):
         fee = -self.fee * 100

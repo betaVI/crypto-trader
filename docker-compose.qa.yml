@@ -2,14 +2,9 @@ version: '3.3'
 
 services:
   trader-site:
-    command: ["sh", "-c", "pip3 install debugpy -t /tmp && python /tmp/debugpy --wait-for-client --listen 0.0.0.0:5679 src/site/application.py runserver 0.0.0.0:8000 --nothreading --noreload"]
-    ports:
-      - "5679:5679"
     build:
       context: .
       dockerfile: ./src/site/Dockerfile
-    volumes:
-      - ".:/usr/share/trader:ro"
     environment:
       PG_TESTCB_HOST: trader-testcb-db
       PG_TESTCB_DATABASE: ${PG_TESTCB_DATABASE}
@@ -20,14 +15,9 @@ services:
       - trader-testcb-db
 
   trader-bot:
-    command: ["sh", "-c", "pip3 install debugpy -t /tmp && python /tmp/debugpy --wait-for-client --listen 0.0.0.0:5678 src/bots/databot.py runserver 0.0.0.0:8000 --nothreading --noreload"]
-    ports:
-      - "5678:5678"
     build:
       context: .
       dockerfile: ./src/bots/Dockerfile
-    volumes:
-      - ".:/usr/share/trader:ro"
     environment:
       PG_TESTCB_HOST: trader-testcb-db
       PG_TESTCB_DATABASE: ${PG_TESTCB_DATABASE}

@@ -3,11 +3,14 @@ import psycopg2
 
 class DataAccess():
     def __init__(self, host, port, dbname, user, password):
-        self._host = host
-        self._port = port
-        self._dbname = dbname
-        self._user = user
-        self._password = password
+        self._connectionparameters = {
+            "dbname": dbname,
+            "user": user,
+            "password": password,
+            "host": host,
+        }
+        if port != 0:
+            self._connectionparameters["port"] = port
 
         self._initializeTables()
 
@@ -60,7 +63,7 @@ class DataAccess():
     def _create_connection(self):
         connection = None
         try:
-            connection = psycopg2.connect(host=self._host, port=self._port, dbname=self._dbname, user=self._user, password=self._password)
+            connection = psycopg2.connect(**self._connectionparameters)# host=self._host, port=self._port, dbname=self._dbname, user=self._user, password=self._password)
         except (Exception, psycopg2.DatabaseError) as e:
             print(f"The error '{e}' occurred")
         return connection
@@ -154,4 +157,4 @@ class DataAccess():
         self.execute("INSERT INTO status (name) VALUES ('Active'),('Disabled'),('Cash Out') ON CONFLICT DO NOTHING")
         record = self.executeScalar("SELECT count(*) FROM settings")
         if int(record['count']) == 0:
-            self.execute("INSERT INTO settings (interval,loglevel) VALUES (5,10)")
+            self.execute("INSERT INTO settings (interval,loglevel) VALUES (60,10)")

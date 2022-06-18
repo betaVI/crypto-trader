@@ -1,12 +1,16 @@
 image: docker:18.09.7
 
 stages:
-  - build
-  - deploy
+  - build QA
+  - deploy QA
+  - build PROD
+  - deploy PROD
 
 variables:
-  SITE_CONTAINER_IMAGE: $CI_REGISTRY_IMAGE/site:latest
-  BOT_CONTAINER_IMAGE: $CI_REGISTRY_IMAGE/bot:latest
+  QA_SITE_CONTAINER_IMAGE: $CI_REGISTRY_IMAGE/site:qa
+  QA_BOT_CONTAINER_IMAGE: $CI_REGISTRY_IMAGE/bot:qa
+  PROD_SITE_CONTAINER_IMAGE: $CI_REGISTRY_IMAGE/site:latest
+  PROD_BOT_CONTAINER_IMAGE: $CI_REGISTRY_IMAGE/bot:latest
 
 .docker_login_template: &docker-login
   - ls -lah /usr/local/share/ca-certificates/
@@ -17,15 +21,33 @@ variables:
   - echo "$CI_REGISTRY_PASSWORD" | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
 
 BUILD:
-  stage: build
+  stage: build QA
   before_script:
     - *docker-login
   script:
-    - echo $CI_REGISTRY_IMAGE
-    - docker build -t $SITE_CONTAINER_IMAGE -f ./src/site/Dockerfile .
-    - docker build -t $BOT_CONTAINER_IMAGE -f ./src/bots/Dockerfile .
-    - docker push $SITE_CONTAINER_IMAGE
-    - docker push $BOT_CONTAINER_IMAGE
+    - echo $QA_SITE_CONTAINER_IMAGE
+    - echo $QA_BOT_CONTAINER_IMAGE
+    - docker build -t $QA_SITE_CONTAINER_IMAGE -f ./src/site/Dockerfile .
+    - docker build -t $QA_BOT_CONTAINER_IMAGE -f ./src/bots/Dockerfile .
+    - docker push $QA_SITE_CONTAINER_IMAGE
+    - docker push $QA_BOT_CONTAINER_IMAGE
+
+DEPLOY:
+  variables:
+    ENVIRONMENT: QA
+  stage: deploy QA
+  before_script:
+    - *docker-login
+  script:
+    - ls -lah /root/.docker
+    - apk add docker-compose
+    - echo "$UAT_ADDRESS|$UAT_HOSTNAME"
+    - export DOCKER_TLS_VERIFY=1 DOCKER_HOST=$UAT_HOSTNAME:2376
+    - docker info
+    - docker-compose -f docker-compose.yml -f docker-compose.qa.yml down --remove-orphans
+    - docker-compose -f docker-compose.yml -f docker-compose.qa.yml pull
+    - docker-compose -f docker-compose.yml -f docker-compose.qa.yml up -d
+    - unset DOCKER_HOST DOCKER_TLS_VERIFY
 
 # DEPLOY:
 #   stage: deploy

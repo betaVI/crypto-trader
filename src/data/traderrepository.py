@@ -65,8 +65,8 @@ class TraderRepository:
                             WHERE id = {}""".format(id)
         else:
             query = ",".join(['%s']*len(values))
-            query = """INSERT INTO traders (productid, loglevel, baseaccount, quoteaccount, buyupperthreshold, buylowerthreshold, sellupperthreshold, selllowerthreshold, maxpurchaseamount) 
-                        VALUES ({})""".format(query)
+            query = """INSERT INTO traders (statusid, productid, loglevel, baseaccount, quoteaccount, buyupperthreshold, buylowerthreshold, sellupperthreshold, selllowerthreshold, maxpurchaseamount) 
+                        VALUES ((select id from status where name = 'Active'), {})""".format(query)
         
         return self.dataaccess.execute(query,values)
 

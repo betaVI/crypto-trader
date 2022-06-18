@@ -54,5 +54,5 @@ def runapp(
         time.sleep(runinterval)
 
 if __name__ == "__main__":
-    container = create_container(__name__)
+    create_container(__name__)
     runapp()
