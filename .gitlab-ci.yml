@@ -35,14 +35,13 @@ BUILD:
 DEPLOY:
   variables:
     ENVIRONMENT: QA
-    SITE_CONTAINER_IMAGE: $QA_SITE_CONTAINER_IMAGE/something
-    BOT_CONTAINER_IMAGE: $QA_BOT_CONTAINER_IMAGE/something
   stage: deploy QA
   before_script:
     - *docker-login
   script:
-    - ls -lah /root/.docker
     - apk add docker-compose
+    - export SITE_CONTAINER_IMAGE=$QA_SITE_CONTAINER_IMAGE
+    - export BOT_CONTAINER_IMAGE=$QA_BOT_CONTAINER_IMAGE
     - export DOCKER_TLS_VERIFY=1 DOCKER_HOST=$UAT_HOSTNAME:2376
     - docker info
     - echo "$SITE_CONTAINER_IMAGE"
