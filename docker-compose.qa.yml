@@ -6,6 +6,7 @@ services:
       context: .
       dockerfile: ./src/site/Dockerfile
     environment:
+      VIRTUAL_HOST: tradersite-qa.betavi.local
       PG_TESTCB_HOST: trader-testcb-db
       PG_TESTCB_DATABASE: ${PG_TESTCB_DATABASE}
       PG_TESTCB_USER: ${PG_TESTCB_USER}

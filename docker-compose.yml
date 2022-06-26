@@ -45,3 +45,8 @@ services:
     environment:
       POSTGRES_PASSWORD: ${PG_PASSWORD}
       POSTGRES_DB: ${PG_DATABASE}
+
+networks:
+  default:
+    external:
+     name: web-server

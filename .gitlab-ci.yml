@@ -35,6 +35,8 @@ BUILD:
 DEPLOY:
   variables:
     ENVIRONMENT: QA
+    SITE_CONTAINER_IMAGE: QA_SITE_CONTAINER_IMAGE
+    BOT_CONTAINER_IMAGE: QA_BOT_CONTAINER_IMAGE
   stage: deploy QA
   before_script:
     - *docker-login
