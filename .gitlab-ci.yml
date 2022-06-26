@@ -35,18 +35,18 @@ BUILD:
 DEPLOY:
   variables:
     ENVIRONMENT: QA
-    SITE_CONTAINER_IMAGE: '$QA_SITE_CONTAINER_IMAGE'
-    BOT_CONTAINER_IMAGE: '$QA_BOT_CONTAINER_IMAGE'
+    SITE_CONTAINER_IMAGE: $QA_SITE_CONTAINER_IMAGE/something
+    BOT_CONTAINER_IMAGE: $QA_BOT_CONTAINER_IMAGE/something
   stage: deploy QA
   before_script:
     - *docker-login
   script:
     - ls -lah /root/.docker
     - apk add docker-compose
-    - echo "$SITE_CONTAINER_IMAGE"
-    - echo "$BOT_CONTAINER_IMAGE"
     - export DOCKER_TLS_VERIFY=1 DOCKER_HOST=$UAT_HOSTNAME:2376
     - docker info
+    - echo "$SITE_CONTAINER_IMAGE"
+    - echo "$BOT_CONTAINER_IMAGE"
     - docker-compose -f docker-compose.yml -f docker-compose.qa.yml down --remove-orphans
     - docker-compose -f docker-compose.yml -f docker-compose.qa.yml pull
     - docker-compose -f docker-compose.yml -f docker-compose.qa.yml up -d
