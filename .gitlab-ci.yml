@@ -13,6 +13,7 @@ variables:
   PROD_BOT_CONTAINER_IMAGE: $CI_REGISTRY_IMAGE/bot:latest
 
 .docker_login_template: &docker-login
+  - cp /etc/gitlab-runner/certs/ca.crt /usr/local/share/ca-certificates/ca.crt
   - ls -lah /usr/local/share/ca-certificates/
   - ls -lah /etc/gitlab-runner/certs/
   - update-ca-certificates --fresh
