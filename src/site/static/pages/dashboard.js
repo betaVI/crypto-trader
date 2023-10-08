@@ -24,7 +24,7 @@ export default {
         async fetchProducts(){
             const result = await fetch('/api/products', {method: "GET" });
             const data = await result.json();
-            this.wsconnection = new WebSocket("wss://ws-feed.pro.coinbase.com");
+            this.wsconnection = new WebSocket("wss://ws-feed.exchange.coinbase.com");
             this.wsconnection.addEventListener('message', (event)=>{
                 var response = JSON.parse(event.data);
                 this.product = {

@@ -9,8 +9,8 @@ export default{
                                 <slot name="header"></slot>
                             </div>
                             <div class="modal-body">
-                                <v-alert v-if="alertmodel !=null" :model=alertmodel @dismissed="$emit('alertDismissed')"></v-alert>
-                                <v-spinner v-if=model.isloading></v-spinner>
+                                <alert-component v-if="alertmodel !=null" :model=alertmodel @dismissed="$emit('alertDismissed')"></alert-component>
+                                <spinner-component v-if=model.isloading></spinner-component>
                                 <slot name="body"></slot>
                             </div>
                             <div class="modal-footer">
