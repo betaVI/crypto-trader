@@ -14,7 +14,6 @@ variables:
 
 .docker_login_template: &docker-login
   - ls -lah /usr/local/share/ca-certificates/
-  - ls -lah /etc/docker/
   - update-ca-certificates --fresh
   - docker info
   - apk add --no-cache openssl curl
