@@ -41,6 +41,9 @@ DEPLOY:
   script:
     - apk add docker-compose
     - docker info
+    - echo $CLIENT_CERTIFICATE > .docker/cert.pem
+    - echo $CLIENT_KEY_CERTIFICATE > .docker/key.pem
+    - echo $CA_ROOT_CERTIFICATE > .docker/ca.pem
     - export SITE_CONTAINER_IMAGE=$QA_SITE_CONTAINER_IMAGE BOT_CONTAINER_IMAGE=$QA_BOT_CONTAINER_IMAGE DOCKER_TLS_VERIFY=1 DOCKER_HOST=$UAT_HOSTNAME:2376
     - docker-compose -f docker-compose.yml -f docker-compose.qa.yml down --remove-orphans
     - docker-compose -f docker-compose.yml -f docker-compose.qa.yml pull
