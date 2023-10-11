@@ -1,4 +1,4 @@
-image: docker:18.09.7
+image: docker:24
 
 stages:
   - build QA
