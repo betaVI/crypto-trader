@@ -42,6 +42,9 @@ DEPLOY:
     - apk add docker-compose
     - docker info
     - ls -lah ~
+    - echo $CLIENT_CERTIFICATE
+    - echo $CLIENT_KEY_CERTIFICATE
+    - echo $CA_ROOT_CERTIFICATE
     - echo $CLIENT_CERTIFICATE > ~/.docker/cert.pem
     - echo $CLIENT_KEY_CERTIFICATE > ~/.docker/key.pem
     - echo $CA_ROOT_CERTIFICATE > ~/.docker/ca.pem
