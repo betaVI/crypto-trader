@@ -23,19 +23,12 @@ class TestCbApi(CbApi):
             size = (funds-fee)/price
             usd_volume = funds
         else:
-            # query = """select sum(o.size) as totalsize
-            #             from ordergroups og
-            #             inner join products p on p.id = og.productid
-            #             inner join orders o on o.ordergroupid = og.id
-            #             where p.name = %s
-            #             and og.updatedat is null"""
-            # size = float(self.dataaccess.executeScalar(query,(product_id,))['totalsize'])
-
             usd_volume = size*price
             fee = usd_volume*feepercent
             usd_volume -= fee
 
         self.dataaccess.createOrder(side,product_id,orderid,size,usd_volume,price,fee)
+        self.dataaccess.createOrder('buy' if side == 'sell' else 'sell', 'USD', orderid, usd_volume, 0, 0, 0)
 
         return orderid, price, usd_volume, size, fee
 
