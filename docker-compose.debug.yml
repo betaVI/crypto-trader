@@ -47,6 +47,11 @@ services:
     ports:
       - "1025:5432"
     restart: always
+    volumes:
+      - testcb-data:/var/lib/postgresql/data
     environment:
       POSTGRES_PASSWORD: ${PG_TESTCB_PASSWORD}
       POSTGRES_DB: ${PG_TESTCB_DATABASE}
+
+volumes:
+  testcb-data:

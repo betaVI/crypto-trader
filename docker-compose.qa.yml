@@ -38,6 +38,8 @@ services:
     ports:
       - "1025:5432"
     restart: always
+    volumes:
+      - ${TESTAPI_DB_LOCAL_STORAGE}/testapidb:/var/lib/postgresql/data
     environment:
       POSTGRES_PASSWORD: ${PG_TESTCB_PASSWORD}
       POSTGRES_DB: ${PG_TESTCB_DATABASE}
