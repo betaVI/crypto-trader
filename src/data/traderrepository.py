@@ -8,11 +8,9 @@ class TraderRepository:
                     INNER JOIN products p on p.id = t.productid
                     INNER JOIN status s on s.id = t.statusid
                     LEFT JOIN (
-                        select og.productid, sum(funds) as totalspent 
+                        select og.productid, sum(CASE WHEN o.side = 'buy' THEN funds ELSE -funds END) as totalspent 
                         from orders o 
-                        inner join ordergroups og on og.id = o.ordergroupid 
-                        where og.updatedat is null 
-                        and o.side = 'buy'
+                        inner join ordergroups og on og.id = o.ordergroupid
                         group by og.productid) f on f.productid = p.id
                     WHERE s.name != 'Disabled'"""
         return self.dataaccess.executeRead(query)
