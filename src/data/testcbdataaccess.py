@@ -1,3 +1,4 @@
+import uuid
 from src.data.dataaccess import DataAccess
 
 class TestCbDataAccess(DataAccess):
@@ -8,7 +9,7 @@ class TestCbDataAccess(DataAccess):
         return self.executeRead("SELECT a.accountid as id, a.product as currency, sum(case when side is null then 0 when side = 'sell' then -size else size end) as balance from account a left join productorder po on a.product = po.product group by a.accountid, a.product")
 
     def getAccountBalance(self, accountid):
-        results = self.executeRead("SELECT sum(case when side is null then 0 when side = 'sell' then -size else size end) as balance from productorder where accountid = %s",(accountid,))
+        results = self.executeRead("SELECT coalesce(sum(case when side is null then 0 when side = 'sell' then -size else size end), 0) as balance from productorder where accountid = %s",(accountid,))
         return next(iter(results))
 
     def createAccount(self, accountid, product):
@@ -46,3 +47,9 @@ class TestCbDataAccess(DataAccess):
         
         self.execute(create_accounts_table)
         self.execute(create_order_table)
+
+    def initializeUSDBankAccount(self):
+        row = self.executeScalar("select accountid from account where product = 'USD'")
+        account = self.getAccountBalance(row['accountid'])
+        if account['balance'] < 300:
+            self.createOrder('buy', 'USD', str(uuid.uuid4()), 300, 0, 0, 0)
