@@ -1,3 +1,4 @@
+import uuid
 from src.data.testcbdataaccess import TestCbDataAccess
 from src.services.cpapi import CbApi
 
