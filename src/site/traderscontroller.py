@@ -10,9 +10,11 @@ trader_api = Blueprint('trader_api',__name__)
 
 @trader_api.route('/api/traders', methods=["GET"])
 @inject
-def getTraders(tradersrepo: TraderRepository = Provide[Container.traders_repo]):
+def getTraders(cbapi: CbApi = Provide[Container.cbapi_client], tradersrepo: TraderRepository = Provide[Container.traders_repo]):
     traders = tradersrepo.fetchProductTraders()
-    return jsonify(success=True, data=traders)
+    accounts = [a['currency'] for a in cbapi.getAccounts()]
+    allowedtraders = [t for t in traders if t["product"].split('-')[0] in accounts]
+    return jsonify(success=True, data=allowedtraders)
 
 @trader_api.route('/api/traders/<id>', methods=["GET"])
 @inject
