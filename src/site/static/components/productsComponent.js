@@ -146,13 +146,12 @@ export default{
             return statusname=='Active';
         },
         isOutOfFunds(trader){
+            console.log('trader: ' + trader.product);
             console.log('maxpurchaseamount: ' + trader.maxpurchaseamount);
             console.log('totalspent: ' + trader.totalspent);
-            if (trader.maxpurchaseamount) {
-                console.log('difference: ' + (parseFloat(trader.maxpurchaseamount) - parseFloat(trader.totalspent)))
-                console.log('is greater than 0: ' + (parseFloat(trader.maxpurchaseamount) - parseFloat(trader.totalspent) >= 0))
-            }
-            if (trader.maxpurchaseamount && (parseFloat(trader.maxpurchaseamount) - parseFloat(trader.totalspent) >= 0))
+            console.log('difference: ' + (parseFloat(trader.maxpurchaseamount) - parseFloat(trader.totalspent)))
+            console.log('is greater than 0: ' + (parseFloat(trader.maxpurchaseamount) - parseFloat(trader.totalspent) <= 0))
+            if ((parseFloat(trader.maxpurchaseamount) - parseFloat(trader.totalspent) <= 0))
                 return 'text-warning'
             return '';
         }
@@ -160,7 +159,7 @@ export default{
     template:   `<alert-component :model=alert></alert-component>
                 <spinner-component v-if="isloading"></spinner-component>
                 <v-table v-if="!isloading" :columns="[{name:'Product'},{name:'Actions'}]" :rows="traders" v-slot:default="row">
-                    <tr :class="isOutOfFunds(row.item)">
+                    <tr :class="(row.item.maxpurchaseamount && isOutOfFunds(row.item))">
                         <td>{{ row.item.product }}<span class="badge badge-secondary float-right">{{ $filters.currencyUSD(row.item.price, 3) }}</span></td>
                         <td v-if="hasTrader(row.item)">
                             <loading-button-component v-if="row.item.statusname == 'Active'" class="btn-primary btn-sm" @click="updateStatus(row.item.id, 'Disabled')">
