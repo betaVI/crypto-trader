@@ -149,7 +149,7 @@ export default{
             console.log('maxpurchaseamount: ' + trader.maxpurchaseamount);
             console.log('totalspent: ' + trader.totalspent);
             if (trader.maxpurchaseamount) {
-                console.log('difference: ' (parseFloat(trader.maxpurchaseamount) - parseFloat(trader.totalspent)))
+                console.log('difference: ' + (parseFloat(trader.maxpurchaseamount) - parseFloat(trader.totalspent)))
                 console.log('is greater than 0: ' + (parseFloat(trader.maxpurchaseamount) - parseFloat(trader.totalspent) >= 0))
             }
             if (trader.maxpurchaseamount && (parseFloat(trader.maxpurchaseamount) - parseFloat(trader.totalspent) >= 0))
