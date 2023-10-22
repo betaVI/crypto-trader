@@ -146,11 +146,6 @@ export default{
             return statusname=='Active';
         },
         isOutOfFunds(trader){
-            console.log('trader: ' + trader.product);
-            console.log('maxpurchaseamount: ' + trader.maxpurchaseamount);
-            console.log('totalspent: ' + trader.totalspent);
-            console.log('difference: ' + (parseFloat(trader.maxpurchaseamount) - parseFloat(trader.totalspent)))
-            console.log('is greater than 0: ' + (parseFloat(trader.maxpurchaseamount) - parseFloat(trader.totalspent) <= 0))
             if ((parseFloat(trader.maxpurchaseamount) - parseFloat(trader.totalspent) <= 0))
                 return 'text-warning'
             return '';
