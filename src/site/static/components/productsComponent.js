@@ -146,7 +146,7 @@ export default{
             return statusname=='Active';
         },
         isOutOfFunds(trader){
-            if (trader.maxpurchaseamount && (parseFloat(trader.maxpurchaseamount) - parseFloat(trader.totalspent) > 0))
+            if (trader.maxpurchaseamount && (parseFloat(trader.maxpurchaseamount) - parseFloat(trader.totalspent) <= 0))
                 return 'text-warning'
             return '';
         }
