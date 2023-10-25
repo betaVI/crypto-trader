@@ -1,6 +1,9 @@
+import logging
+
 class OrdersRepository():
     def __init__(self, dataaccess):
         self.dataaccess = dataaccess
+        self.logger = logging.getLogger('')
 
     def getOrderProducts(self):
         query = "SELECT distinct p.name from ordergroups og inner join products p on p.id = og.productid"
@@ -30,10 +33,11 @@ class OrdersRepository():
         return row
 
     def updateOrderGroup(self, referenceid, ordergroupid, sellprice, totalearned, totalsize, totalfees):
+        self.logger.debug('Update Order Group ({}) [{}]: earned {} = (${} * {}) - ${}'.format(ordergroupid, referenceid, totalearned, sellprice, totalsize, totalfees))
         values = (sellprice, totalearned, totalsize, totalfees, ordergroupid)
         query =  """UPDATE ordergroups og
                     SET 
-                        sellprice = %s, 
+                        saleprice = %s, 
                         totalearned = %s, 
                         totalsize = %s, 
                         totalfees = o.fee + %s, 
@@ -44,15 +48,22 @@ class OrdersRepository():
                     WHERE
                         o.ordergroupid = og.id
                     and og.id = %s"""
-        self.dataaccess.execute(query, values)
+        
+        self.logger.debug('QUERY: {}'.format(query))
+        error = self.dataaccess.execute(query, values)
 
-        values = (ordergroupid, 'sell', totalearned, referenceid, totalsize, sellprice, totalfees)
-        query = "INSERT INTO orders (ordergroupid, side, funds, referenceid, size, price, fee) "
-        query += "VALUES (%s, %s, %s, %s, %s, %s, %s)"
-        self.dataaccess.execute(query, values)
+        if error is not None:
+            self.logger.error('Update Order Group ERROR: {}'.format(error))
+
+        self.createOrder(ordergroupid, 'sell', totalearned, referenceid, totalsize, sellprice, totalfees)
 
     def createOrder(self, ordergroupid, side, funds, referenceid, size, price, fee):
+        self.logger.debug('Create Order ({}): [{}] ${} = (${} * {}) + {}'.format(ordergroupid, side, funds, price, size, fee))
         values = (ordergroupid, side, funds, referenceid, size, price, fee)
         query = "INSERT INTO orders (ordergroupid, side, funds, referenceid, size, price, fee) "
         query += "VALUES (%s, %s, %s, %s, %s, %s, %s)"
-        self.dataaccess.execute(query, values)
+
+        error = self.dataaccess.execute(query, values)
+
+        if error is not None:
+            self.logger.error('Update Order Group ERROR: {}'.format(error))

@@ -17,7 +17,7 @@ class TestTrader():
         self.orderrepo = orderrepo
 
         self.log = logging.getLogger(self.product_id)
-        self.log.setLevel(logging.DEBUG)
+        self.log.setLevel(int(dbtrader['loglevel']))
 
         self._updateFees()
 

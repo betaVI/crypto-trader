@@ -35,7 +35,8 @@ def runapp(
         settings = db.executeScalar("SELECT * FROM settings")
         runinterval = int(settings['interval'])
         loglevel = int(settings['loglevel'])
-        console.setLevel(loglevel)
+        botlogger = logging.getLogger('BOT')
+        botlogger.setLevel(loglevel)
 
         products =[p for p in api.getProducts() if p['id'].endswith('USD')]
         for product in products:
@@ -43,12 +44,11 @@ def runapp(
 
         activeTraders = traderrepo.getActiveTraders()
         for traderconfig in activeTraders:
-            loghandler.setLevel(int(traderconfig['loglevel']))
             trader = TestTrader(orderrepo, traderconfig, api)
             if trader.attemptToMakeTrade() and trader.cashout:
                 traderrepo.deleteTrader(int(traderconfig['id']))
         
-        print('Waiting ' + str(runinterval) + ' seconds')
+        botlogger.debug('Waiting ' + str(runinterval) + ' seconds')
         logrepo.purgeLogs()
 
         time.sleep(runinterval)
