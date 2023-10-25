@@ -100,14 +100,9 @@ export default{
                             callbacks:{
                                 title: function(context){
                                     var label = context[0].label;
-                                    var total = context.reduce(function(prevValue,currentValue, currentIndex, array){
-                                        if (prevValue.raw != undefined){
-                                            return parseFloat(prevValue.raw)+parseFloat(currentValue.raw);
-                                        }
-                                        else{
-                                            return parseFloat(prevValue)+parseFloat(currentValue.raw);
-                                        }
-                                    })
+                                    var total = context.reduce(function(sum,currentValue, currentIndex, array){
+                                        return parseFloat(sum)+parseFloat(currentValue.raw);
+                                    }, 0);
                                     return label +' - '+ self.$filters.currencyUSD(total);
                                 },
                                 label: function(context){
