@@ -19,7 +19,7 @@ def getProductProfit(reportrepo: ReportRepository = Provide[Container.report_rep
         for p in products:
             values = []
             for d in dates:
-                values.append(next(iter([profit['netprofit'] for profit in profits if profit['product']==p and profit['month']==d]), 0))
+                values.append(next(iter([profit['grossprofit'] for profit in profits if profit['product']==p and profit['month']==d]), 0))
             data.append({ 'product':p,'values':values})
         return jsonify(success=True, dates=dates, data=data)
     except Exception:
