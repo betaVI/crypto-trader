@@ -1,5 +1,5 @@
 from psycopg2.extras import RealDictCursor
-import psycopg2
+import psycopg2, logging, traceback
 
 class DataAccess():
     def __init__(self, host, port, dbname, user, password):
@@ -12,6 +12,7 @@ class DataAccess():
         if port != 0:
             self._connectionparameters["port"] = port
 
+        self.logger = logging.getLogger('DataAccess')
         self._initializeTables()
 
     def createFilter(self,filters):
@@ -44,7 +45,7 @@ class DataAccess():
                 result = c.fetchall()
                 return result
             except (Exception, psycopg2.DatabaseError) as e:
-                print(f"Sql Read Error: '{e}'")
+                self.logger.error('Exception in executeRead: {} | {}: {}'.format(statement,values, traceback.format_exc()))
             finally:
                 c.close()
     
@@ -56,16 +57,16 @@ class DataAccess():
                 result = c.fetchone()
                 return result
             except (Exception, psycopg2.DatabaseError) as e:
-                print(f"Sql Read Error: '{e}'")
+                self.logger.error('Exception in executeScalar: {} | {}: {}'.format(statement,values, traceback.format_exc()))
             finally:
                 c.close()
 
     def _create_connection(self):
         connection = None
         try:
-            connection = psycopg2.connect(**self._connectionparameters)# host=self._host, port=self._port, dbname=self._dbname, user=self._user, password=self._password)
+            connection = psycopg2.connect(**self._connectionparameters)
         except (Exception, psycopg2.DatabaseError) as e:
-            print(f"The error '{e}' occurred")
+            self.logger.error('Exception in _create_connection: {}'.format(traceback.format_exc()))
         return connection
 
     def _initializeTables(self):
@@ -76,7 +77,7 @@ class DataAccess():
                                         currentprice numeric(16,10) NOT NULL,
                                         createdat timestamp NOT NULL DEFAULT now(),
                                         updatedat timestamp NOT NULL DEFAULT now(),
-                                        CONSTRAINT unique_product_name UNIQUE (name)
+                                        CONSTRAINT unique_product_name_ix UNIQUE (exchangeid,name)
                                     )"""
         
         create_exchanges_table = """CREATE TABLE IF NOT EXISTS exchanges (
@@ -153,6 +154,7 @@ class DataAccess():
         self.execute(create_ordergroups_table)
         self.execute(create_orders_table)
         self.execute(create_log_table)
+        #create index if not exists log_date_ix on traderlogs (createdat);
         self.execute("INSERT INTO exchanges (name) VALUES ('CoinbasePro') ON CONFLICT DO NOTHING")
         self.execute("INSERT INTO status (name) VALUES ('Active'),('Disabled'),('Cash Out') ON CONFLICT DO NOTHING")
         record = self.executeScalar("SELECT count(*) FROM settings")

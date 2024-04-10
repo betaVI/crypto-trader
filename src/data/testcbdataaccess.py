@@ -51,5 +51,5 @@ class TestCbDataAccess(DataAccess):
     def initializeUSDBankAccount(self):
         row = self.executeScalar("select accountid from account where product = 'USD'")
         account = self.getAccountBalance(row['accountid'])
-        if account['balance'] < 300:
+        if int(account['balance']) < 300:
             self.createOrder('buy', 'USD', str(uuid.uuid4()), 300, 0, 0, 0)

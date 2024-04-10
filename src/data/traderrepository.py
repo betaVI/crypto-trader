@@ -1,6 +1,10 @@
+import logging, traceback
+from src.data.dataaccess import DataAccess
+
 class TraderRepository:
-    def __init__(self, dataaccess):
+    def __init__(self, dataaccess: DataAccess):
         self.dataaccess = dataaccess
+        self.logger = logging.getLogger('TraderRepository')
 
     def getActiveTraders(self):
         query = """SELECT p.name as product, s.name as status, t.id, loglevel, baseaccount, quoteaccount, buyupperthreshold, buylowerthreshold, sellupperthreshold, selllowerthreshold, maxpurchaseamount, COALESCE(f.totalspent,0) as totalspent
@@ -71,12 +75,15 @@ class TraderRepository:
         return self.dataaccess.execute(query,(id,))
 
     def updateProduct(self, exchangeid, product, currentprice):
-        values =(exchangeid,product, currentprice)
-        update_product_query = ','.join(['%s']*len(values))
-        update_product_query = "INSERT INTO products (exchangeid, name, currentprice) VALUES ({}) ".format(update_product_query)
-        update_product_query += "ON CONFLICT (name) DO UPDATE SET currentprice = {}, updatedat = CURRENT_TIMESTAMP".format(currentprice)
+        try:
+            values =(exchangeid,product, currentprice)
+            update_product_query = ','.join(['%s']*len(values))
+            update_product_query = "INSERT INTO products (exchangeid, name, currentprice) VALUES ({}) ".format(update_product_query)
+            update_product_query += "ON CONFLICT (exchangeid, name) DO UPDATE SET currentprice = {}, updatedat = CURRENT_TIMESTAMP".format(currentprice)
 
-        self.dataaccess.execute(update_product_query, values)
+            self.dataaccess.execute(update_product_query, values)
 
-        row = self.dataaccess.executeScalar("SELECT ID FROM products WHERE name = '{}'".format(product))
-        return row['id']
+            row = self.dataaccess.executeScalar("SELECT ID FROM products WHERE name = %s and exchangeid = %s",(product, exchangeid))
+            return row['id']
+        except Exception:
+            self.logger.error('Exception in UpdateProduct: {} | {}: {}'.format(exchangeid,product, traceback.format_exc()))

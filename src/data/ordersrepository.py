@@ -1,9 +1,10 @@
 import logging
+from src.data.dataaccess import DataAccess
 
 class OrdersRepository():
-    def __init__(self, dataaccess):
+    def __init__(self, dataaccess: DataAccess):
         self.dataaccess = dataaccess
-        self.logger = logging.getLogger('')
+        self.logger = logging.getLogger('OrderRepository')
 
     def getOrderProducts(self):
         query = "SELECT distinct p.name from ordergroups og inner join products p on p.id = og.productid"
