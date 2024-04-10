@@ -19,8 +19,8 @@ class OrdersRepository():
         return self.dataaccess.executeRead(query, values), self.dataaccess.executeScalar(countquery, values)['totalcount']
     
     def fetchRecentOrderGroup(self, product):
-        query = "SELECT id FROM ordergroups WHERE productid = (SELECT id FROM products WHERE name = %s) AND updatedat IS NULL ORDER BY createdat DESC LIMIT 1"
-        ordergroup = self.dataaccess.executeScalar(query, (product,))
+        query = "SELECT id FROM ordergroups WHERE productid = (SELECT id FROM products WHERE name = %s and exchangeid = %s) AND updatedat IS NULL ORDER BY createdat DESC LIMIT 1"
+        ordergroup = self.dataaccess.executeScalar(query, (product,1))
         if ordergroup != None:
             query = "SELECT * FROM orders WHERE ordergroupid = %s"
             orders = self.dataaccess.executeRead(query, (ordergroup['id'],))
@@ -28,8 +28,8 @@ class OrdersRepository():
         return ordergroup
 
     def createOrderGroup(self, product):
-        query = "INSERT INTO ordergroups (productid) VALUES ((SELECT id FROM products WHERE name = %s)) RETURNING id"
-        row = self.dataaccess.executeScalar(query,(product,))
+        query = "INSERT INTO ordergroups (productid) VALUES ((SELECT id FROM products WHERE name = %s and exchangeid = %s)) RETURNING id"
+        row = self.dataaccess.executeScalar(query,(product,1))
         row['orders'] = []
         return row
 
