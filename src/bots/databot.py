@@ -51,6 +51,7 @@ def runapp(
                 traderrepo.deleteTrader(int(traderconfig['id']))
         
         botlogger.debug('Waiting ' + str(runinterval) + ' seconds')
+        botlogger.debug('Removing Logs older than {} {}'.format(log_interval, log_frequency))
         logrepo.purgeLogs(log_interval, log_frequency)
         botlogger.debug('Removed Logs older than {} {}'.format(log_interval, log_frequency))
 
