@@ -54,20 +54,20 @@ def postSettings(db: DataAccess = Provide[Container.db]):
     except Exception:
         return jsonify(success=False, message=traceback.format_exc())
 
-@main_api.route('/api/system/')
-@inject
-def systemAction():
-    try:
-        if 'action' not in request.json:
-            return jsonify(success=False, message='Missing parameter')
-        action = request.json['action']
-        if action == 'reboot':
-            os.system('sudo reboot')
-            return jsonify(success=True, message='Successfully rebooted server')
-        elif action == 'shutdown':
-            os.system('sudo halt')
-            return jsonify(success=True, message='Successfully shutdown server')
-        else:
-            return jsonify(success=False, message='Unknown command "' + action +'" received')
-    except Exception:
-        return jsonify(success=False, message=traceback.format_exc())
+# @main_api.route('/api/system/')
+# @inject
+# def systemAction():
+#     try:
+#         if 'action' not in request.json:
+#             return jsonify(success=False, message='Missing parameter')
+#         action = request.json['action']
+#         if action == 'reboot':
+#             os.system('sudo reboot')
+#             return jsonify(success=True, message='Successfully rebooted server')
+#         elif action == 'shutdown':
+#             os.system('sudo halt')
+#             return jsonify(success=True, message='Successfully shutdown server')
+#         else:
+#             return jsonify(success=False, message='Unknown command "' + action +'" received')
+#     except Exception:
+#         return jsonify(success=False, message=traceback.format_exc())

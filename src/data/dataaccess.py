@@ -23,7 +23,6 @@ class DataAccess():
         return where, tuple([f['value'] for f in filters])
 
     def execute(self, statement, params=None):
-        error = None
         with self._create_connection() as conn:
             c = conn.cursor()
             try:
@@ -32,10 +31,9 @@ class DataAccess():
                 else:
                     c.execute(statement, params)
             except (Exception, psycopg2.DatabaseError) as e:
-                error = f"Sql Error: '{e}'"
+                self.logger.error('Exception in execute: {} | {}: {}'.format(statement,params, traceback.format_exc()))
             finally:
                 c.close()
-        return error
 
     def executeRead(self,statement, values=None):
         with self._create_connection() as conn:
@@ -146,6 +144,15 @@ class DataAccess():
                                         loglevel INT NOT NULL DEFAULT 10
                                     )"""
 
+        create_delete_logs_sproc = """CREATE OR REPLACE PROCEDURE delete_logs(days INT, frequency TEXT)
+                                        LANGUAGE plpgsql
+                                        AS $$
+                                        DECLARE
+                                        log_date TIMESTAMP := now() - CAST(days || ' ' || frequency as interval);
+                                        BEGIN
+                                            DELETE from traderlogs where createdat < log_date;
+                                        END $$;
+                                    """
         self.execute(create_status_table)
         self.execute(create_exchanges_table)
         self.execute(create_products_table)
@@ -154,6 +161,7 @@ class DataAccess():
         self.execute(create_ordergroups_table)
         self.execute(create_orders_table)
         self.execute(create_log_table)
+        self.execute(create_delete_logs_sproc)
         #create index if not exists log_date_ix on traderlogs (createdat);
         self.execute("INSERT INTO exchanges (name) VALUES ('CoinbasePro') ON CONFLICT DO NOTHING")
         self.execute("INSERT INTO status (name) VALUES ('Active'),('Disabled'),('Cash Out') ON CONFLICT DO NOTHING")

@@ -97,4 +97,7 @@ def create_container(module_name):
     c.config.testcbdb.user.from_env('PG_TESTCB_USER', as_=str, required=True)
     c.config.testcbdb.password.from_env('PG_TESTCB_PASSWORD', as_=str, required=True)
 
+    c.config.logretention.interval.from_env('LOG_RETENTION_INTERVAL', as_=int, default=60)
+    c.config.logretention.frequency.from_env('LOG_RETENTION_FREQUENCY', as_=str, default='days')
+
     return c

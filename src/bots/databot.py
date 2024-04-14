@@ -19,7 +19,9 @@ def runapp(
     db: DataAccess = Provide[Container.db],
     logrepo: LogsRepository = Provide[Container.logs_repo],
     traderrepo: TraderRepository = Provide[Container.traders_repo],
-    orderrepo: OrdersRepository = Provide[Container.orders_repo]
+    orderrepo: OrdersRepository = Provide[Container.orders_repo],
+    log_interval: int = Provide[Container.config.logretention.interval.as_(int)],
+    log_frequency: str = Provide[Container.config.logretention.frequency]
     ):
 
     loghandler = DbLogHandler(logrepo)
@@ -49,7 +51,8 @@ def runapp(
                 traderrepo.deleteTrader(int(traderconfig['id']))
         
         botlogger.debug('Waiting ' + str(runinterval) + ' seconds')
-        logrepo.purgeLogs()
+        logrepo.purgeLogs(log_interval, log_frequency)
+        botlogger.debug('Removed Logs older than {} {}'.format(log_interval, log_frequency))
 
         time.sleep(runinterval)
 

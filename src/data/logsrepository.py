@@ -22,6 +22,6 @@ class LogsRepository():
         count = self.dataaccess.executeRead(pagequery, values)
         return logs,count[0]['totalcount']
 
-    def purgeLogs(self):
-        query = "DELETE from traderlogs where createdat < now() - interval '60 days'"
-        self.dataaccess.execute(query)
+    def purgeLogs(self, interval, frequency):
+        query = "call delete_logs(%s,%s);"
+        self.dataaccess.execute(query, (interval, frequency))

@@ -26,6 +26,8 @@ services:
     image: ${BOT_CONTAINER_IMAGE}
     restart: always
     environment:
+      LOG_RETENTION_INTERVAL: ${LOG_RETENTION_INTERVAL}
+      LOG_RETENTION_FREQUENCY: ${LOG_RETENTION_FREQUENCY}
       PG_HOST: trader-db
       PG_DATABASE: ${PG_DATABASE}
       PG_USER: ${PG_USER}
