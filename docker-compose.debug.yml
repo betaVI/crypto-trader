@@ -49,6 +49,15 @@ services:
     restart: always
     volumes:
       - testcb-data:/var/lib/postgresql/data
+    command: 
+      - "-c"
+      - "shared_preload_libraries=pg_stat_statements"
+      - "-c"
+      - "pg_stat_statements.track=all"
+      - "-c"
+      - "max_connections=200"
+      - "-c"
+      - "log_statement=all"
     environment:
       POSTGRES_PASSWORD: ${PG_TESTCB_PASSWORD}
       POSTGRES_DB: ${PG_TESTCB_DATABASE}
