@@ -6,7 +6,7 @@ from src.data.reportrepository import ReportRepository
 from src.data.testcbdataaccess import TestCbDataAccess
 from src.data.traderrepository import TraderRepository
 from src.services.cpapi import CbApi
-from src.services.testcpapi import TestCbApi
+from src.services.testcbapi import TestCbApi
 
 from . import bots, services, data, container
 
@@ -18,10 +18,8 @@ class Container(containers.DeclarativeContainer):
 
     cbapi_client = providers.Factory(
         CbApi,
-        key = config.cb.key,
-        secret = config.cb.secret,
-        passphrase = config.cb.passphrase,
-        url = config.cb.url
+        api_key = config.cb.api_key,
+        api_secret = config.cb.api_secret
     )
 
     db = providers.Singleton(
@@ -59,7 +57,8 @@ class Container(containers.DeclarativeContainer):
         port = config.testcbdb.port,
         database = config.testcbdb.database,
         user = config.testcbdb.user,
-        password = config.testcbdb.password
+        password = config.testcbdb.password,
+        logrepo = logs_repo
     )
 
 def create_container(module_name):
@@ -70,20 +69,17 @@ def create_container(module_name):
 
     c.config.environment.from_env("ENVIRONMENT", as_=str, required=True)
 
-    if not c.config.environment == 'PROD':
+    if c.config.environment != 'PROD':
         c.cbapi_client.override(providers.Singleton(
             TestCbApi,
-            key = c.config.cb.key,
-            secret = c.config.cb.secret,
-            passphrase = c.config.cb.passphrase,
-            url = c.config.cb.url,
+            api_key = c.config.cb.api_key,
+            api_secret = c.config.cb.api_secret,
             db = c.testcb_db
         ))
 
-    c.config.cb.key.from_env('CB_KEY', as_=str, required=True)
-    c.config.cb.secret.from_env('CB_SECRET', as_=str, required=True)
-    c.config.cb.passphrase.from_env('CB_PASSPHRASE', as_=str, required=True)
-    c.config.cb.url.from_env('CB_URL', as_=str, required=True)
+    # c.config.cb.keyfile.from_env('CB_KEYFILE', as_=str, required=True)
+    c.config.cb.api_key.from_env('CB_API_KEY', as_=str, required=True)
+    c.config.cb.api_secret.from_env('CB_API_SECRET', as_=str, required=True)
     
     c.config.db.host.from_env('PG_HOST', as_=str, required=True)
     c.config.db.port.from_env('PG_PORT', as_=int, default=0)

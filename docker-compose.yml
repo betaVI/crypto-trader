@@ -13,10 +13,11 @@ services:
       PG_DATABASE: ${PG_DATABASE}
       PG_USER: ${PG_USER}
       PG_PASSWORD: ${PG_PASSWORD}
-      CB_URL: ${CB_URL}
-      CB_KEY: ${CB_KEY}
-      CB_SECRET: ${CB_SECRET}
-      CB_PASSPHRASE: ${CB_PASSPHRASE}
+      CB_KEYFILE: ${CB_KEYFILE}
+      # CB_URL: ${CB_URL}
+      # CB_KEY: ${CB_KEY}
+      # CB_SECRET: ${CB_SECRET}
+      # CB_PASSPHRASE: ${CB_PASSPHRASE}
       ENVIRONMENT: ${ENVIRONMENT}
     depends_on:
       - trader-db
@@ -32,10 +33,13 @@ services:
       PG_DATABASE: ${PG_DATABASE}
       PG_USER: ${PG_USER}
       PG_PASSWORD: ${PG_PASSWORD}
-      CB_URL: ${CB_URL}
-      CB_KEY: ${CB_KEY}
-      CB_SECRET: ${CB_SECRET}
-      CB_PASSPHRASE: ${CB_PASSPHRASE}
+      # CB_KEYFILE: ${CB_KEYFILE}
+      CB_API_KEY: ${CB_API_KEY}
+      CB_API_SECRET: ${CB_API_SECRET}
+      # CB_URL: ${CB_URL}
+      # CB_KEY: ${CB_KEY}
+      # CB_SECRET: ${CB_SECRET}
+      # CB_PASSPHRASE: ${CB_PASSPHRASE}
       ENVIRONMENT: ${ENVIRONMENT}
     depends_on:
       - trader-db
@@ -46,6 +50,15 @@ services:
     restart: always
     volumes:
       - ${DB_LOCAL_STORAGE}/traderdb:/var/lib/postgresql/data
+    command: 
+      - "-c"
+      - "shared_preload_libraries=pg_stat_statements"
+      - "-c"
+      - "pg_stat_statements.track=all"
+      - "-c"
+      - "max_connections=200"
+      - "-c"
+      - "log_statement=all"
     environment:
       POSTGRES_PASSWORD: ${PG_PASSWORD}
       POSTGRES_DB: ${PG_DATABASE}

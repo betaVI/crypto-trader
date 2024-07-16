@@ -56,9 +56,9 @@ def createTrader(cbapi: CbApi = Provide[Container.cbapi_client], tradersrepo: Tr
     product = cbapi.getProduct(form.product.data)
     print(product)
     accounts = cbapi.getAccounts()
-    baseaccount = next(iter([a['id'] for a in accounts if a['currency'] == product['base_currency']]), None)
+    baseaccount = next(iter([a['id'] for a in accounts if a['currency'] == product['base_currency_id']]), None)
     print(baseaccount)
-    quoteaccount = next(iter([a['id'] for a in accounts if a['currency'] == product['quote_currency']]), None)
+    quoteaccount = next(iter([a['id'] for a in accounts if a['currency'] == product['quote_currency_id']]), None)
     print(quoteaccount)
     result = tradersrepo.alterTrader(id, form.product.data, form.loglevel.data, baseaccount, quoteaccount, form.buyupperthreshold.data, form.buylowerthreshold.data, form.sellupperthreshold.data, form.selllowerthreshold.data, form.maxpurchaseamount.data)
     action = 'update' if id != '0' else 'create'
