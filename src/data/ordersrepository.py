@@ -51,10 +51,7 @@ class OrdersRepository():
                     and og.id = %s"""
         
         self.logger.debug('QUERY: {}'.format(query))
-        error = self.dataaccess.execute(query, values)
-
-        if error is not None:
-            self.logger.error('Update Order Group ERROR: {}'.format(error))
+        self.dataaccess.execute(query, values)
 
         self.createOrder(ordergroupid, 'sell', totalearned, referenceid, totalsize, sellprice, totalfees)
 
@@ -64,7 +61,4 @@ class OrdersRepository():
         query = "INSERT INTO orders (ordergroupid, side, funds, referenceid, size, price, fee) "
         query += "VALUES (%s, %s, %s, %s, %s, %s, %s)"
 
-        error = self.dataaccess.execute(query, values)
-
-        if error is not None:
-            self.logger.error('Update Order Group ERROR: {}'.format(error))
+        self.dataaccess.execute(query, values)
