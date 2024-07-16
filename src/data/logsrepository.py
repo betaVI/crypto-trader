@@ -22,6 +22,6 @@ class LogsRepository():
         count = self.dataaccess.executeRead(pagequery, values)
         return logs,count[0]['totalcount']
 
-    def purgeLogs(self, interval, frequency):
+    def purgeLogs(self, interval: int, frequency: str):
         query = "call delete_logs(%s,%s);"
         self.dataaccess.execute(query, (interval, frequency))
