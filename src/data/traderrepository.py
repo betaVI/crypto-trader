@@ -76,14 +76,10 @@ class TraderRepository:
 
     def updateProduct(self, exchangeid, product, currentprice):
         try:
-            values =(exchangeid,product, currentprice)
-            update_product_query = ','.join(['%s']*len(values))
-            update_product_query = "INSERT INTO products (exchangeid, name, currentprice) VALUES ({}) ".format(update_product_query)
-            update_product_query += "ON CONFLICT (exchangeid, name) DO UPDATE SET currentprice = {}, updatedat = CURRENT_TIMESTAMP".format(currentprice)
+            values = (exchangeid, product, currentprice)
 
-            self.dataaccess.execute(update_product_query, values)
+            row = self.dataaccess.executeScalar("SELECT upsert_product(%s,%s,%s);", values)
 
-            row = self.dataaccess.executeScalar("SELECT ID FROM products WHERE name = %s and exchangeid = %s",(product, exchangeid))
-            return row['id']
+            return row['upsert_product']
         except Exception:
             self.logger.error('Exception in UpdateProduct: {} | {}: {}'.format(exchangeid,product, traceback.format_exc()))

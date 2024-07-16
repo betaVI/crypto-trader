@@ -13,6 +13,7 @@ class DataAccess():
             self._connectionparameters["port"] = port
 
         self.logger = logging.getLogger('DataAccess')
+        self.logger.setLevel(logging.DEBUG)
         self._initializeTables()
 
     def createFilter(self,filters):
@@ -148,11 +149,32 @@ class DataAccess():
                                         LANGUAGE plpgsql
                                         AS $$
                                         DECLARE
-                                        log_date TIMESTAMP := now() - CAST(days || ' ' || frequency as interval);
+                                            log_date TIMESTAMP := now() - CAST(days || ' ' || frequency as interval);
                                         BEGIN
                                             DELETE from traderlogs where createdat < log_date;
                                         END $$;
                                     """
+        
+        create_product_insert_sproc = """CREATE OR REPLACE FUNCTION upsert_product(_exchangeid INT, _product TEXT, _currentprice NUMERIC(16,10))
+                                            RETURNS INT
+                                            LANGUAGE plpgsql
+                                            AS $$
+                                            DECLARE
+                                                _productid INT;
+                                            BEGIN
+                                                SELECT id FROM products WHERE exchangeid = _exchangeid and name = _product INTO _productid;
+                                                IF not found then
+                                                    INSERT INTO products
+                                                        (exchangeid, name, currentprice)
+                                                    VALUES
+                                                        (_exchangeid, _product, _currentprice)
+                                                    RETURNING id
+                                                    INTO _productid;
+                                                end if;
+                                                RETURN _productid;
+                                            END $$;
+                                        """
+        
         self.execute(create_status_table)
         self.execute(create_exchanges_table)
         self.execute(create_products_table)
@@ -162,6 +184,7 @@ class DataAccess():
         self.execute(create_orders_table)
         self.execute(create_log_table)
         self.execute(create_delete_logs_sproc)
+        self.execute(create_product_insert_sproc)
         #create index if not exists log_date_ix on traderlogs (createdat);
         self.execute("INSERT INTO exchanges (name) VALUES ('CoinbasePro') ON CONFLICT DO NOTHING")
         self.execute("INSERT INTO status (name) VALUES ('Active'),('Disabled'),('Cash Out') ON CONFLICT DO NOTHING")
