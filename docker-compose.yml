@@ -13,7 +13,9 @@ services:
       PG_DATABASE: ${PG_DATABASE}
       PG_USER: ${PG_USER}
       PG_PASSWORD: ${PG_PASSWORD}
-      CB_KEYFILE: ${CB_KEYFILE}
+      # CB_KEYFILE: ${CB_KEYFILE}
+      CB_API_KEY: ${CB_API_KEY}
+      CB_API_SECRET: ${CB_API_SECRET}
       # CB_URL: ${CB_URL}
       # CB_KEY: ${CB_KEY}
       # CB_SECRET: ${CB_SECRET}
