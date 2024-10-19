@@ -12,10 +12,11 @@ from src.data.ordersrepository import OrdersRepository
 truncate_logs_timer : threading.Timer = None
 
 def handle_cancel(sig, frame):
-    print('Cancelled')
+    botlogger = logging.getLogger('BOT')
+    botlogger.debug('Cancelled')
     if truncate_logs_timer:
         truncate_logs_timer.cancel()
-        print('Timer Cancelled')
+        botlogger.debug('Timer Cancelled')
     sys.exit(0)
 
 def truncate_logs(logrepo: LogsRepository, log_interval: int, log_frequency: str):
@@ -72,6 +73,10 @@ def runapp(
 
     #start main process
     runbots(db,api, traderrepo, orderrepo)
+
+    #log when process has ended
+    botlogger = logging.getLogger('BOT')
+    botlogger.debug('Completed')
 
 if __name__ == "__main__":
     create_container(__name__)
