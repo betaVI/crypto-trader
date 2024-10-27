@@ -43,7 +43,7 @@ services:
 
   trader-testcb-db:
     container_name: trader-testcb-db
-    image: postgres:latest
+    image: postgres:16
     ports:
       - "1025:5432"
     restart: always

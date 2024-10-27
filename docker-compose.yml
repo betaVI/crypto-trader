@@ -48,7 +48,7 @@ services:
 
   trader-db:
     container_name: trader-db
-    image: postgres:latest
+    image: postgres:16
     restart: always
     volumes:
       - ${DB_LOCAL_STORAGE}/traderdb:/var/lib/postgresql/data
