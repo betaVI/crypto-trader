@@ -1,10 +1,19 @@
 image: docker:18.09.7
 
 stages:
+  - test
   - build QA
   - deploy QA
   - build PROD
   - deploy PROD
+
+include:
+  - template: Security/SAST.gitlab-ci.yml
+  - template: Security/Secret-Detection.gitlab-ci.yml
+
+secret_detection:
+  variables:
+    SECRET_DETECTION_HISTORIC_SCAN: "true"
 
 variables:
   QA_SITE_CONTAINER_IMAGE: $CI_REGISTRY_IMAGE/site:qa
